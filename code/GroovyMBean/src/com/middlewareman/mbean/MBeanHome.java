@@ -17,13 +17,31 @@ import javax.management.ReflectionException;
 
 public abstract class MBeanHome {
 
+	private static final Object[] NOARGS = new Object[0];
+
+	public static Object[] argsArray(Object obj) {
+		if (obj == null)
+			return NOARGS;
+		else if (obj instanceof Object[])
+			return (Object[]) obj;
+		else
+			return new Object[] { obj };
+	}
+
 	public abstract MBeanServerConnection getMBeanServerConnection();
 
 	public Object invokeOperation(ObjectName objectName, String operationName,
 			Object args) throws InstanceNotFoundException, MBeanException,
 			ReflectionException, IOException {
-		Object[] params = null; // TODO
-		String[] signature = null; // TODO
+		args = unwrap(args);
+		Object[] params = argsArray(args);
+		String[] signature = new String[params.length];
+		for (int i = 0; i < params.length; i++) {
+			if (params[i] == null)
+				signature[i] = Object.class.getName(); // TODO Really valid?
+			else
+				signature[i] = params[i].getClass().getName();
+		}
 		return invokeOperation(objectName, operationName, params, signature);
 	}
 
@@ -31,6 +49,7 @@ public abstract class MBeanHome {
 			Object[] params, String[] signature)
 			throws InstanceNotFoundException, MBeanException,
 			ReflectionException, IOException {
+		// TODO already unwrapped?
 		Object result = getMBeanServerConnection().invoke(objectName,
 				operationName, params, signature);
 		return wrap(result);
@@ -46,15 +65,12 @@ public abstract class MBeanHome {
 
 	public Object[] getAttributes(ObjectName objectName, String[] attributeNames)
 			throws InstanceNotFoundException, ReflectionException, IOException {
-		AttributeList al = getMBeanServerConnection().getAttributes(objectName,
-				attributeNames);
-		List<Attribute> attributes = al.asList();
+		List<Attribute> attributes = getMBeanServerConnection().getAttributes(
+				objectName, attributeNames).asList();
 		Object[] result = new Object[attributes.size()];
-		for (int i = 0; i < result.length; i++) {
+		for (int i = 0; i < result.length; i++)
 			result[i] = wrap(attributes.get(i).getValue());
-		}
 		return result;
-
 	}
 
 	public void setAttribute(ObjectName objectName, String attributeName,
@@ -75,12 +91,53 @@ public abstract class MBeanHome {
 		getMBeanServerConnection().setAttributes(objectName, attributeList);
 	}
 
-	public Object wrap(Object unwrapped) {
-		return null; // TODO
+	private Object wrap(Object unwrapped) {
+		if (unwrapped == null)
+			return null;
+		else if (unwrapped instanceof ObjectName[]) {
+			ObjectName[] objectNames = (ObjectName[]) unwrapped;
+			MBean[] wrapped = new MBean[objectNames.length];
+			for (int i = 0; i < objectNames.length; i++)
+				if (objectNames[i] != null)
+					wrapped[i] = createMBean(objectNames[i]);
+			return wrapped;
+		} else if (unwrapped instanceof Object[]) {
+			Object[] objects = (Object[]) unwrapped;
+			Object[] wrapped = new Object[objects.length]; // TODO Or reuse?
+			for (int i = 0; i < objects.length; i++)
+				wrapped[i] = wrap(objects[i]);
+			return wrapped;
+		} else if (unwrapped instanceof ObjectName)
+			return createMBean((ObjectName) unwrapped);
+		else
+			return unwrapped;
 	}
 
-	public Object unwrap(Object wrapped) {
-		return null; // TODO
+	private Object unwrap(Object wrapped) {
+		if (wrapped == null)
+			return null;
+		else if (wrapped instanceof MBean[]) {
+			MBean[] mbeans = (MBean[]) wrapped;
+			ObjectName[] objectNames = new ObjectName[mbeans.length];
+			for (int i = 0; i < mbeans.length; i++)
+				if (mbeans[i] != null)
+					objectNames[i] = mbeans[i].objectName;
+			return objectNames;
+		} else if (wrapped instanceof Object[]) {
+			Object[] objects = (Object[]) wrapped;
+			Object[] unwrapped = new Object[objects.length]; // TODO Or reuse?
+			for (int i = 0; i < objects.length; i++) {
+				unwrapped[i] = unwrap(objects[i]);
+			}
+			return unwrapped;
+		} else if (wrapped instanceof MBean)
+			return ((MBean) wrapped).objectName;
+		else
+			return wrapped;
+	}
+
+	public MBean createMBean(ObjectName objectName) {
+		return new MBean(this, objectName); // TODO Caching
 	}
 
 }
