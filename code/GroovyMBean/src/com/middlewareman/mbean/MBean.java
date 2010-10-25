@@ -17,23 +17,26 @@ import org.codehaus.groovy.runtime.InvokerHelper;
 
 public class MBean implements GroovyObject {
 
-	// enum ResolveStrategy {
-	// MBeanOnly, MBeanFirst, MetaOnly, MetaFirst
-	// }
-	// public ResolveStrategy resolveStrategy = ResolveStrategy.MBeanFirst;
-
-	private MetaClass metaClass;
-
+	public final MetaClass metaClass;
 	public final MBeanHome home;
 	public final ObjectName objectName;
 
-	public MBean(MBeanHome home, ObjectName objectName) {
+	public MBean(MBeanHome home, ObjectName objectName, MetaClass metaClass) {
 		this.home = home;
 		this.objectName = objectName;
+		this.metaClass = metaClass;
 	}
 
-	@Override
+	public MBean(MBeanHome home, ObjectName objectName) {
+		this(home, objectName, InvokerHelper.getMetaClass(MBean.class));
+	}
+
 	public Object invokeMethod(String methodName, Object args) {
+		// Object[] argss = MBeanHome.argsArray(args);
+		// MetaMethod mm = getMetaClass().getMetaMethod(methodName, argss);
+		// if (mm != null) {
+		// return mm.invoke(this, argss);
+		// } else {
 		try {
 			return home.invokeOperation(objectName, methodName, args);
 		} catch (InstanceNotFoundException e) {
@@ -45,10 +48,14 @@ public class MBean implements GroovyObject {
 		} catch (IOException e) {
 			throw new GroovyRuntimeException(e);
 		}
+		// }
 	}
 
-	@Override
 	public Object getProperty(String propertyName) {
+		// MetaProperty mp = getMetaClass().getMetaProperty(propertyName);
+		// if (mp != null) {
+		// return mp.getProperty(this);
+		// } else {
 		try {
 			return home.getAttribute(objectName, propertyName);
 		} catch (AttributeNotFoundException e) {
@@ -62,10 +69,14 @@ public class MBean implements GroovyObject {
 		} catch (IOException e) {
 			throw new GroovyRuntimeException(e);
 		}
+		// }
 	}
 
-	@Override
 	public void setProperty(String propertyName, Object value) {
+		// MetaProperty mp = getMetaClass().getMetaProperty(propertyName);
+		// if (mp != null) {
+		// mp.setProperty(this, value);
+		// } else {
 		try {
 			home.setAttribute(objectName, propertyName, value);
 		} catch (InstanceNotFoundException e) {
@@ -81,18 +92,40 @@ public class MBean implements GroovyObject {
 		} catch (IOException e) {
 			throw new GroovyRuntimeException(e);
 		}
+		// }
 	}
 
-	@Override
-	public synchronized MetaClass getMetaClass() {
-		if (metaClass == null)
-			metaClass = InvokerHelper.getMetaClass(getClass());
+	public MetaClass getMetaClass() {
 		return metaClass;
 	}
 
-	@Override
-	public synchronized void setMetaClass(MetaClass metaClass) {
-		this.metaClass = metaClass;
+	public void setMetaClass(MetaClass metaClass) {
+		throw new UnsupportedOperationException();
+	}
+
+	public String toString() {
+		return getClass().getSimpleName() + "(" + objectName + ")";
+	}
+
+	public int hashCode() {
+		return objectName.hashCode();
+	}
+
+	public boolean equals(Object other) {
+		if (other instanceof MBean) {
+			MBean mother = (MBean) other;
+			return objectName.equals(mother.objectName);
+		} else
+			return false;
+	}
+
+	boolean asBoolean() {
+		try {
+			return home.getMBeanServerConnection().isRegistered(objectName);
+		} catch (IOException e) {
+			// TODO Log error?
+			return false;
+		}
 	}
 
 }

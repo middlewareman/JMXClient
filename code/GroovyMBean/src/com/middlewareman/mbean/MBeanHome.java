@@ -9,8 +9,10 @@ import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
+import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
@@ -19,7 +21,7 @@ public abstract class MBeanHome {
 
 	private static final Object[] NOARGS = new Object[0];
 
-	public static Object[] argsArray(Object obj) {
+	static Object[] argsArray(Object obj) {
 		if (obj == null)
 			return NOARGS;
 		else if (obj instanceof Object[])
@@ -28,7 +30,28 @@ public abstract class MBeanHome {
 			return new Object[] { obj };
 	}
 
+	public boolean assertRegistered = true;
+
 	public abstract MBeanServerConnection getMBeanServerConnection();
+
+	protected MBean createMBean(ObjectName objectName) {
+		return new MBean(this, objectName);
+	}
+
+	public MBean getMBean(ObjectName objectName)
+			throws InstanceNotFoundException, IOException {
+		if (assertRegistered) {
+			if (!getMBeanServerConnection().isRegistered(objectName))
+				throw new InstanceNotFoundException(objectName.toString());
+		}
+		return createMBean(objectName);
+	}
+
+	public MBeanInfo getInfo(ObjectName objectName)
+			throws InstanceNotFoundException, IntrospectionException,
+			ReflectionException, IOException {
+		return getMBeanServerConnection().getMBeanInfo(objectName);
+	}
 
 	public Object invokeOperation(ObjectName objectName, String operationName,
 			Object args) throws InstanceNotFoundException, MBeanException,
@@ -134,10 +157,6 @@ public abstract class MBeanHome {
 			return ((MBean) wrapped).objectName;
 		else
 			return wrapped;
-	}
-
-	public MBean createMBean(ObjectName objectName) {
-		return new MBean(this, objectName); // TODO Caching
 	}
 
 }
