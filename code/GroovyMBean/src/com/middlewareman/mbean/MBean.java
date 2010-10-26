@@ -114,7 +114,7 @@ public class MBean implements GroovyObject {
 	public boolean equals(Object other) {
 		if (other instanceof MBean) {
 			MBean mother = (MBean) other;
-			return objectName.equals(mother.objectName);
+			return objectName.equals(mother.objectName) && home.equals(mother.home);
 		} else
 			return false;
 	}

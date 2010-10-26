@@ -30,8 +30,15 @@ public abstract class MBeanHome {
 			return new Object[] { obj };
 	}
 
-	public boolean assertRegistered = true;
+	/** Used equality and logging etc. */
+	public final Object url;
 
+	public boolean assertRegistered = true;
+	
+	public MBeanHome(Object url) {
+		this.url = url;
+	}
+	
 	public abstract MBeanServerConnection getMBeanServerConnection();
 
 	protected MBean createMBean(ObjectName objectName) {
@@ -159,4 +166,15 @@ public abstract class MBeanHome {
 			return wrapped;
 	}
 
+	public String toString() {
+		return getClass().getSimpleName() + "(" + url.toString() + ")";
+	}
+	
+	public boolean equals(Object other) {
+		if (other instanceof MBeanHome) {
+			MBeanHome mhother = (MBeanHome) other;
+			return url.equals(mhother.url);
+		}
+		return false;
+	}
 }

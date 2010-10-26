@@ -32,6 +32,12 @@ public abstract class CachingMBeanHome extends MBeanHome {
 	private Map<ObjectName, WeakReference<MBean>> mbeanCache;
 	private Map<ObjectName, MBeanInfoWrapper> infoCache;
 
+	public CachingMBeanHome(Object url, boolean mbeanCache, boolean infoCache) {
+		super(url);
+		setMBeanCache(mbeanCache);
+		setInfoCache(infoCache);
+	}
+	
 	public boolean isMBeanCache() {
 		return mbeanCache != null;
 	}
@@ -54,10 +60,7 @@ public abstract class CachingMBeanHome extends MBeanHome {
 			infoCache = null;
 	}
 
-	public CachingMBeanHome() {
-		setMBeanCache(true);
-		setInfoCache(true);
-	}
+
 
 	public MBean getMBean(ObjectName objectName)
 			throws InstanceNotFoundException, IOException {
