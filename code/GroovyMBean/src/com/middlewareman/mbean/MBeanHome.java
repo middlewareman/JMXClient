@@ -1,9 +1,11 @@
 package com.middlewareman.mbean;
 
 import java.io.IOException;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.management.Attribute;
 import javax.management.AttributeList;
@@ -14,7 +16,9 @@ import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import javax.management.QueryExp;
 import javax.management.ReflectionException;
 
 public abstract class MBeanHome {
@@ -34,11 +38,11 @@ public abstract class MBeanHome {
 	public final Object url;
 
 	public boolean assertRegistered = true;
-	
+
 	public MBeanHome(Object url) {
 		this.url = url;
 	}
-	
+
 	public abstract MBeanServerConnection getMBeanServerConnection();
 
 	protected MBean createMBean(ObjectName objectName) {
@@ -52,6 +56,26 @@ public abstract class MBeanHome {
 				throw new InstanceNotFoundException(objectName.toString());
 		}
 		return createMBean(objectName);
+	}
+
+	public MBean getMBean(String objectName) throws InstanceNotFoundException,
+			MalformedObjectNameException, NullPointerException, IOException {
+		return getMBean(ObjectName.getInstance(objectName));
+	}
+
+	public Set<MBean> getMBeans(ObjectName name, QueryExp query)
+			throws IOException, InstanceNotFoundException {
+		Set<ObjectName> names = getMBeanServerConnection().queryNames(name,
+				query);
+		Set<MBean> mbeans = new LinkedHashSet<MBean>(names.size());
+		for (ObjectName objectName : names)
+			mbeans.add(getMBean(objectName));
+		return mbeans;
+	}
+
+	public Set<MBean> getMBeans(String name) throws InstanceNotFoundException,
+			MalformedObjectNameException, IOException {
+		return getMBeans(new ObjectName(name), null);
 	}
 
 	public MBeanInfo getInfo(ObjectName objectName)
@@ -169,7 +193,7 @@ public abstract class MBeanHome {
 	public String toString() {
 		return getClass().getSimpleName() + "(" + url.toString() + ")";
 	}
-	
+
 	public boolean equals(Object other) {
 		if (other instanceof MBeanHome) {
 			MBeanHome mhother = (MBeanHome) other;
