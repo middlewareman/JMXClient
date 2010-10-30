@@ -1,15 +1,15 @@
 package com.middlewareman.mbean;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.MBeanInfo;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
+
+import org.apache.commons.collections.map.ReferenceMap;
 
 public abstract class CachingMBeanHome extends MBeanHome {
 
@@ -29,7 +29,7 @@ public abstract class CachingMBeanHome extends MBeanHome {
 
 	}
 
-	private Map<ObjectName, WeakReference<MBean>> mbeanCache;
+	private Map<ObjectName, MBean> mbeanCache;
 	private Map<ObjectName, MBeanInfoWrapper> infoCache;
 
 	public CachingMBeanHome(Object url, boolean mbeanCache, boolean infoCache) {
@@ -37,14 +37,15 @@ public abstract class CachingMBeanHome extends MBeanHome {
 		setMBeanCache(mbeanCache);
 		setInfoCache(infoCache);
 	}
-	
+
 	public boolean isMBeanCache() {
 		return mbeanCache != null;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void setMBeanCache(boolean flag) {
 		if (flag)
-			mbeanCache = new WeakHashMap<ObjectName, WeakReference<MBean>>();
+			mbeanCache = new ReferenceMap();
 		else
 			mbeanCache = null;
 	}
@@ -53,27 +54,23 @@ public abstract class CachingMBeanHome extends MBeanHome {
 		return infoCache != null;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void setInfoCache(boolean flag) {
 		if (flag)
-			infoCache = new WeakHashMap<ObjectName, MBeanInfoWrapper>();
+			infoCache = new ReferenceMap();
 		else
 			infoCache = null;
 	}
-
-
 
 	public MBean getMBean(ObjectName objectName)
 			throws InstanceNotFoundException, IOException {
 		if (mbeanCache != null) {
 			synchronized (mbeanCache) {
-				WeakReference<MBean> ref = mbeanCache.get(objectName);
-				if (ref != null) {
-					MBean mbean = ref.get();
-					if (mbean != null)
-						return mbean;
-				}
-				MBean mbean = super.getMBean(objectName);
-				mbeanCache.put(objectName, new WeakReference<MBean>(mbean));
+				MBean mbean = mbeanCache.get(objectName);
+				if (mbean != null)
+					return mbean;
+				mbean = super.getMBean(objectName);
+				mbeanCache.put(objectName, mbean);
 				return mbean;
 			}
 		} else
