@@ -1,6 +1,7 @@
 package com.middlewareman.mbean;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -35,18 +36,27 @@ public abstract class MBeanHome {
 	}
 
 	/** Used equality and logging etc. */
-	public final Object url;
+	public Object url;
 
 	public boolean assertRegistered = true;
+
+	public boolean blind = true;
+
+	protected MBeanHome() {
+	}
 
 	public MBeanHome(Object url) {
 		this.url = url;
 	}
 
-	public abstract MBeanServerConnection getMBeanServerConnection();
+	public abstract MBeanServerConnection getMBeanServerConnection()
+			throws IOException;
 
 	protected MBean createMBean(ObjectName objectName) {
-		return new MBean(this, objectName);
+		if (blind)
+			return new BlindMBean(this, objectName);
+		else
+			return new BackedMBean(this, objectName);
 	}
 
 	public MBean getMBean(ObjectName objectName)
@@ -148,7 +158,8 @@ public abstract class MBeanHome {
 	private Object wrap(Object unwrapped) {
 		if (unwrapped == null)
 			return null;
-		else if (unwrapped instanceof ObjectName[]) {
+		assert !(unwrapped instanceof Collection); // TODO Can this happen?
+		if (unwrapped instanceof ObjectName[]) {
 			ObjectName[] objectNames = (ObjectName[]) unwrapped;
 			MBean[] wrapped = new MBean[objectNames.length];
 			for (int i = 0; i < objectNames.length; i++)
@@ -170,7 +181,8 @@ public abstract class MBeanHome {
 	private Object unwrap(Object wrapped) {
 		if (wrapped == null)
 			return null;
-		else if (wrapped instanceof MBean[]) {
+		assert !(wrapped instanceof Collection); // TODO Can this happen?
+		if (wrapped instanceof MBean[]) {
 			MBean[] mbeans = (MBean[]) wrapped;
 			ObjectName[] objectNames = new ObjectName[mbeans.length];
 			for (int i = 0; i < mbeans.length; i++)
