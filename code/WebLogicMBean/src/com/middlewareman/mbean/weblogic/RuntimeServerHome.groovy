@@ -3,6 +3,7 @@ package com.middlewareman.mbean.weblogic
 import com.middlewareman.mbean.LocalMBeanHome
 import com.middlewareman.mbean.MBean 
 import com.middlewareman.mbean.MBeanHome 
+import com.middlewareman.mbean.MBeanHomeFactory 
 import java.lang.management.ManagementFactory 
 import javax.naming.InitialContext 
 
@@ -25,6 +26,10 @@ class RuntimeServerHome {
 	
 	RuntimeServerHome(MBeanHome home) {
 		this.home = home
+	}
+	
+	RuntimeServerHome(MBeanHomeFactory homeFactory) {
+		this.home = homeFactory.createMBeanHome(remoteJndiName)
 	}
 	
 	MBean getRuntimeService() {
@@ -60,15 +65,15 @@ class RuntimeServerHome {
 	}
 	
 	Set<MBean> getMemoryPoolMXBeans() {
-		home.getMBeans ManagementFactory.MEMORY_POOL_MXBEAN_DOMAIN_TYPE
+		home.getMBeans "${ManagementFactory.MEMORY_POOL_MXBEAN_DOMAIN_TYPE},*"
 	}
 	
 	MBean getMemoryPoolMXBean(String name) {
-		home.getMBean "${ManagementFactory.MEMORY_MANAGER_MXBEAN_DOMAIN_TYPE},name=${name}"
+		home.getMBean "${ManagementFactory.MEMORY_POOL_MXBEAN_DOMAIN_TYPE},name=${name}"
 	}
 	
 	Set<MBean> getMemoryManagerMXBeans() {
-		home.getMBeans ManagementFactory.MEMORY_MANAGER_MXBEAN_DOMAIN_TYPE
+		home.getMBeans("${ManagementFactory.MEMORY_MANAGER_MXBEAN_DOMAIN_TYPE},*")
 	}
 	
 	MBean getMemoryManagerMXBean(String name) {
@@ -76,7 +81,7 @@ class RuntimeServerHome {
 	}
 	
 	Set<MBean> getGarbageCollectorMXBeans() {
-		home.getMBeans ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE
+		home.getMBeans "${ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE},*"
 	}
 	
 	MBean getGarbageCollectorMXBean(String name) {

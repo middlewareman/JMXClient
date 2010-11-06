@@ -2,6 +2,7 @@ package com.middlewareman.mbean.weblogic
 
 import com.middlewareman.mbean.MBean 
 import com.middlewareman.mbean.MBeanHome 
+import com.middlewareman.mbean.MBeanHomeFactory 
 
 class EditServerHome {
 	
@@ -11,6 +12,10 @@ class EditServerHome {
 	
 	EditServerHome(MBeanHome home) {
 		this.home = home
+	}
+	
+	EditServerHome(MBeanHomeFactory homeFactory) {
+		this.home = homeFactory.createMBeanHome(remoteJndiName)
 	}
 	
 	MBean getRuntimeService() {

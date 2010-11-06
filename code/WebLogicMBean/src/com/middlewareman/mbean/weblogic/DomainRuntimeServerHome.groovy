@@ -3,6 +3,7 @@ package com.middlewareman.mbean.weblogic
 import com.middlewareman.mbean.LocalMBeanHome;
 import com.middlewareman.mbean.MBean 
 import com.middlewareman.mbean.MBeanHome 
+import com.middlewareman.mbean.MBeanHomeFactory 
 
 import java.lang.management.ManagementFactory 
 import javax.naming.InitialContext 
@@ -10,7 +11,7 @@ import javax.naming.InitialContext
 class DomainRuntimeServerHome {
 	
 	private static final localJndiName = 'java:comp/env/jmx/domainRuntime'
-	private static final domainRuntimeRemoteJndiName = 'weblogic.management.mbeanservers.domainruntime'
+	private static final remoteJndiName = 'weblogic.management.mbeanservers.domainruntime'
 	
 	static LocalMBeanHome getLocalMBeanHome() {
 		def ic = new InitialContext()
@@ -26,6 +27,10 @@ class DomainRuntimeServerHome {
 	
 	DomainRuntimeServerHome(MBeanHome home) {
 		this.home = home
+	}
+	
+	DomainRuntimeServerHome(MBeanHomeFactory homeFactory) {
+		this.home = homeFactory.createMBeanHome(remoteJndiName)
 	}
 	
 	MBean getRuntimeService() {
