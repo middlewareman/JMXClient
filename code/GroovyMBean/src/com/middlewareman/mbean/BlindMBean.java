@@ -18,6 +18,8 @@ public class BlindMBean extends MBean implements GroovyObject {
 
 	private transient MetaClass metaClass;
 
+	public boolean attributeCapitalisation = true;
+
 	public BlindMBean(MBeanHome home, ObjectName objectName) {
 		super(home, objectName);
 		this.metaClass = InvokerHelper.getMetaClass(this.getClass());
@@ -38,6 +40,8 @@ public class BlindMBean extends MBean implements GroovyObject {
 	}
 
 	public Object getProperty(String propertyName) {
+		if (attributeCapitalisation)
+			propertyName = MBeanHome.capitalise(propertyName);
 		try {
 			return home.getAttribute(objectName, propertyName);
 		} catch (AttributeNotFoundException e) {
@@ -54,6 +58,8 @@ public class BlindMBean extends MBean implements GroovyObject {
 	}
 
 	public void setProperty(String propertyName, Object value) {
+		if (attributeCapitalisation)
+			propertyName = MBeanHome.capitalise(propertyName);
 		try {
 			home.setAttribute(objectName, propertyName, value);
 		} catch (InstanceNotFoundException e) {
@@ -80,4 +86,5 @@ public class BlindMBean extends MBean implements GroovyObject {
 	public void setMetaClass(MetaClass metaClass) {
 		this.metaClass = metaClass;
 	}
+
 }

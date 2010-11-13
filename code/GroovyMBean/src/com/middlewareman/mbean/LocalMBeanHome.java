@@ -19,5 +19,8 @@ public class LocalMBeanHome extends CachingMBeanHome {
 	public MBeanServerConnection getMBeanServerConnection() {
 		return getMBeanServer();
 	}
+	
+	public void close() {
+	}
 
 }

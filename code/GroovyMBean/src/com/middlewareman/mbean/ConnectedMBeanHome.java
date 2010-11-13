@@ -15,4 +15,7 @@ public class ConnectedMBeanHome extends MBeanHome {
 		return sc;
 	}
 
+	public void close() {
+	}
+
 }

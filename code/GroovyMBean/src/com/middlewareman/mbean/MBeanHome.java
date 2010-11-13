@@ -2,6 +2,7 @@ package com.middlewareman.mbean;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.InvalidAttributeValueException;
+import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
@@ -21,6 +23,9 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
+
+import com.middlewareman.mbean.type.MBeanAttributeInfoFilter;
+import com.middlewareman.mbean.type.OpenTypeWrapper;
 
 public abstract class MBeanHome {
 
@@ -33,6 +38,28 @@ public abstract class MBeanHome {
 			return (Object[]) obj;
 		else
 			return new Object[] { obj };
+	}
+
+	static String capitalise(String string) {
+		char first = string.charAt(0);
+		if (!Character.isUpperCase(first)) {
+			char[] ca = string.toCharArray();
+			ca[0] = Character.toUpperCase(first);
+			return new String(ca);
+		} else {
+			return string;
+		}
+	}
+
+	static String decapitalise(String string) {
+		char first = string.charAt(0);
+		if (Character.isUpperCase(first)) {
+			char[] ca = string.toCharArray();
+			ca[0] = Character.toLowerCase(first);
+			return new String(ca);
+		} else {
+			return string;
+		}
 	}
 
 	/** Used equality and logging etc. */
@@ -51,6 +78,8 @@ public abstract class MBeanHome {
 
 	public abstract MBeanServerConnection getMBeanServerConnection()
 			throws IOException;
+
+	public abstract void close();
 
 	protected MBean createMBean(ObjectName objectName) {
 		if (blind)
@@ -175,7 +204,7 @@ public abstract class MBeanHome {
 		} else if (unwrapped instanceof ObjectName)
 			return createMBean((ObjectName) unwrapped);
 		else
-			return unwrapped;
+			return OpenTypeWrapper.wrap(unwrapped);
 	}
 
 	private Object unwrap(Object wrapped) {
@@ -199,7 +228,7 @@ public abstract class MBeanHome {
 		} else if (wrapped instanceof MBean)
 			return ((MBean) wrapped).objectName;
 		else
-			return wrapped;
+			return OpenTypeWrapper.unwrap(wrapped);
 	}
 
 	public String toString() {
@@ -213,4 +242,24 @@ public abstract class MBeanHome {
 		}
 		return false;
 	}
+
+	public Map<String, ?> getProperties(ObjectName objectName,
+			MBeanAttributeInfoFilter filter, boolean attributeCapitalisation)
+			throws InstanceNotFoundException, IntrospectionException,
+			AttributeNotFoundException, ReflectionException, MBeanException,
+			IOException {
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
+		for (MBeanAttributeInfo attribute : getInfo(objectName).getAttributes()) {
+			if (filter == null || filter.accept(attribute)) {
+				String name = attribute.getName();
+				Object value = getAttribute(objectName, name); // TODO
+																// getAttributes
+				if (attributeCapitalisation)
+					name = MBeanHome.decapitalise(name);
+				map.put(name, value);
+			}
+		}
+		return map;
+	}
+
 }
