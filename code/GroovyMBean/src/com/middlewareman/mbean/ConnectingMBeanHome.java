@@ -48,18 +48,19 @@ public class ConnectingMBeanHome extends MBeanHome implements Serializable,
 		return connector.getMBeanServerConnection(subject);
 	}
 
-	public void close() {
-		try {
-			connector.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public void close() throws IOException {
+		connector.close();
 	}
 
 	private void addShutdownHook(final JMXConnector connector) {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
-				close();
+				try {
+					close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		});
 	}

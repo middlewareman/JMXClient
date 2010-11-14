@@ -1,7 +1,5 @@
 package com.middlewareman.mbean.type;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,7 +108,6 @@ class TabularDataWrapper {
 		}
 	}
 
-	// @Override
 	public Object[] calculateIndex(Map<String, ?> value) {
 		Object[] index = new Object[indexNames.length];
 		for (int i = 0; i < indexNames.length; i++) {
@@ -122,17 +119,14 @@ class TabularDataWrapper {
 		return index;
 	}
 
-	// @Override
 	public int size() {
 		return delegate.size();
 	}
 
-	// @Override
 	public boolean isEmpty() {
 		return delegate.isEmpty();
 	}
 
-	// @Override
 	public boolean containsKey(Object[] key) {
 		assert indexNames.length == key.length;
 		return delegate.containsKey(key);
@@ -147,53 +141,27 @@ class TabularDataWrapper {
 		return containsKey(calculateIndex(key));
 	}
 
-	// @Override
-	public boolean containsValue(CompositeData value) {
-		// TODO Auto-generated method stub
-		return false;
+	public Object get(Object[] key) {
+		assert indexNames.length == key.length;
+		CompositeData cd = delegate.get(key);
+		if (nonIndexNames.length == 1)
+			return cd.get(nonIndexNames[0]);
+		else
+			return new CompositeDataWrapper(cd);
 	}
 
-	// @Override
-	public CompositeData get(Object[] key) {
-		// TODO Auto-generated method stub
-		return null;
+	public Object get(String key) {
+		assert indexNames.length == 1;
+		return get(new Object[] { key });
 	}
 
-	// @Override
-	public void put(CompositeData value) {
-		// TODO Auto-generated method stub
-
-	}
-
-	// @Override
-	public CompositeData remove(Object[] key) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	// @Override
-	public void putAll(CompositeData[] values) {
-		// TODO Auto-generated method stub
-
-	}
-
-	// @Override
-	public void clear() {
-		// TODO Auto-generated method stub
-
-	}
-
-	// @Override
-	public Set<?> keySet() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	// @Override
-	public Collection<?> values() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	// @Override public boolean containsValue(CompositeData value) {
+	// @Override public void put(CompositeData value) {
+	// @Override public CompositeData remove(Object[] key) {
+	// @Override public void putAll(CompositeData[] values) {
+	// @Override public void clear() {
+	// @Override public Set<?> keySet() {
+	// @Override public Collection<?> values() {
 
 	public String toString() {
 		return getProperties().toString();

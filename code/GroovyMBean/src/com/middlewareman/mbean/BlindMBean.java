@@ -4,9 +4,11 @@ import groovy.lang.GroovyObject;
 import groovy.lang.MetaClass;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
 import javax.management.ObjectName;
@@ -40,9 +42,11 @@ public class BlindMBean extends MBean implements GroovyObject {
 	}
 
 	public Object getProperty(String propertyName) {
-		if (attributeCapitalisation)
-			propertyName = MBeanHome.capitalise(propertyName);
 		try {
+			if (propertyName.equals("properties"))
+				return getProperties();
+			if (attributeCapitalisation)
+				propertyName = MBeanHome.capitalise(propertyName);
 			return home.getAttribute(objectName, propertyName);
 		} catch (AttributeNotFoundException e) {
 			throw new RuntimeException(e);
@@ -53,6 +57,8 @@ public class BlindMBean extends MBean implements GroovyObject {
 		} catch (ReflectionException e) {
 			throw new RuntimeException(e);
 		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} catch (IntrospectionException e) { // getProperties only
 			throw new RuntimeException(e);
 		}
 	}
@@ -85,6 +91,12 @@ public class BlindMBean extends MBean implements GroovyObject {
 
 	public void setMetaClass(MetaClass metaClass) {
 		this.metaClass = metaClass;
+	}
+
+	public Map<String, ?> getProperties() throws InstanceNotFoundException,
+			IntrospectionException, AttributeNotFoundException,
+			ReflectionException, MBeanException, IOException {
+		return home.getProperties(objectName, null, attributeCapitalisation);
 	}
 
 }

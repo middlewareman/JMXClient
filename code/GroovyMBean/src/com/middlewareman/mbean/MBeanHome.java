@@ -18,16 +18,16 @@ import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
-import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
 import javax.management.ReflectionException;
+import javax.management.RuntimeMBeanException;
 
 import com.middlewareman.mbean.type.MBeanAttributeInfoFilter;
 import com.middlewareman.mbean.type.OpenTypeWrapper;
 
-public abstract class MBeanHome {
+public abstract class MBeanHome implements MBeanServerConnectionFactory {
 
 	private static final Object[] NOARGS = new Object[0];
 
@@ -75,11 +75,6 @@ public abstract class MBeanHome {
 	public MBeanHome(Object url) {
 		this.url = url;
 	}
-
-	public abstract MBeanServerConnection getMBeanServerConnection()
-			throws IOException;
-
-	public abstract void close();
 
 	protected MBean createMBean(ObjectName objectName) {
 		if (blind)
@@ -197,10 +192,9 @@ public abstract class MBeanHome {
 			return wrapped;
 		} else if (unwrapped instanceof Object[]) {
 			Object[] objects = (Object[]) unwrapped;
-			Object[] wrapped = new Object[objects.length]; // TODO Or reuse?
 			for (int i = 0; i < objects.length; i++)
-				wrapped[i] = wrap(objects[i]);
-			return wrapped;
+				objects[i] = wrap(objects[i]);
+			return objects;
 		} else if (unwrapped instanceof ObjectName)
 			return createMBean((ObjectName) unwrapped);
 		else
@@ -220,11 +214,10 @@ public abstract class MBeanHome {
 			return objectNames;
 		} else if (wrapped instanceof Object[]) {
 			Object[] objects = (Object[]) wrapped;
-			Object[] unwrapped = new Object[objects.length]; // TODO Or reuse?
 			for (int i = 0; i < objects.length; i++) {
-				unwrapped[i] = unwrap(objects[i]);
+				objects[i] = unwrap(objects[i]);
 			}
-			return unwrapped;
+			return objects;
 		} else if (wrapped instanceof MBean)
 			return ((MBean) wrapped).objectName;
 		else
@@ -243,23 +236,40 @@ public abstract class MBeanHome {
 		return false;
 	}
 
+	private static MBeanAttributeInfoFilter getPropertiesFilter = new MBeanAttributeInfoFilter() {
+		public boolean accept(MBeanAttributeInfo attributeInfo) {
+			return attributeInfo.isReadable()
+					&& attributeInfo.getDescriptor()
+							.getFieldValue("deprecated") == null;
+		}
+	};
+
 	public Map<String, ?> getProperties(ObjectName objectName,
 			MBeanAttributeInfoFilter filter, boolean attributeCapitalisation)
 			throws InstanceNotFoundException, IntrospectionException,
 			AttributeNotFoundException, ReflectionException, MBeanException,
 			IOException {
+		if (filter == null)
+			filter = getPropertiesFilter;
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 		for (MBeanAttributeInfo attribute : getInfo(objectName).getAttributes()) {
-			if (filter == null || filter.accept(attribute)) {
+			if (filter.accept(attribute)) {
 				String name = attribute.getName();
-				Object value = getAttribute(objectName, name); // TODO
-																// getAttributes
-				if (attributeCapitalisation)
-					name = MBeanHome.decapitalise(name);
-				map.put(name, value);
+				try {
+					// TODO getAttributes (in bulk)?
+					Object value = getAttribute(objectName, name);
+					if (attributeCapitalisation)
+						name = MBeanHome.decapitalise(name);
+					map.put(name, value);
+				} catch (RuntimeMBeanException e) {
+					// TODO proper logging
+					System.err.println("MBeanHome getProperties " + objectName
+							+ " " + attribute.getName()
+							+ " RuntimeMBeanException: "
+							+ e.getCause().getMessage());
+				}
 			}
 		}
 		return map;
 	}
-
 }

@@ -21,10 +21,6 @@ public class CompositeDataWrapper {
 		return OpenTypeWrapper.wrap(type, value);
 	}
 
-	public Object getAt(String key) throws ClassNotFoundException {
-		return get(key);
-	}
-
 	public Map<String, ?> getProperties() {
 		Set<String> keys = delegate.getCompositeType().keySet();
 		Map<String, Object> map = new LinkedHashMap<String, Object>(keys.size());
@@ -35,7 +31,6 @@ public class CompositeDataWrapper {
 		return map;
 	}
 
-	// @Override
 	public boolean containsKey(String key) {
 		return delegate.containsKey(key);
 	}
@@ -65,7 +60,7 @@ public class CompositeDataWrapper {
 		return delegate.equals(other);
 	}
 
-	public boolean equals(Map other) {
+	public boolean equals(Map<?,?> other) {
 		return getProperties().equals(other);
 	}
 
