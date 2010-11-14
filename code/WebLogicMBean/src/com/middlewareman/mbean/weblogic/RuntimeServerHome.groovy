@@ -4,6 +4,9 @@ import com.middlewareman.mbean.LocalMBeanHome
 import com.middlewareman.mbean.MBean 
 import com.middlewareman.mbean.MBeanHome 
 import com.middlewareman.mbean.MBeanHomeFactory 
+import com.middlewareman.mbean.platform.MBeanPlatformHome 
+import com.middlewareman.mbean.platform.ProxyPlatformHome 
+import java.lang.management.ClassLoadingMXBean 
 import java.lang.management.ManagementFactory 
 import javax.naming.InitialContext 
 
@@ -40,51 +43,11 @@ class RuntimeServerHome {
 		home.getMBean 'com.bea:Name=MBeanTypeService,Type=weblogic.management.mbeanservers.MBeanTypeService'
 	}
 	
-	MBean getClassLoadingMXMBean() {
-		home.getMBean ManagementFactory.CLASS_LOADING_MXBEAN_NAME
+	ProxyPlatformHome getProxyPlatformHome() {
+		new ProxyPlatformHome(home)
 	}
 	
-	MBean getMemoryMXBean() {
-		home.getMBean ManagementFactory.MEMORY_MXBEAN_NAME
-	}
-	
-	MBean getThreadMXBean() {
-		home.getMBean ManagementFactory.THREAD_MXBEAN_NAME
-	}
-	
-	MBean getRuntimeMXBean() {
-		home.getMBean ManagementFactory.RUNTIME_MXBEAN_NAME
-	}
-	
-	MBean getCompilationMXBean() {
-		home.getMBean ManagementFactory.COMPILATION_MXBEAN_NAME
-	}
-	
-	MBean getOperatingSystemMXBean() {
-		home.getMBean ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME
-	}
-	
-	Set<MBean> getMemoryPoolMXBeans() {
-		home.getMBeans "${ManagementFactory.MEMORY_POOL_MXBEAN_DOMAIN_TYPE},*"
-	}
-	
-	MBean getMemoryPoolMXBean(String name) {
-		home.getMBean "${ManagementFactory.MEMORY_POOL_MXBEAN_DOMAIN_TYPE},name=${name}"
-	}
-	
-	Set<MBean> getMemoryManagerMXBeans() {
-		home.getMBeans("${ManagementFactory.MEMORY_MANAGER_MXBEAN_DOMAIN_TYPE},*")
-	}
-	
-	MBean getMemoryManagerMXBean(String name) {
-		home.getMBean "${ManagementFactory.MEMORY_MANAGER_MXBEAN_DOMAIN_TYPE},name=${name}"
-	}
-	
-	Set<MBean> getGarbageCollectorMXBeans() {
-		home.getMBeans "${ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE},*"
-	}
-	
-	MBean getGarbageCollectorMXBean(String name) {
-		home.getMBean "${ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE},name=${name}"
+	MBeanPlatformHome getMBeanPlatformHome() {
+		new MBeanPlatformHome(home)
 	}
 }
