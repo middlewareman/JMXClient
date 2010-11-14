@@ -11,6 +11,7 @@ import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
+import javax.management.MBeanInfo;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
@@ -45,6 +46,8 @@ public class BlindMBean extends MBean implements GroovyObject {
 		try {
 			if (propertyName.equals("properties"))
 				return getProperties();
+			if (propertyName.equals("info"))
+				return getInfo();
 			if (attributeCapitalisation)
 				propertyName = MBeanHome.capitalise(propertyName);
 			return home.getAttribute(objectName, propertyName);
@@ -96,7 +99,12 @@ public class BlindMBean extends MBean implements GroovyObject {
 	public Map<String, ?> getProperties() throws InstanceNotFoundException,
 			IntrospectionException, AttributeNotFoundException,
 			ReflectionException, MBeanException, IOException {
-		return home.getProperties(objectName, null, attributeCapitalisation);
+		return home.getProperties(objectName, null, false);
+	}
+
+	public MBeanInfo getInfo() throws InstanceNotFoundException,
+			IntrospectionException, ReflectionException, IOException {
+		return home.getInfo(objectName);
 	}
 
 }
