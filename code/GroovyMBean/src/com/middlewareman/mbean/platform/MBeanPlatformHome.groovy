@@ -4,59 +4,61 @@ import com.middlewareman.mbean.MBean
 import com.middlewareman.mbean.MBeanHome 
 import java.lang.management.*
 
-class MBeanPlatformHome extends PlatformHome {
+class MBeanPlatformHome implements IPlatformHome {
 	
 	private final MBeanHome home
+	private final PlatformNames names
 	
-	MBeanPlatformHome(MBeanHome home) {
+	MBeanPlatformHome(MBeanHome home, PlatformNames names = PlatformNames.DEFAULT) {
 		this.home = home
+		this.names = names
 	}
 	
 	MBean getClassLoading() {
-		home.getMBean classLoadingName
+		home.getMBean names.classLoading
 	}	
 	
 	MBean getMemory() {
-		home.getMBean memoryName
+		home.getMBean names.memory
 	}
 	
 	MBean getThread() {
-		home.getMBean threadName
+		home.getMBean names.thread
 	}
 	
 	MBean getRuntime() {
-		home.getMBean runtimeName
+		home.getMBean names.runtime
 	}
 	
 	MBean getCompilation() {
-		home.getMBean compilationName
+		home.getMBean names.compilation
 	}
 	
 	MBean getOperatingSystem() {
-		home.getMBean operatingSystemName
+		home.getMBean names.operatingSystem
 	}
 	
 	Collection<MBean> getMemoryPools() {
-		home.getMBeans getMemoryPoolName('*')
+		home.getMBeans names.getMemoryPool('*')
 	}
 	
 	MBean getMemoryPool(String name) {
-		home.getMBean getMemoryPoolName(name)
+		home.getMBean names.getMemoryPool(name)
 	}
 	
 	Collection<MBean> getMemoryManagers() {
-		home.getMBeans getMemoryManagerName('*')
+		home.getMBeans names.getMemoryManager('*')
 	}
 	
 	MBean getMemoryManager(String name) {
-		home.getMBean getMemoryManagerName(name)
+		home.getMBean names.getMemoryManager(name)
 	}
 	
 	Collection<MBean> getGarbageCollectors() {
-		home.getMBeans getGarbageCollectorName('*')
+		home.getMBeans names.getGarbageCollector('*')
 	}
 	
 	MBean getGarbageCollector(String name) {
-		home.getMBean getGarbageCollectorName(name)
+		home.getMBean names.getGarbageCollector(name)
 	}
 }
