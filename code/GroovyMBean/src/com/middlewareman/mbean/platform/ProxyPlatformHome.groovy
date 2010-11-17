@@ -5,7 +5,7 @@ import java.lang.management.*
 import javax.management.MBeanServerConnection 
 import javax.management.ObjectName 
 
-class ProxyPlatformHome extends PlatformHome implements IPlatformHome {
+class ProxyPlatformHome extends PlatformHome implements IProxyPlatformHome {
 	
 	private final MBeanServerConnectionFactory scf;
 	
@@ -41,7 +41,7 @@ class ProxyPlatformHome extends PlatformHome implements IPlatformHome {
 		ManagementFactory.newPlatformMXBeanProxy(connection, operatingSystemName, OperatingSystemMXBean.class)
 	}
 	
-	List<MemoryPoolMXBean> getMemoryPools() {
+	Collection<MemoryPoolMXBean> getMemoryPools() {
 		connection.queryNames(new ObjectName(getMemoryPoolName('*')), null).collect { 
 			ManagementFactory.newPlatformMXBeanProxy(connection, it.toString(), MemoryPoolMXBean.class)
 		}
@@ -51,7 +51,7 @@ class ProxyPlatformHome extends PlatformHome implements IPlatformHome {
 		ManagementFactory.newPlatformMXBeanProxy(connection, getMemoryPoolName(name), MemoryPoolMXBean.class)
 	}
 	
-	List<MemoryManagerMXBean> getMemoryManagers() {
+	Collection<MemoryManagerMXBean> getMemoryManagers() {
 		connection.queryNames(new ObjectName(getMemoryManagerName('*')), null).collect { 
 			ManagementFactory.newPlatformMXBeanProxy(connection, it.toString(), MemoryManagerMXBean.class)
 		}
@@ -61,7 +61,7 @@ class ProxyPlatformHome extends PlatformHome implements IPlatformHome {
 		ManagementFactory.newPlatformMXBeanProxy(connection, getMemoryManagerName(name), MemoryManagerMXBean.class)
 	}
 	
-	List<GarbageCollectorMXBean> getGarbageCollectors() {
+	Collection<GarbageCollectorMXBean> getGarbageCollectors() {
 		connection.queryNames(new ObjectName(getGarbageCollectorName('*')), null).collect { 
 			ManagementFactory.newPlatformMXBeanProxy(connection, it.toString(), GarbageCollectorMXBean.class)
 		}

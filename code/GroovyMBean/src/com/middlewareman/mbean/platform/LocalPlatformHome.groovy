@@ -2,7 +2,7 @@ package com.middlewareman.mbean.platform
 
 import java.lang.management.*
 
-class LocalPlatformHome implements IPlatformHome {
+class LocalPlatformHome implements IProxyPlatformHome {
 	
 	ClassLoadingMXBean getClassLoading() {
 		ManagementFactory.classLoadingMXBean
@@ -28,7 +28,7 @@ class LocalPlatformHome implements IPlatformHome {
 		ManagementFactory.operatingSystemMXBean
 	}
 	
-	List<MemoryPoolMXBean> getMemoryPools() {
+	Collection<MemoryPoolMXBean> getMemoryPools() {
 		ManagementFactory.memoryPoolMXBeans
 	}
 	
@@ -36,7 +36,7 @@ class LocalPlatformHome implements IPlatformHome {
 		ManagementFactory.memoryPoolMXBeans.find { it.name == name }
 	}
 	
-	List<MemoryManagerMXBean> getMemoryManagers() {
+	Collection<MemoryManagerMXBean> getMemoryManagers() {
 		ManagementFactory.memoryManagerMXBeans
 	}
 	
@@ -44,7 +44,7 @@ class LocalPlatformHome implements IPlatformHome {
 		ManagementFactory.memoryManagerMXBeans.find { it.name == name }
 	}
 	
-	List<GarbageCollectorMXBean> getGarbageCollectors() {
+	Collection<GarbageCollectorMXBean> getGarbageCollectors() {
 		ManagementFactory.garbageCollectorMXBeans
 	}
 	
