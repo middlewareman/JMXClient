@@ -4,6 +4,8 @@ import com.middlewareman.mbean.LocalMBeanHome;
 import com.middlewareman.mbean.MBean 
 import com.middlewareman.mbean.MBeanHome 
 import com.middlewareman.mbean.MBeanHomeFactory 
+import com.middlewareman.mbean.platform.MBeanPlatformHome;
+import com.middlewareman.mbean.platform.ProxyPlatformHome;
 
 import java.lang.management.ManagementFactory 
 import javax.naming.InitialContext 
@@ -33,7 +35,7 @@ class DomainRuntimeServerHome {
 		this.home = homeFactory.createMBeanHome(remoteJndiName)
 	}
 	
-	MBean getRuntimeService() {
+	MBean getDomainRuntimeService() {
 		home.getMBean 'com.bea:Name=DomainRuntimeService,Type=weblogic.management.mbeanservers.domainruntime.DomainRuntimeServiceMBean'
 	}
 	
@@ -41,51 +43,11 @@ class DomainRuntimeServerHome {
 		home.getMBean 'com.bea:Name=MBeanTypeService,Type=weblogic.management.mbeanservers.MBeanTypeService'
 	}
 	
-	MBean getClassLoadingMXMBean(String serverName) {
-		home.getMBean "${ManagementFactory.CLASS_LOADING_MXBEAN_NAME},Location=${serverName}"
+	ProxyPlatformHome getProxyPlatformHome(String serverName) {
+		new ProxyPlatformHome(home, new ManagedServerPlatformNames(serverName))
 	}
 	
-	MBean getMemoryMXBean(String serverName) {
-		home.getMBean "${ManagementFactory.MEMORY_MXBEAN_NAME},Location=${serverName}"
-	}
-	
-	MBean getThreadMXBean(String serverName) {
-		home.getMBean "${ManagementFactory.THREAD_MXBEAN_NAME},Location=${serverName}"
-	}
-	
-	MBean getRuntimeMXBean(String serverName) {
-		home.getMBean "${ManagementFactory.RUNTIME_MXBEAN_NAME},Location=${serverName}"
-	}
-	
-	MBean getCompilationMXBean(String serverName) {
-		home.getMBean "${ManagementFactory.COMPILATION_MXBEAN_NAME},Location=${serverName}"
-	}
-	
-	MBean getOperatingSystemMXBean(String serverName) {
-		home.getMBean "${ManagementFactory.OPERATING_SYSTEM_MXBEAN_NAME},Location=${serverName}"
-	}
-	
-	Set<MBean> getMemoryPoolMXBeans(String serverName) {
-		home.getMBeans "${ManagementFactory.MEMORY_POOL_MXBEAN_DOMAIN_TYPE},Location=${serverName}"
-	}
-	
-	MBean getMemoryPoolMXBean(String name, String serverName) {
-		home.getMBean "${ManagementFactory.MEMORY_POOL_MXBEAN_DOMAIN_TYPE},name=${name},Location=${serverName}"
-	}
-	
-	Set<MBean> getMemoryManagerMXBeans(String serverName) {
-		home.getMBeans "${ManagementFactory.MEMORY_MANAGER_MXBEAN_DOMAIN_TYPE},Location=${serverName}"
-	}
-	
-	MBean getMemoryManagerMXBean(String name, String serverName) {
-		home.getMBean "${ManagementFactory.MEMORY_MANAGER_MXBEAN_DOMAIN_TYPE},name=${name},Location=${serverName}"
-	}
-	
-	Set<MBean> getGarbageCollectorMXBeans(String serverName) {
-		home.getMBeans "${ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE},Location=${serverName}"
-	}
-	
-	MBean getGarbageCollectorMXBean(String name, String serverName) {
-		home.getMBean "${ManagementFactory.GARBAGE_COLLECTOR_MXBEAN_DOMAIN_TYPE},name=${name},Location=${serverName}"
+	MBeanPlatformHome getMBeanPlatformHome(String serverName) {
+		new MBeanPlatformHome(home, new ManagedServerPlatformNames(serverName))
 	}
 }
