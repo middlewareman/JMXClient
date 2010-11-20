@@ -7,9 +7,7 @@ class DomainRuntimeServerTest extends GroovyTestCase {
 	final DomainRuntimeServer home
 	
 	DomainRuntimeServerTest() {
-		home = new DomainRuntimeServer(
-				new WebLogicMBeanHomeFactory(
-				url:'t3://localhost:7001',username:'weblogic',password:'welcome1'))
+		home = new DomainRuntimeServer(WebLogicMBeanHomeFactory.default)
 	}
 	
 	void testDomainRuntimeService() {
@@ -24,5 +22,4 @@ class DomainRuntimeServerTest extends GroovyTestCase {
 		def bean = home.typeService
 		assert bean.getMBeanInfo('weblogic.management.configuration.DomainMBean')
 	}
-	
 }

@@ -6,12 +6,15 @@ import javax.management.remote.JMXServiceURL
 import javax.naming.Context 
 
 public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
-
-	// protocol packages etc
+	
+	static WebLogicMBeanHomeFactory getDefault() {
+		new WebLogicMBeanHomeFactory(
+				url:'t3://localhost:7001',username:'weblogic',password:'welcome1')
+	}
 	
 	String username
 	String password
-	String protocolProviderPackages
+	String protocolProviderPackages = 'weblogic.management.remote' 
 	
 	JMXServiceURL surl(String path) throws MalformedURLException {
 		new JMXServiceURL("service:jmx:${url}/jndi/${path}");
@@ -19,9 +22,9 @@ public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 	
 	Map<String,?> env() {
 		def map = super.env()
-		map.put Context.SECURITY_PRINCIPAL, username ?: 'weblogic'
-		map.put Context.SECURITY_CREDENTIALS, password ?: 'welcome1'
-		map.put JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES, protocolProviderPackages ?: 'weblogic.management.remote' 
+		map.put Context.SECURITY_PRINCIPAL, username
+		map.put Context.SECURITY_CREDENTIALS, password
+		map.put JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES, protocolProviderPackages 
 		return map
 	}
 }

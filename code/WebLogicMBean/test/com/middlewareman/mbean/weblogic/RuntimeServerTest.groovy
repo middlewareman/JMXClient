@@ -8,9 +8,7 @@ class RuntimeServerTest extends GroovyTestCase {
 	final RuntimeServer home
 	
 	RuntimeServerTest() {
-		home = new RuntimeServer(
-				new WebLogicMBeanHomeFactory(
-				url:'t3://localhost:7001',username:'weblogic',password:'welcome1'))
+		home = new RuntimeServer(WebLogicMBeanHomeFactory.default)
 	}
 	
 	void testRuntimeService() {
