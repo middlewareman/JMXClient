@@ -8,7 +8,7 @@ class DomainRuntimeServerTest extends GroovyTestCase {
 	
 	DomainRuntimeServerTest() {
 		home = new DomainRuntimeServer(
-				new DefaultMBeanHomeFactory(
+				new WebLogicMBeanHomeFactory(
 				url:'t3://localhost:7001',username:'weblogic',password:'welcome1'))
 	}
 	

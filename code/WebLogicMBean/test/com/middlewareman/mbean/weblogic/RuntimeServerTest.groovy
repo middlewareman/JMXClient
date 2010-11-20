@@ -9,7 +9,7 @@ class RuntimeServerTest extends GroovyTestCase {
 	
 	RuntimeServerTest() {
 		home = new RuntimeServer(
-				new DefaultMBeanHomeFactory(
+				new WebLogicMBeanHomeFactory(
 				url:'t3://localhost:7001',username:'weblogic',password:'welcome1'))
 	}
 	

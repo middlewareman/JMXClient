@@ -5,7 +5,7 @@ import javax.management.remote.JMXConnectorFactory
 import javax.management.remote.JMXServiceURL 
 import javax.naming.Context 
 
-public class DefaultMBeanHomeFactory extends MBeanHomeFactory {
+public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 
 	// protocol packages etc
 	
