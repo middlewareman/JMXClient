@@ -4,17 +4,17 @@ import com.middlewareman.mbean.MBean
 import com.middlewareman.mbean.MBeanHome 
 import com.middlewareman.mbean.MBeanHomeFactory 
 
-class EditServerHome {
+class EditServer {
 	
 	private static final remoteJndiName = 'weblogic.management.mbeanservers.edit'
 	
 	final MBeanHome home
 	
-	EditServerHome(MBeanHome home) {
+	EditServer(MBeanHome home) {
 		this.home = home
 	}
 	
-	EditServerHome(MBeanHomeFactory homeFactory) {
+	EditServer(MBeanHomeFactory homeFactory) {
 		this.home = homeFactory.createMBeanHome(remoteJndiName)
 	}
 	

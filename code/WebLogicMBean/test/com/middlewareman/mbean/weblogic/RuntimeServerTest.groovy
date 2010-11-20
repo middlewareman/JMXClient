@@ -3,12 +3,12 @@ package com.middlewareman.mbean.weblogic
 import groovy.util.GroovyTestCase
 
 
-class RuntimeServerHomeTest extends GroovyTestCase {
+class RuntimeServerTest extends GroovyTestCase {
 	
-	final RuntimeServerHome home
+	final RuntimeServer home
 	
-	RuntimeServerHomeTest() {
-		home = new RuntimeServerHome(
+	RuntimeServerTest() {
+		home = new RuntimeServer(
 				new DefaultMBeanHomeFactory(
 				url:'t3://localhost:7001',username:'weblogic',password:'welcome1'))
 	}

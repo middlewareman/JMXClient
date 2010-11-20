@@ -10,7 +10,7 @@ import com.middlewareman.mbean.platform.ProxyPlatformHome;
 import java.lang.management.ManagementFactory 
 import javax.naming.InitialContext 
 
-class DomainRuntimeServerHome {
+class DomainRuntimeServer {
 	
 	private static final localJndiName = 'java:comp/env/jmx/domainRuntime'
 	private static final remoteJndiName = 'weblogic.management.mbeanservers.domainruntime'
@@ -21,17 +21,17 @@ class DomainRuntimeServerHome {
 		new LocalMBeanHome(localJndiName, server)
 	}
 	
-	static DomainRuntimeServerHome getLocalMBeanServerHome() {
-		new DomainRuntimeServerHome(getLocalMBeanHome())
+	static DomainRuntimeServer getLocalMBeanServerHome() {
+		new DomainRuntimeServer(getLocalMBeanHome())
 	}
 	
 	final MBeanHome home
 	
-	DomainRuntimeServerHome(MBeanHome home) {
+	DomainRuntimeServer(MBeanHome home) {
 		this.home = home
 	}
 	
-	DomainRuntimeServerHome(MBeanHomeFactory homeFactory) {
+	DomainRuntimeServer(MBeanHomeFactory homeFactory) {
 		this.home = homeFactory.createMBeanHome(remoteJndiName)
 	}
 	

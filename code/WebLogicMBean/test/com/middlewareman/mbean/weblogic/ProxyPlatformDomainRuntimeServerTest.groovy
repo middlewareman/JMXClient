@@ -3,14 +3,14 @@ package com.middlewareman.mbean.weblogic
 import com.middlewareman.mbean.platform.PlatformHomeTest
 import com.middlewareman.mbean.platform.ProxyPlatformHome 
 
-class ProxyPlatformDomainRuntimeServerHomeTest extends PlatformHomeTest {
+class ProxyPlatformDomainRuntimeServerTest extends PlatformHomeTest {
 	
 	final ph
 	
-	ProxyPlatformDomainRuntimeServerHomeTest() {
+	ProxyPlatformDomainRuntimeServerTest() {
 		def hf = new DefaultMBeanHomeFactory(
 				url:'t3://localhost:7001',username:'weblogic',password:'welcome1')
-		def drs = new DomainRuntimeServerHome(hf)
+		def drs = new DomainRuntimeServer(hf)
 		ph = drs.getProxyPlatformHome('AdminServer')
 	}
 }
