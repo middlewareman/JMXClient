@@ -49,7 +49,7 @@ public class ConnectingMBeanHome extends MBeanHome implements Serializable,
 	}
 
 	public void close() throws IOException {
-		connector.close();
+		if (connector != null) connector.close();
 	}
 
 	private void addShutdownHook(final JMXConnector connector) {
