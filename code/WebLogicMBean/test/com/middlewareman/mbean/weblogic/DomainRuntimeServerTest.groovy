@@ -4,14 +4,10 @@ import groovy.util.GroovyTestCase
 
 class DomainRuntimeServerTest extends GroovyTestCase {
 	
-	final DomainRuntimeServer home
-	
-	DomainRuntimeServerTest() {
-		home = new DomainRuntimeServer(WebLogicMBeanHomeFactory.default)
-	}
+	final DomainRuntimeServer domainRuntimeServer = new DomainRuntimeServer(WebLogicMBeanHomeFactory.default)
 	
 	void testDomainRuntimeService() {
-		def drs = home.domainRuntimeService
+		def drs = domainRuntimeServer.domainRuntimeService
 		for (sr in drs.ServerRuntimes) {
 			println "Server $sr.Name is $sr.State"
 		}
@@ -19,7 +15,7 @@ class DomainRuntimeServerTest extends GroovyTestCase {
 	}
 	
 	void testTypeService() {
-		def bean = home.typeService
+		def bean = domainRuntimeServer.typeService
 		assert bean.getMBeanInfo('weblogic.management.configuration.DomainMBean')
 	}
 }
