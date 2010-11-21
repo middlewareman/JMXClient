@@ -18,11 +18,8 @@ class EditServer {
 		this.home = homeFactory.createMBeanHome(remoteJndiName)
 	}
 	
-	MBean getRuntimeService() {
+	MBean getEditService() {
 		home.getMBean 'com.bea:Name=EditService,Type=weblogic.management.mbeanservers.edit.EditServiceMBean'
 	}
 	
-	MBean getTypeService() {
-		home.getMBean 'com.bea:Name=MBeanTypeService,Type=weblogic.management.mbeanservers.MBeanTypeService'
-	}
 }
