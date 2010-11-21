@@ -1,5 +1,6 @@
 package com.middlewareman.mbean;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -27,7 +28,7 @@ import javax.management.RuntimeMBeanException;
 import com.middlewareman.mbean.type.MBeanAttributeInfoFilter;
 import com.middlewareman.mbean.type.OpenTypeWrapper;
 
-public abstract class MBeanHome implements MBeanServerConnectionFactory {
+public abstract class MBeanHome implements MBeanServerConnectionFactory, Closeable {
 
 	private static final Object[] NOARGS = new Object[0];
 
@@ -74,6 +75,10 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory {
 
 	public MBeanHome(Object url) {
 		this.url = url;
+	}
+	
+	public void ping() throws IOException {
+		assert getMBeanServerConnection().getDefaultDomain() != null;
 	}
 
 	protected MBean createMBean(ObjectName objectName) {
