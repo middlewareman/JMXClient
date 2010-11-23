@@ -7,6 +7,23 @@ import com.middlewareman.mbean.weblogic.WebLogicMBeanHomeFactory;
 
 class GWLSTBindings {
 	
+	static status(def runtimeService) {
+		if (runtimeService) {
+			try {
+				def serverRuntime = runtimeService.ServerRuntime
+				def serverName = runtimeService.ServerName
+				def serverType = serverRuntime.AdminServer ? 'admin' : 'managed'
+				def serverState = serverRuntime.State
+				def address = serverRuntime.@home.url
+				return "Connected to $serverName ($serverType) $serverState on $address"
+			} catch (Exception e) {
+				return e.message
+			}
+		} else {
+			return 'Not connected'
+		}
+	}
+	
 	static bind(WebLogicMBeanHomeFactory hf, def target) {
 		def newRuntimeServer = new RuntimeServer(hf)
 		newRuntimeServer.home.ping()
@@ -38,21 +55,7 @@ class GWLSTBindings {
 			}
 		}
 		// TODO convenience closures
-		target.status = {
-			if (target.runtimeServer) {
-				try {
-					def serverRuntime = target.runtimeService.ServerRuntime
-					def serverName = target.runtimeService.ServerName
-					def serverType = serverRuntime.AdminServer ? 'admin' : 'managed'
-					def serverState = serverRuntime.State
-					def address = serverRuntime.@home.url
-					return "Connected to $serverName ($serverType) $serverState on $address"
-				} catch (Exception e) {
-					return e.message
-				}
-			} else {
-				return 'Not connected'
-			}
-		}
+		target.status = { status(target.runtimeService) }
 	}
 }
+
