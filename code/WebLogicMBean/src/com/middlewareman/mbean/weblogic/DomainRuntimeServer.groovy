@@ -21,7 +21,7 @@ class DomainRuntimeServer {
 		new LocalMBeanHome(localJndiName, server)
 	}
 	
-	static DomainRuntimeServer getLocalMBeanServerHome() {
+	static DomainRuntimeServer getLocalDomainRuntimeServer() {
 		new DomainRuntimeServer(getLocalMBeanHome())
 	}
 	
