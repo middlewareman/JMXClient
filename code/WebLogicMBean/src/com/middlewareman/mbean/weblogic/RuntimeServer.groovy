@@ -20,7 +20,7 @@ class RuntimeServer {
 		new LocalMBeanHome(localJndiName, server)
 	}
 	
-	static RuntimeServer getLocalMBeanServerHome() {
+	static RuntimeServer getLocalRuntimeServer() {
 		new RuntimeServer(getLocalMBeanHome())
 	}
 	
