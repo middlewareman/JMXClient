@@ -12,21 +12,19 @@
 		<servlet-name>Groovy</servlet-name>
 		<url-pattern>*.groovy</url-pattern>
 	</servlet-mapping>
-	<!-- 
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Authenticated</web-resource-name>
 			<url-pattern>*</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
-			<role-name>Monitor</role-name>
+			<role-name>Anonymous</role-name>
 		</auth-constraint>
 	</security-constraint>
 	<login-config>
 		<auth-method>CLIENT-CERT,BASIC</auth-method>
 	</login-config>
 	<security-role>
-		<role-name>Monitor</role-name>
+		<role-name>Anonymous</role-name>
 	</security-role>
-	-->
 </web-app>

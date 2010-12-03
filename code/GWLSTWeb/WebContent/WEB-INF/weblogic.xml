@@ -6,10 +6,8 @@
 	<wls:container-descriptor>
 		<wls:index-directory-enabled>true</wls:index-directory-enabled>
 	</wls:container-descriptor>
-	<!-- 
 	<wls:security-role-assignment>
-		<wls:role-name>Monitor</wls:role-name>
+		<wls:role-name>Anonymous</wls:role-name>
 		<wls:externally-defined />
 	</wls:security-role-assignment>
-	-->
 </wls:weblogic-web-app>
