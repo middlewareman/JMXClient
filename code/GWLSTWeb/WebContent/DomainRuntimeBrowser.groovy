@@ -1,14 +1,87 @@
-import javax.management.ObjectName
-import com.middlewareman.mbean.weblogic.DomainRuntimeServer
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
+
+import com.middlewareman.mbean.MBean
+import com.middlewareman.mbean.weblogic.DomainRuntimeServer 
+import com.middlewareman.mbean.weblogic.builder.HtmlExporter 
 
 if (params.objectName) {
+	
 	def objectName = params.objectName
 	def home = DomainRuntimeServer.localMBeanHome
 	assert home
-	mbean = home.getMBean(objectName)
+	def mbean = home.getMBean(objectName)
+	assert mbean
+	
+	def htmlExporter = new HtmlExporter(html:html)	
+	// TODO any additional parameters or preferences
+	
+	def timestamp = new Date()
+	def extras = [
+				'URL':request.requestURL,
+				'Timestamp':timestamp,
+				'user':request.remoteUser, 
+				'principal':request.userPrincipal]
+	htmlExporter.mbean mbean, extras
+	
 } else {
-	mbean = DomainRuntimeServer.localDomainRuntimeServer.domainRuntimeService
+	
+	def server = DomainRuntimeServer.localDomainRuntimeServer
+	def service = server.domainRuntimeService
+	def adminServerName = service.DomainConfiguration.AdminServerName
+	def serverNames = service.ServerRuntimes.Name 
+	html.html {
+		head { title 'WebLogic RuntimeMBeanServer Browser' }
+		body {
+			h1 'WebLogic RuntimeMBeanServer Browser'
+			
+			h2 'WebLogic Services'
+			for (name in [
+				'domainRuntimeService',
+				'typeService'
+			]) {
+				def mbean = server."$name"
+				def objectName = mbean.@objectName
+				h3 name
+				a(href:"?objectName=$objectName") { pre objectName }
+			}
+			
+			def selectedServerName = params.serverName ?: adminServerName
+			h2 "Java Platform MXBeans ($selectedServerName)"
+			
+			form {
+				select(name:'serverName') {
+					for (serverName in serverNames) {
+						if (serverName == selectedServerName) {
+							option selected:serverName, serverName
+						} else {
+							option serverName
+						}
+					}	
+				}
+				input type:'submit'
+			}
+			def map = server.getMBeanPlatformHome(selectedServerName).properties.findAll { key, value ->
+				value instanceof MBean || value instanceof Collection<MBean>
+			}
+			map.each { name, mbeans -> 
+				h3 name
+				if (mbeans instanceof MBean) {
+					def objectName = mbeans.@objectName
+					a(href:"?objectName=$objectName") { pre objectName }
+				} else if (mbeans instanceof Collection<MBean>) {
+					ul {
+						mbeans.each { mbean ->
+							def objectName = mbean.@objectName
+							li {
+								a(href:"?objectName=$objectName") { pre objectName }
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
-assert mbean
-request.setAttribute 'MBean', mbean
-forward 'DumpMBean.groovy'
