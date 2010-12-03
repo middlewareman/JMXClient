@@ -35,11 +35,22 @@ class HtmlExporter {
 		true
 	}
 	
-	void mbean(MBean mbean) {
+	void mbean(MBean mbean, Map extras = null) {
 		def info = mbean.info
 		html.html {
-			head { title 'MBean Browser' }
+			head { title 'WebLogic MBean Browser' }
 			body {
+				h1 'WebLogic MBean Browser'
+				if (extras) {
+					table(border:'1') {
+						extras.each { key, value ->
+							tr {
+								td key
+								td { pre value }
+							}
+						}
+					}
+				}
 				h2 'MBeanHome'
 				pre mbean.@home
 				h2 'ObjectName'
@@ -104,7 +115,10 @@ class HtmlExporter {
 					td { name ai, delegate }
 					td { descriptor ai, delegate }
 					td { type ai.type, delegate }
-					td { if (val != null) type val.getClass(), delegate }
+					td {
+						if (val != null) 
+							type val.getClass(), delegate
+					}
 					td { value val, delegate }
 				}
 			}
