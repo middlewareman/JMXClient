@@ -8,6 +8,9 @@ class EditServer {
 	
 	private static final remoteJndiName = 'weblogic.management.mbeanservers.edit'
 	
+	public static final editServiceName = 'com.bea:Name=EditService,Type=weblogic.management.mbeanservers.edit.EditServiceMBean'
+	public static final typeServiceName = 'com.bea:Name=MBeanTypeService,Type=weblogic.management.mbeanservers.MBeanTypeService'
+	
 	final MBeanHome home
 	
 	EditServer(MBeanHome home) {
@@ -19,7 +22,10 @@ class EditServer {
 	}
 	
 	MBean getEditService() {
-		home.getMBean 'com.bea:Name=EditService,Type=weblogic.management.mbeanservers.edit.EditServiceMBean'
+		home.getMBean editServiceName
 	}
 	
+	MBean getTypeService() {
+		home.getMBean typeServiceName
+	}
 }

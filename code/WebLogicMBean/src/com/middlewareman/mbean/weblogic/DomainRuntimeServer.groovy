@@ -15,6 +15,9 @@ class DomainRuntimeServer {
 	private static final localJndiName = 'java:comp/env/jmx/domainRuntime'
 	private static final remoteJndiName = 'weblogic.management.mbeanservers.domainruntime'
 	
+	public static final domainRuntimeServiceName = 'com.bea:Name=DomainRuntimeService,Type=weblogic.management.mbeanservers.domainruntime.DomainRuntimeServiceMBean'
+	public static final typeServiceName = 'com.bea:Name=MBeanTypeService,Type=weblogic.management.mbeanservers.MBeanTypeService'
+	
 	static LocalMBeanHome getLocalMBeanHome() {
 		def ic = new InitialContext()
 		def server = ic.lookup(localJndiName)
@@ -36,11 +39,11 @@ class DomainRuntimeServer {
 	}
 	
 	MBean getDomainRuntimeService() {
-		home.getMBean 'com.bea:Name=DomainRuntimeService,Type=weblogic.management.mbeanservers.domainruntime.DomainRuntimeServiceMBean'
+		home.getMBean domainRuntimeServiceName
 	}
 	
 	MBean getTypeService() {
-		home.getMBean 'com.bea:Name=MBeanTypeService,Type=weblogic.management.mbeanservers.MBeanTypeService'
+		home.getMBean typeServiceName
 	}
 	
 	ProxyPlatformHome getProxyPlatformHome(String serverName) {
