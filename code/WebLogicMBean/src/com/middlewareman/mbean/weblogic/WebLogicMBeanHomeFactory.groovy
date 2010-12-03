@@ -10,6 +10,7 @@ public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 	static WebLogicMBeanHomeFactory getDefault() {
 		def hf = new WebLogicMBeanHomeFactory(
 				url:'t3://localhost:7001',username:'weblogic',password:'welcome1')
+		hf.loadEnvironmentProperties()
 		hf.loadSystemProperties()
 		return hf
 	}
@@ -19,18 +20,30 @@ public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 	String protocolProviderPackages = 'weblogic.management.remote'
 	Long timeout
 	
-	void loadSystemProperties() {
-		def props = System.getProperties() // TODO optimise: gwlst* only
-		def config = new ConfigSlurper().parse(props).gwlst
-		loadProperties config
+	void loadEnvironmentProperties() {
+		String value
+		value = System.getenv('GWLST_URL')
+		if (value) url = value
+		value = System.getenv('GWLST_USERNAME')
+		if (value) username = value
+		value = System.getenv('GWLST_PASSWORD')
+		if (value) password = value
+		value = System.getenv('GWLST_TIMEOUT')
+		if (value) timeout = value as Long
+		// TODO GWLST_ENV_*
 	}
 	
-	void loadProperties(def map) {
-		if (map.url) url = map.url
-		if (map.username) username = map.username
-		if (map.password) password = map.password
-		if (map.timeout) timeout = map.timeout
-		// TODO use gwlst.env.*
+	void loadSystemProperties() {
+		String value
+		value = System.getenv('gwlst.url')
+		if (value) url = value
+		value = System.getenv('gwlst.username')
+		if (value) username = value
+		value = System.getenv('gwlst.password')
+		if (value) password = value
+		value = System.getenv('gwlst.timeout')
+		if (value) timeout = value as Long
+		// TODO gwlst.env.*
 	}
 	
 	String[] loadArguments(String[] args) {
