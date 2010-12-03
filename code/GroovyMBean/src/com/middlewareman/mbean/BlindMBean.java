@@ -11,7 +11,6 @@ import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
-import javax.management.MBeanInfo;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
@@ -100,11 +99,6 @@ public class BlindMBean extends MBean implements GroovyObject {
 			IntrospectionException, AttributeNotFoundException,
 			ReflectionException, MBeanException, IOException {
 		return home.getProperties(objectName, null, false);
-	}
-
-	public MBeanInfo getInfo() throws InstanceNotFoundException,
-			IntrospectionException, ReflectionException, IOException {
-		return home.getInfo(objectName);
 	}
 
 }

@@ -2,7 +2,11 @@ package com.middlewareman.mbean;
 
 import java.io.IOException;
 
+import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
+import javax.management.MBeanInfo;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 
 public class MBean {
 
@@ -38,6 +42,11 @@ public class MBean {
 			// TODO Log error?
 			return false;
 		}
+	}
+
+	public MBeanInfo getInfo() throws InstanceNotFoundException,
+			IntrospectionException, ReflectionException, IOException {
+		return home.getInfo(objectName);
 	}
 
 }
