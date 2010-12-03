@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<wls:weblogic-web-app
-	xmlns:wls="http://xmlns.oracle.com/weblogic/weblogic-web-app"
+<weblogic-web-app
+	xmlns="http://xmlns.oracle.com/weblogic/weblogic-web-app"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd http://xmlns.oracle.com/weblogic/weblogic-web-app http://xmlns.oracle.com/weblogic/weblogic-web-app/1.1/weblogic-web-app.xsd">
-	<wls:container-descriptor>
-		<wls:index-directory-enabled>true</wls:index-directory-enabled>
-	</wls:container-descriptor>
-	<wls:security-role-assignment>
-		<wls:role-name>Anonymous</wls:role-name>
-		<wls:externally-defined />
-	</wls:security-role-assignment>
-</wls:weblogic-web-app>
+	<container-descriptor>
+		<index-directory-enabled>true</index-directory-enabled>
+	</container-descriptor>
+	<security-role-assignment>
+		<role-name>Admin</role-name>
+		<externally-defined />
+	</security-role-assignment>
+	<context-root>gwlst</context-root>
+</weblogic-web-app>
