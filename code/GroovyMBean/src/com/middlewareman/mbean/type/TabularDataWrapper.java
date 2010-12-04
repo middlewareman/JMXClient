@@ -1,5 +1,10 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean.type;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,11 +18,23 @@ import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularType;
 
 /**
- * Simplifying wrapper for TabularData that behaves as a map. If indexNames is
- * single String, the key of this map is a single String, otherwise an array of
- * Strings. If the non-index names (keys for the row minus indexNames) is a
- * single value, the map value is single, otherwise a map. Rows can be indexed
- * by String/String[] or by a Map.
+ * Wrapper for {@link TabularData} that unwraps {@link OpenType} values and
+ * provides map-like access in Groovy and a readable String representation.
+ * <p>
+ * Columns are identified by names, of which at least one is part of the index
+ * (primary key of a row), and the rest are not. TabularData allows this index
+ * to consist of an arbitrary set of columns and hence addresses a row by an
+ * object array. TabularDataWrapper extends this behaviour by allowing indexing
+ * by a single value in the common case that the index consists of a single
+ * name. In addition, when there is only one non-index column, it too will be
+ * treated as a single value rather than an array or a map. Thus, in the common
+ * case that TabularData is used to represent a simple key-value map,
+ * TabularDataWrapper will behave as such.
+ * </p>
+ * <p>
+ * Rows can be indexed by <code>Object</code> (only when single index column),
+ * <code>Object[]</code> or <code>Map<String,?></code>.
+ * </p>
  * 
  * @author Andreas Nyberg
  */
@@ -141,7 +158,19 @@ class TabularDataWrapper {
 		return containsKey(calculateIndex(key));
 	}
 
-	public Object get(Object[] key) {
+	public Object getAt(Object key) {
+		assert indexNames.length == 1;
+		assert key != null;
+		return getAt(new Object[] { key });
+	}
+
+	public Object getAt(List<?> key) {
+		assert key != null;
+		return getAt(key.toArray());
+	}
+
+	public Object getAt(Object[] key) {
+		assert key != null;
 		assert indexNames.length == key.length;
 		CompositeData cd = delegate.get(key);
 		if (nonIndexNames.length == 1)
@@ -151,8 +180,39 @@ class TabularDataWrapper {
 	}
 
 	public Object get(String key) {
+		System.err.println("get Object " + key);
 		assert indexNames.length == 1;
-		return get(new Object[] { key });
+		return getAt(new Object[] { key });
+	}
+
+	public Object get(Map<String, ?> key) {
+		System.err.println("get Map " + key);
+		Object[] index = calculateIndex(key);
+		if (index == null)
+			return null;
+		Object value = getAt(index);
+		if (value == null)
+			return null;
+		if (key.size() > indexNames.length) {
+			System.err.println("TabularDataWrapper.getAt(" + key
+					+ ") checking superfluos keys"); // TODO logging
+			for (String name : nonIndexNames) {
+				if (key.containsKey(name)) {
+					Object keyValue = key.get(name);
+					Object colValue = (value instanceof CompositeDataWrapper) ? ((CompositeDataWrapper) value)
+							.get(name) : value;
+					boolean equal = (keyValue == null) ? (colValue == null)
+							: keyValue.equals(colValue);
+					if (!equal) {
+						System.err.println("Disqualifying name=" + name
+								+ ", keyValue=" + keyValue + ", colValue="
+								+ colValue); // TODO logging
+						return null;
+					}
+				}
+			}
+		}
+		return value;
 	}
 
 	// @Override public boolean containsValue(CompositeData value) {
@@ -163,15 +223,40 @@ class TabularDataWrapper {
 	// @Override public Set<?> keySet() {
 	// @Override public Collection<?> values() {
 
-	public String toString() {
-		return getProperties().toString();
+	public boolean equals(Object other) {
+		if (other == null)
+			return false;
+		else if (other instanceof TabularDataWrapper)
+			return equals((TabularDataWrapper) other);
+		else if (other instanceof TabularData)
+			return equals((TabularData) other);
+		else if (other instanceof Map)
+			return equals((Map<?, ?>) other);
+		else
+			return false;
+	}
+
+	public boolean equals(TabularDataWrapper other) {
+		return delegate.equals(other.delegate);
 	}
 
 	public boolean equals(TabularData other) {
 		return delegate.equals(other);
 	}
 
-	public boolean equals(Map other) {
+	public boolean equals(Map<?, ?> other) {
 		return getProperties().equals(other);
 	}
+
+	public int hashCode() {
+		return delegate.hashCode();
+	}
+
+	/**
+	 * Returns String representation of {@link #getProperties properties} map.
+	 */
+	public String toString() {
+		return getProperties().toString();
+	}
+
 }

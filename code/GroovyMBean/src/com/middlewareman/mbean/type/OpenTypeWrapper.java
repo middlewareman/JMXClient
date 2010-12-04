@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean.type;
 
 import javax.management.openmbean.ArrayType;
@@ -7,6 +11,11 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularData;
 
+/**
+ * Static utility methods for wrapping/unwrapping {@link OpenType} values.
+ * 
+ * @author Andreas Nyberg
+ */
 public class OpenTypeWrapper {
 
 	public static Object wrap(OpenType<?> openType, Object object) {
