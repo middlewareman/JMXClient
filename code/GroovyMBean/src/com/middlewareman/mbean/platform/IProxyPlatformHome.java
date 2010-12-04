@@ -1,16 +1,17 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean.platform;
 
-import java.lang.management.ClassLoadingMXBean;
-import java.lang.management.CompilationMXBean;
-import java.lang.management.GarbageCollectorMXBean;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryManagerMXBean;
-import java.lang.management.MemoryPoolMXBean;
-import java.lang.management.OperatingSystemMXBean;
-import java.lang.management.RuntimeMXBean;
-import java.lang.management.ThreadMXBean;
+import java.lang.management.*;
 import java.util.Collection;
 
+/**
+ * Type-safe Java Platform MXBeans factory.
+ * 
+ * @author Andreas Nyberg
+ */
 public interface IProxyPlatformHome extends IPlatformHome {
 
 	ClassLoadingMXBean getClassLoading();

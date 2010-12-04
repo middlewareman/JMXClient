@@ -1,7 +1,17 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean.platform
 
 import java.lang.management.*
 
+/**
+ * Java Platform MXBeans factory returning local JVM MXBeans.
+ * Primarily used for testing.
+ * 
+ * @author Andreas Nyberg
+ */
 class LocalPlatformHome implements IProxyPlatformHome {
 	
 	ClassLoadingMXBean getClassLoading() {

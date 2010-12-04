@@ -1,9 +1,19 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean.platform
 
 import com.middlewareman.mbean.MBean 
 import com.middlewareman.mbean.MBeanHome 
+
 import java.lang.management.*
 
+/**
+ * Java Platform MXBeans factory returning {@link MBean MBeans}.
+ * 
+ * @author Andreas Nyberg
+ */
 class MBeanPlatformHome implements IPlatformHome {
 	
 	private final MBeanHome home

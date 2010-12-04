@@ -1,7 +1,16 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean.platform
 
 import java.lang.management.ManagementFactory 
 
+/**
+ * Source of object names for Java Platform MXBeans.
+ * 
+ * @author Andreas Nyberg
+ */
 class PlatformNames {
 	
 	static final PlatformNames DEFAULT = new PlatformNames()

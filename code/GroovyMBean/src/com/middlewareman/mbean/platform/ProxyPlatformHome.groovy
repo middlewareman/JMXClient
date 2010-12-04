@@ -1,20 +1,20 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean.platform
 
 import com.middlewareman.mbean.MBeanServerConnectionFactory 
-import java.lang.management.ClassLoadingMXBean 
-import java.lang.management.CompilationMXBean 
-import java.lang.management.GarbageCollectorMXBean 
-import java.lang.management.ManagementFactory 
-import java.lang.management.MemoryMXBean 
-import java.lang.management.MemoryManagerMXBean 
-import java.lang.management.MemoryPoolMXBean 
-import java.lang.management.OperatingSystemMXBean 
-import java.lang.management.RuntimeMXBean 
-import java.lang.management.ThreadMXBean 
+
+import java.lang.management.*
 import javax.management.MBeanServerConnection 
 import javax.management.ObjectName 
 
-
+/**
+ * Java Platform MXBeans factory returning type-safe MBean proxies.
+ * 
+ * @author Andreas Nyberg
+ */
 class ProxyPlatformHome implements IProxyPlatformHome {
 	
 	private final MBeanServerConnectionFactory scf;
