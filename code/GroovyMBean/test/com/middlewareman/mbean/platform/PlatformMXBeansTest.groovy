@@ -1,4 +1,8 @@
-package com.middlewareman.mbean.test
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
+package com.middlewareman.mbean.platform
 
 import java.lang.management.*
 
@@ -8,7 +12,7 @@ import javax.management.RuntimeMBeanException
 
 import com.middlewareman.mbean.*
 import com.middlewareman.mbean.type.* 
-
+import com.middlewareman.mbean.type.AttributeFilter.OnException 
 
 class PlatformMXBeansTest extends GroovyTestCase {
 	
@@ -27,9 +31,13 @@ class PlatformMXBeansTest extends GroovyTestCase {
 	
 	void compareRemoteLocal(MBean remote, Object local) {
 		println name
-		Map remoteProps = remote.@home.getProperties(remote.@objectName,null,true)
+		def attributeFilter = new SimpleAttributeFilter(noDeprecated:true,decapitalise:true,onException:OnException.OMIT)
+		Map remoteProps = remote.@home.getProperties(remote.@objectName,attributeFilter)
+		println "remote keys: ${remoteProps.keySet().sort()}"
 		Map localProps = local.properties
-		assert localProps.remove('class') // TODO compare only common keys?
+		println "local keys:  ${localProps.keySet().sort()}"
+		println "remote-local: ${remoteProps.keySet() - localProps.keySet()}"
+		println "local-remote: ${localProps.keySet() - remoteProps.keySet()}"
 		assert localProps.keySet().containsAll(remoteProps.keySet())
 		for (key in remoteProps.keySet()) {
 			def rval = remoteProps.get(key)

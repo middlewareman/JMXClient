@@ -1,34 +1,64 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
-import javax.management.Attribute;
-import javax.management.AttributeList;
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
-import javax.management.InvalidAttributeValueException;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanException;
-import javax.management.MBeanInfo;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.management.QueryExp;
-import javax.management.ReflectionException;
-import javax.management.RuntimeMBeanException;
+import javax.management.*;
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.TabularData;
 
-import com.middlewareman.mbean.type.MBeanAttributeInfoFilter;
+import com.middlewareman.mbean.type.AttributeFilter;
+import com.middlewareman.mbean.type.CompositeDataWrapper;
 import com.middlewareman.mbean.type.OpenTypeWrapper;
 
-public abstract class MBeanHome implements MBeanServerConnectionFactory, Closeable {
+/**
+ * {@link MBean} factory that handles access to MBeanServer and wraps and
+ * unwraps values from and to the MBeanServer respectively. An
+ * {@link ObjectName} value from the server is wrapped into an {@link MBean}.
+ * {@link CompositeData} and {@link TabularData} values from the server are
+ * wrapped into {@link CompositeDataWrapper} and {@link TabularDataWrapper}
+ * respectively and recursively by {@link OpenTypeWrapper}. Combined with
+ * property and method delegation of an {@link MBean} subclass, this allows
+ * transparent and intuitive access to a remote MBean and its attributes as if
+ * they were plain Groovy objects.
+ * 
+ * @author Andreas Nyberg
+ */
+public abstract class MBeanHome implements MBeanServerConnectionFactory,
+		Closeable {
+
+	/**
+	 * Include attributes that are readable and not deprecated, decapitalise
+	 * names and return any exception as a value.
+	 */
+	private static class GetPropertiesAttributeFilter implements
+			AttributeFilter {
+
+		public boolean acceptAttribute(MBeanAttributeInfo attributeInfo) {
+			return attributeInfo.isReadable()
+					&& attributeInfo.getDescriptor()
+							.getFieldValue("deprecated") == null;
+		}
+
+		public boolean acceptAttribute(MBeanAttributeInfo attributeInfo,
+				Object value) {
+			return true;
+		}
+
+		public boolean isDecapitalise() {
+			return true;
+		}
+
+		public OnException getOnException() {
+			return AttributeFilter.OnException.OMIT;
+		}
+	}
 
 	private static final Object[] NOARGS = new Object[0];
 
@@ -52,35 +82,48 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory, Closeab
 		}
 	}
 
-	static String decapitalise(String string) {
-		char first = string.charAt(0);
-		if (Character.isUpperCase(first)) {
-			char[] ca = string.toCharArray();
-			ca[0] = Character.toLowerCase(first);
-			return new String(ca);
-		} else {
-			return string;
-		}
+	static String decapitalise(String name) {
+		return java.beans.Introspector.decapitalize(name);
 	}
 
 	/** Used equality and logging etc. */
-	public Object url;
+	protected Object url;
 
-	public boolean assertRegistered = true;
+	/**
+	 * If true, the existence of an MBean with a given ObjectName is verified
+	 * before an {@link MBean} instance is returned to the client. This provides
+	 * early failure instead of invalid {@link MBean} proxies to invalid remote
+	 * MBeans at the costs a network round trip for each access.
+	 */
+	public boolean assertRegistered = false;
 
-	public boolean blind = true;
+	private boolean blind = true;
 
+	/** Serialization only. */
 	protected MBeanHome() {
 	}
 
+	/**
+	 * @param url
+	 *            Arbitrary object to identify the server instance used for
+	 *            logging and equality.
+	 */
 	public MBeanHome(Object url) {
 		this.url = url;
 	}
-	
+
+	/**
+	 * @throws IOException
+	 *             if MBeanServer is not available.
+	 */
 	public void ping() throws IOException {
 		assert getMBeanServerConnection().getDefaultDomain() != null;
 	}
 
+	/**
+	 * Creates an {@link MBean} instance. Subclass may override to provide
+	 * different implementation or caching.
+	 */
 	protected MBean createMBean(ObjectName objectName) {
 		if (blind)
 			return new BlindMBean(this, objectName);
@@ -88,6 +131,14 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory, Closeab
 			return new BackedMBean(this, objectName);
 	}
 
+	/**
+	 * @param objectName
+	 *            Uniquely identifies the MBean on this MBeanServer.
+	 * @throws InstanceNotFoundException
+	 *             if {@link #assertRegistered} and the MBean does not exist.
+	 * @throws IOException
+	 *             if access to MBeanServer failed.
+	 */
 	public MBean getMBean(ObjectName objectName)
 			throws InstanceNotFoundException, IOException {
 		if (assertRegistered) {
@@ -97,11 +148,31 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory, Closeab
 		return createMBean(objectName);
 	}
 
+	/**
+	 * @param objectName
+	 *            Uniquely identifies the MBean on this MBeanServer.
+	 * @throws InstanceNotFoundException
+	 *             if {@link #assertRegistered} and the MBean does not exist.
+	 * @throws IOException
+	 *             if access to MBeanServer failed.
+	 * @throws MalformedObjectNameException
+	 *             of the object name was invalid.
+	 */
 	public MBean getMBean(String objectName) throws InstanceNotFoundException,
-			MalformedObjectNameException, NullPointerException, IOException {
+			MalformedObjectNameException, IOException {
 		return getMBean(ObjectName.getInstance(objectName));
 	}
 
+	/**
+	 * Delegates to
+	 * {@link MBeanServerConnection#queryNames(ObjectName, QueryExp)} and
+	 * returns the wrapped result.
+	 * 
+	 * @throws IOException
+	 *             if access to MBeanServer failed.
+	 * @throws InstanceNotFoundException
+	 *             should not happen as we just found it.
+	 */
 	public Set<MBean> getMBeans(ObjectName name, QueryExp query)
 			throws IOException, InstanceNotFoundException {
 		Set<ObjectName> names = getMBeanServerConnection().queryNames(name,
@@ -112,17 +183,24 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory, Closeab
 		return mbeans;
 	}
 
-	public Set<MBean> getMBeans(String name) throws InstanceNotFoundException,
-			MalformedObjectNameException, IOException {
-		return getMBeans(new ObjectName(name), null);
+	/** Simplified version of {@link #getMBeans(ObjectName, QueryExp). */
+	public Set<MBean> getMBeans(String objectName)
+			throws InstanceNotFoundException, MalformedObjectNameException,
+			IOException {
+		return getMBeans(new ObjectName(objectName), null);
 	}
 
+	/** Delegates to {@link MBeanServerConnection#getMBeanInfo(ObjectName)}. */
 	public MBeanInfo getInfo(ObjectName objectName)
 			throws InstanceNotFoundException, IntrospectionException,
 			ReflectionException, IOException {
 		return getMBeanServerConnection().getMBeanInfo(objectName);
 	}
 
+	/**
+	 * Unwrap parameters, invoke operation on remote MBean and return the
+	 * wrapped result.
+	 */
 	public Object invokeOperation(ObjectName objectName, String operationName,
 			Object args) throws InstanceNotFoundException, MBeanException,
 			ReflectionException, IOException {
@@ -138,6 +216,10 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory, Closeab
 		return invokeOperation(objectName, operationName, params, signature);
 	}
 
+	/**
+	 * Unwrap parameters, invoke operation on remote MBean and return the
+	 * wrapped result.
+	 */
 	public Object invokeOperation(ObjectName objectName, String operationName,
 			Object[] params, String[] signature)
 			throws InstanceNotFoundException, MBeanException,
@@ -148,6 +230,9 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory, Closeab
 		return wrap(result);
 	}
 
+	/**
+	 * Returns the wrapped attribute value of remote MBean.
+	 */
 	public Object getAttribute(ObjectName objectName, String attributeName)
 			throws AttributeNotFoundException, InstanceNotFoundException,
 			MBeanException, ReflectionException, IOException {
@@ -156,6 +241,9 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory, Closeab
 		return wrap(result);
 	}
 
+	/**
+	 * Returns wrapped attribute values of remote MBean in bulk.
+	 */
 	public Object[] getAttributes(ObjectName objectName, String[] attributeNames)
 			throws InstanceNotFoundException, ReflectionException, IOException {
 		List<Attribute> attributes = getMBeanServerConnection().getAttributes(
@@ -166,6 +254,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory, Closeab
 		return result;
 	}
 
+	/** Sets attribute of remote MBean with unwrapped value. */
 	public void setAttribute(ObjectName objectName, String attributeName,
 			Object value) throws InstanceNotFoundException,
 			AttributeNotFoundException, InvalidAttributeValueException,
@@ -174,6 +263,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory, Closeab
 		getMBeanServerConnection().setAttribute(objectName, attribute);
 	}
 
+	/** Sets attributes of remote MBean with unwrapped values in bulk. */
 	public void setAttributes(ObjectName objectName, Map<String, Object> map)
 			throws InstanceNotFoundException, ReflectionException, IOException {
 		AttributeList attributeList = new AttributeList(map.size());
@@ -184,6 +274,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory, Closeab
 		getMBeanServerConnection().setAttributes(objectName, attributeList);
 	}
 
+	/** Returns a wrapped object. */
 	private Object wrap(Object unwrapped) {
 		if (unwrapped == null)
 			return null;
@@ -206,6 +297,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory, Closeab
 			return OpenTypeWrapper.wrap(unwrapped);
 	}
 
+	/** Returns an unwrapped object. */
 	private Object unwrap(Object wrapped) {
 		if (wrapped == null)
 			return null;
@@ -233,6 +325,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory, Closeab
 		return getClass().getSimpleName() + "(" + url.toString() + ")";
 	}
 
+	/** Returns true if the other object is an MBeanHome with the same url. */
 	public boolean equals(Object other) {
 		if (other instanceof MBeanHome) {
 			MBeanHome mhother = (MBeanHome) other;
@@ -241,37 +334,56 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory, Closeab
 		return false;
 	}
 
-	private static MBeanAttributeInfoFilter getPropertiesFilter = new MBeanAttributeInfoFilter() {
-		public boolean accept(MBeanAttributeInfo attributeInfo) {
-			return attributeInfo.isReadable()
-					&& attributeInfo.getDescriptor()
-							.getFieldValue("deprecated") == null;
-		}
-	};
+	/** Returns hashCode of url. */
+	public int hashCode() {
+		return url.hashCode();
+	}
 
+	/**
+	 * Return selected attributes of an MBean as a map.
+	 * 
+	 * @param attributeFilter
+	 *            Specifies which attributes to include and how to handle
+	 *            decapitalisation and exceptions.
+	 * @return Map of key-value and key-exception pairs.
+	 * @throws IOException
+	 * @throws ReflectionException
+	 * @throws IntrospectionException
+	 * @throws InstanceNotFoundException
+	 */
 	public Map<String, ?> getProperties(ObjectName objectName,
-			MBeanAttributeInfoFilter filter, boolean attributeCapitalisation)
-			throws InstanceNotFoundException, IntrospectionException,
-			AttributeNotFoundException, ReflectionException, MBeanException,
-			IOException {
-		if (filter == null)
-			filter = getPropertiesFilter;
+			AttributeFilter attributeFilter) throws InstanceNotFoundException,
+			IntrospectionException, ReflectionException, IOException {
+		if (attributeFilter == null)
+			attributeFilter = new GetPropertiesAttributeFilter(); // TODO
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
+		// TODO getAttributes (in bulk)?
 		for (MBeanAttributeInfo attribute : getInfo(objectName).getAttributes()) {
-			if (filter.accept(attribute)) {
+			if (attributeFilter.acceptAttribute(attribute)) {
 				String name = attribute.getName();
+				String newName = attributeFilter.isDecapitalise() ? MBeanHome
+						.decapitalise(name) : name;
+				// TODO any other criteria for exceptions to pass through?
 				try {
-					// TODO getAttributes (in bulk)?
 					Object value = getAttribute(objectName, name);
-					if (attributeCapitalisation)
-						name = MBeanHome.decapitalise(name);
-					map.put(name, value);
-				} catch (RuntimeMBeanException e) {
-					// TODO proper logging
-					System.err.println("MBeanHome getProperties " + objectName
-							+ " " + attribute.getName()
-							+ " RuntimeMBeanException: "
-							+ e.getCause().getMessage());
+					map.put(newName, value);
+				} catch (IOException e) {
+					throw e;
+				} catch (InstanceNotFoundException e) {
+					throw e;
+					// TODO AttributeNotFoundException?
+				} catch (Exception e) {
+					switch (attributeFilter.getOnException()) {
+					case RETURN:
+						map.put(newName, e);
+						// TODO logging?
+						break;
+					case THROW:
+						throw new InstanceException(url, objectName, e);
+						// TODO AttributeException?
+					case OMIT:
+						// TODO logging?
+					}
 				}
 			}
 		}
