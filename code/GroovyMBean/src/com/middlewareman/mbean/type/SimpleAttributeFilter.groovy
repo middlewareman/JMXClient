@@ -5,7 +5,8 @@
 package com.middlewareman.mbean.type
 
 import com.middlewareman.mbean.type.AttributeFilter.OnException 
-import javax.management.MBeanAttributeInfo;
+
+import javax.management.MBeanAttributeInfo
 import javax.management.ObjectName 
 import javax.management.openmbean.OpenMBeanAttributeInfo 
 
@@ -13,6 +14,29 @@ import javax.management.openmbean.OpenMBeanAttributeInfo
  * @author Andreas Nyberg
  */
 class SimpleAttributeFilter implements AttributeFilter {
+	
+	/** Instance to include all attributes, and include any exception as a value. */
+	static SimpleAttributeFilter getVerbose() {
+		new SimpleAttributeFilter(onException:OnException.RETURN)
+	}
+	
+	/** 
+	 * Instance to include only non-deprecated attributes that are readable, 
+	 * not defaulted and do not throw an exception. 
+	 */
+	static SimpleAttributeFilter getBrief() {
+		new SimpleAttributeFilter(noDeprecated:true, onlyReadable:true,
+				noDefaultValue:true, onException:OnException.OMIT)
+	}
+	
+	/** 
+	 * Instance to include only non-deprecated attributes that are readable, 
+	 * and include any exception as a value. 
+	 */
+	static SimpleAttributeFilter getSafe() {
+		new SimpleAttributeFilter(noDeprecated:true, onlyReadable:true,
+				onException:OnException.RETURN)
+	}
 	
 	/** Don't include deprecated attributes. */
 	boolean noDeprecated
@@ -32,8 +56,11 @@ class SimpleAttributeFilter implements AttributeFilter {
 	/** Don't include any attributes that declare a default value that is equal to the current value. */
 	boolean noDefaultValue
 	
-	/** @see AttributeFilter#isDecapitalise() */
-	boolean decapitalise
+	/** 
+	 * Defaults to true.
+	 * @see AttributeFilter#isDecapitalise() 
+	 */
+	boolean decapitalise = true
 	
 	/** 
 	 * Defaults to throwing any exception. 

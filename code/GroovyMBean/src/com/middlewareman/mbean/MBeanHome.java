@@ -16,6 +16,7 @@ import javax.management.openmbean.TabularData;
 import com.middlewareman.mbean.type.AttributeFilter;
 import com.middlewareman.mbean.type.CompositeDataWrapper;
 import com.middlewareman.mbean.type.OpenTypeWrapper;
+import com.middlewareman.mbean.type.SimpleAttributeFilter;
 
 /**
  * {@link MBean} factory that handles access to MBeanServer and wraps and
@@ -32,33 +33,6 @@ import com.middlewareman.mbean.type.OpenTypeWrapper;
  */
 public abstract class MBeanHome implements MBeanServerConnectionFactory,
 		Closeable {
-
-	/**
-	 * Include attributes that are readable and not deprecated, decapitalise
-	 * names and return any exception as a value.
-	 */
-	private static class GetPropertiesAttributeFilter implements
-			AttributeFilter {
-
-		public boolean acceptAttribute(MBeanAttributeInfo attributeInfo) {
-			return attributeInfo.isReadable()
-					&& attributeInfo.getDescriptor()
-							.getFieldValue("deprecated") == null;
-		}
-
-		public boolean acceptAttribute(MBeanAttributeInfo attributeInfo,
-				Object value) {
-			return true;
-		}
-
-		public boolean isDecapitalise() {
-			return true;
-		}
-
-		public OnException getOnException() {
-			return AttributeFilter.OnException.OMIT;
-		}
-	}
 
 	private static final Object[] NOARGS = new Object[0];
 
@@ -98,6 +72,10 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	public boolean assertRegistered = false;
 
 	private boolean blind = true;
+
+	/** Filter to use for {@link #GetPropertiesAttributeFilter}. */
+	public final AttributeFilter getPropertiesFilter = SimpleAttributeFilter
+			.getSafe();
 
 	/** Serialization only. */
 	protected MBeanHome() {
@@ -340,6 +318,16 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	}
 
 	/**
+	 * {@link #getProperties(ObjectName, AttributeFilter)} with default
+	 * {@link #getPropertiesFilter}.
+	 */
+	public Map<String, ?> getProperties(ObjectName objectName)
+			throws InstanceNotFoundException, IntrospectionException,
+			ReflectionException, IOException {
+		return getProperties(objectName, getPropertiesFilter);
+	}
+
+	/**
 	 * Return selected attributes of an MBean as a map.
 	 * 
 	 * @param attributeFilter
@@ -354,8 +342,6 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	public Map<String, ?> getProperties(ObjectName objectName,
 			AttributeFilter attributeFilter) throws InstanceNotFoundException,
 			IntrospectionException, ReflectionException, IOException {
-		if (attributeFilter == null)
-			attributeFilter = new GetPropertiesAttributeFilter(); // TODO
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 		// TODO getAttributes (in bulk)?
 		for (MBeanAttributeInfo attribute : getInfo(objectName).getAttributes()) {
