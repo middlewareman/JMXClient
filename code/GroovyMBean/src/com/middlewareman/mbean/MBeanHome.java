@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 
 import javax.management.*;
 import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.OpenType;
 import javax.management.openmbean.TabularData;
 
 import com.middlewareman.mbean.type.AttributeFilter;
@@ -19,15 +20,16 @@ import com.middlewareman.mbean.type.OpenTypeWrapper;
 import com.middlewareman.mbean.type.SimpleAttributeFilter;
 
 /**
- * {@link MBean} factory that handles access to MBeanServer and wraps and
- * unwraps values from and to the MBeanServer respectively. An
- * {@link ObjectName} value from the server is wrapped into an {@link MBean}.
- * {@link CompositeData} and {@link TabularData} values from the server are
- * wrapped into {@link CompositeDataWrapper} and {@link TabularDataWrapper}
- * respectively and recursively by {@link OpenTypeWrapper}. Combined with
- * property and method delegation of an {@link MBean} subclass, this allows
- * transparent and intuitive access to a remote MBean and its attributes as if
- * they were plain Groovy objects.
+ * {@link MBean} factory that manages an {@link MBeanServerConnection} and
+ * access over it, and wraps and unwraps values from and to the MBeanServer
+ * respectively. An {@link ObjectName} value from the server is wrapped into an
+ * {@link MBean}. {@link CompositeData} and {@link TabularData} values from the
+ * server are wrapped into {@link CompositeDataWrapper} and
+ * {@link TabularDataWrapper} respectively and recursively by
+ * {@link OpenTypeWrapper}. Combined with property and method delegation of an
+ * {@link MBean} implementation, this provides <a
+ * href="http://groovy.codehaus.org/GPath">GPath</a>-like access to referenced
+ * MBeans and {@link OpenType} values.
  * 
  * @author Andreas Nyberg
  */
