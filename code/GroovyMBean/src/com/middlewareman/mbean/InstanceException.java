@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean;
 
 import javax.management.ObjectName;
