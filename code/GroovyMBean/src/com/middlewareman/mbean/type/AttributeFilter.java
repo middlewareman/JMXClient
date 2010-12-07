@@ -23,10 +23,11 @@ import javax.management.MBeanAttributeInfo;
  * <p>
  * Decapitalisation is useful when dealing with MBeans that have a familiar Java
  * interface, such as the Java Platform MXBeans. Where the Java interface
- * specifies <code>Type getXyz()</code> and <code>void setXyz(Type value)</code>
- * , the Groovy property access be <code>object.xyz</code>. However, because the
- * name of the MBean attribute is <code>Xyz</code> rather than <code>xyz</code>,
- * the default {@link MBean} property access is <code>mbean.Xyz</code>.
+ * specifies <code>Type getXyz()</code> and/or
+ * <code>void setXyz(Type value)</code>, the corresponding Groovy property is
+ * <code>object.xyz</code>. However, because the name of the MBean attribute is
+ * typically <code>Xyz</code>, decapitalisation maintains consistency between
+ * the two access models.
  * </p>
  * 
  * @author Andreas Nyberg
@@ -41,7 +42,7 @@ public interface AttributeFilter {
 	 */
 	enum OnException {
 		THROW, RETURN, OMIT
-	};
+	}
 
 	/** Returns true if this attribute should be included. */
 	boolean acceptAttribute(MBeanAttributeInfo attributeInfo);
