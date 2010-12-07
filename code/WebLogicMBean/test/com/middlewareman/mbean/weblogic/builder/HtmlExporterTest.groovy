@@ -1,32 +1,53 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean.weblogic.builder
+
+import java.io.BufferedWriter;
 
 import com.middlewareman.mbean.MBean 
 import com.middlewareman.mbean.weblogic.RuntimeServer 
 import com.middlewareman.mbean.weblogic.WebLogicMBeanHomeFactory 
+import groovy.xml.MarkupBuilder 
 import javax.management.ObjectName 
 
 class HtmlExporterTest extends GroovyTestCase {
 	
 	RuntimeServer rs = new RuntimeServer(WebLogicMBeanHomeFactory.default)
 	
+	private File getNamedFile() {
+		new File("${getClass().getSimpleName()}.${name}.html")
+	}
+	
 	void testDomainMBean() {
 		def domain = rs.runtimeService.DomainConfiguration
 		assert domain?.Type == "Domain"
-		def htmle = new HtmlExporter()
-		htmle.mbean domain
+		namedFile.withPrintWriter { 
+			def htmle = new HtmlExporter(html:new MarkupBuilder(it))
+			htmle.mbean domain
+		}
 	}
 	
 	void testDomainMBeanInfo() {
 		MBean domain = rs.runtimeService.DomainConfiguration
 		assert domain?.Type == "Domain"
-		def htmle = new HtmlExporter()
-		htmle.mbean domain.info
+		namedFile.withPrintWriter {
+			def htmle = new HtmlExporter(html:new MarkupBuilder(it))
+			htmle.mbean domain.info
+		}
 	}
 	
 	void testServerRuntimeRecursive() {
 		def sr = rs.runtimeService.ServerRuntime
-		def htmle = new HtmlExporter()
-		recurse(sr,htmle,new LinkedHashSet<ObjectName>())
+		File file = namedFile
+		long start = System.currentTimeMillis()
+		file.withPrintWriter { 
+			def htmle = new HtmlExporter(html:new MarkupBuilder(it))
+			recurse(sr,htmle,new LinkedHashSet<ObjectName>())
+		}
+		long finish = System.currentTimeMillis()
+		println "$name wrote ${file.length()} bytes to $file.name in ${finish - start} ms."
 	}
 	
 	void recurse(MBean mbean, HtmlExporter he, Set<ObjectName> visited) {
