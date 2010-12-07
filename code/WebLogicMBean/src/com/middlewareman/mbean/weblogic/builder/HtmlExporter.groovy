@@ -1,23 +1,31 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean.weblogic.builder
+
+import groovy.xml.MarkupBuilder;
 
 import java.util.Map;
 import java.util.regex.Matcher 
 
-import com.middlewareman.mbean.MBean 
-import groovy.xml.MarkupBuilder 
-import javax.management.*
+import javax.management.*;
 
+import com.middlewareman.mbean.MBean;
+import com.middlewareman.mbean.type.AttributeFilter;
+import com.middlewareman.mbean.type.CompositeDataWrapper 
+import com.middlewareman.mbean.type.SimpleAttributeFilter 
+import com.middlewareman.mbean.type.TabularDataWrapper 
+
+/**
+ * Generates an HTML report from an MBean or MBeanInfo.
+ * 
+ * @author Andreas Nyberg
+ */
 class HtmlExporter {
 	
 	MarkupBuilder html = new MarkupBuilder()
-	
-	boolean attributeInfoFilter(MBeanAttributeInfo ai) {
-		true
-	}
-	
-	boolean attributeValueFilter(MBeanAttributeInfo ai, def value) {
-		true
-	}
+	AttributeFilter attributeFilter = SimpleAttributeFilter.verbose
 	
 	boolean operationInfoFilter(MBeanOperationInfo oi) {
 		true
@@ -36,7 +44,9 @@ class HtmlExporter {
 	}
 	
 	void mbean(MBean mbean, Map extras = null) {
+		long time0 = System.currentTimeMillis()
 		def info = mbean.info
+		long time1 = System.currentTimeMillis()
 		html.html {
 			head { title 'WebLogic MBean Browser' }
 			body {
@@ -58,19 +68,37 @@ class HtmlExporter {
 				h2 'Description'
 				div mkp.yieldUnescaped(info.description)	// TODO dangerous?
 				h2 'Attributes'
+				long timeBeforeAttr = System.currentTimeMillis()
 				attributes mbean, info, delegate
+				long timeAfterAttr = System.currentTimeMillis()
 				h2 'Operations'
 				operations info, delegate
 				h2 'Constructors'
 				constructors info, delegate
 				h2 'Notifications'
 				notifications info, delegate
-				h2 'Done.'
+				h2 'Done'
+				long timeEnd = System.currentTimeMillis()
+				table(border:1) {
+					tr {
+						td "info"
+						td align:'right', time1-time0
+					}
+					tr {
+						td 'attributes'
+						td align:'right', timeAfterAttr - timeBeforeAttr
+					}
+					tr {
+						td 'all'
+						td align:'right', timeEnd - time0
+					}
+				}
 			}
 		}
 	}
 	
 	void mbean(MBeanInfo info) {
+		long time0 = System.currentTimeMillis()
 		html.html {
 			head { title 'MBeanInfo Browser' }
 			body {
@@ -84,14 +112,14 @@ class HtmlExporter {
 				operations info, delegate
 				h2 'Notifications'
 				notifications info, delegate
-				h2 'Done.'
+				h2 'Done'
+				div "Total time: ${System.currentTimeMillis() - time0} ms"
 			}
 		}
 	}
 	
 	void attributes(MBean mbean, MBeanInfo info, delegate) {
-		def ais = info.attributes // .findAll &attributeInfoFilter
-		ais.sort { it.name }
+		def ais = info.attributes.findAll { attributeFilter.acceptAttribute it }.sort { it.name }
 		delegate.table(border:'1') {
 			tr {
 				th 'Name'
@@ -101,13 +129,13 @@ class HtmlExporter {
 				th 'Value'
 			}
 			for (ai in ais) {
-				if (!attributeInfoFilter(ai))
-					continue
 				def val
 				try {
 					val = mbean.getProperty(ai.name)
-					if (!attributeValueFilter(ai,val)) 
+					if (!attributeFilter.acceptAttribute(ai,val)) {
+						println "skipping attribute $ai.name"
 						continue
+					}
 				} catch(Exception e) {
 					val = e
 				}
@@ -126,8 +154,7 @@ class HtmlExporter {
 	}
 	
 	void attributes(MBeanInfo info, delegate) {
-		def ais = info.attributes // .findAll &attributeInfoFilter
-		ais.sort { it.name }
+		def ais = info.attributes.findAll { attributeFilter.acceptAttribute(it) }.sort { it.name }
 		delegate.table(border:'1') {
 			tr {
 				th 'Name'
@@ -253,6 +280,12 @@ class HtmlExporter {
 					break
 				case MBean:
 					mbean value, delegate
+					break
+				case CompositeDataWrapper:
+					map value.properties, delegate
+					break
+				case TabularDataWrapper:
+					map value.properties, delegate
 					break
 				default:
 					delegate.pre title:value.getClass().getName(), value
