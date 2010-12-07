@@ -85,6 +85,7 @@ class SimpleAttributeFilter implements AttributeFilter {
 		if (noDefaultValue && ai instanceof OpenMBeanAttributeInfo 
 		&& ai.hasDefaultValue() && ai.getDefaultValue() != value) 
 			return false
+		return true
 	}
 }
 
