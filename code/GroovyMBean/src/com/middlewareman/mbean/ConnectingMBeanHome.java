@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean;
 
 import java.io.IOException;
@@ -13,6 +17,12 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.security.auth.Subject;
 
+/**
+ * MBeanHome that maintains parameters to connect lazily and reconnect on
+ * demand.
+ * 
+ * @author Andreas Nyberg
+ */
 public class ConnectingMBeanHome extends MBeanHome implements Serializable,
 		NotificationListener {
 
@@ -49,7 +59,8 @@ public class ConnectingMBeanHome extends MBeanHome implements Serializable,
 	}
 
 	public void close() throws IOException {
-		if (connector != null) connector.close();
+		if (connector != null)
+			connector.close();
 	}
 
 	private void addShutdownHook(final JMXConnector connector) {

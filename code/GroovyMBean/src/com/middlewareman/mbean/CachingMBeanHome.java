@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean;
 
 import java.io.IOException;
@@ -11,6 +15,12 @@ import javax.management.ReflectionException;
 
 import org.apache.commons.collections.map.ReferenceMap;
 
+// TODO Factor out ServerObjectsFactory with MBeanInfo holder?
+
+/**
+ * 
+ * @author Andreas Nyberg
+ */
 public abstract class CachingMBeanHome extends MBeanHome {
 
 	private static class MBeanInfoWrapper {
