@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean;
 
 import groovy.lang.MetaClass;
@@ -11,6 +15,12 @@ import javax.management.ReflectionException;
 
 import com.middlewareman.mbean.meta.MBeanMetaClass;
 
+/**
+ * Experimental MBean implementation that uses Groovy MetaClass instead of
+ * simple pretend methods and properties.
+ * 
+ * @author Andreas Nyberg
+ */
 public class BackedMBean extends BlindMBean {
 
 	private transient MBeanMetaClass metaClass;

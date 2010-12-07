@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean.meta;
 
 import groovy.lang.MetaClass;
@@ -9,14 +13,18 @@ import javax.management.MBeanInfo;
 
 import org.codehaus.groovy.ast.ClassNode;
 
-
+/**
+ * Experimental Groovy MetaClass per MBean (or MBeanInfo or MBean type).
+ * 
+ * @author Andreas Nyberg
+ */
 public class MBeanMetaClass extends MBeanMetaObjectProtocol implements
 		MetaClass {
 
 	public MBeanMetaClass(MBeanInfo i) {
 		super(i);
 	}
-	
+
 	@Override
 	public Object invokeMethod(Class sender, Object receiver,
 			String methodName, Object[] arguments, boolean isCallToSuper,

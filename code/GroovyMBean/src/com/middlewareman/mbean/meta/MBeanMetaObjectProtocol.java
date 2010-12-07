@@ -1,3 +1,7 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean.meta;
 
 import groovy.lang.MetaMethod;
@@ -8,6 +12,12 @@ import java.util.List;
 
 import javax.management.MBeanInfo;
 
+/**
+ * MetaObjectProtocol part of experimental Groovy MetaClass per MBean (or
+ * MBeanInfo or MBean type).
+ * 
+ * @author Andreas Nyberg
+ */
 public class MBeanMetaObjectProtocol implements MetaObjectProtocol {
 
 	public MBeanMetaObjectProtocol(MBeanInfo info) {
