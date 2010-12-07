@@ -1,7 +1,8 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean.weblogic
-
-import groovy.util.GroovyTestCase
-
 
 class RuntimeServerTest extends GroovyTestCase {
 	
