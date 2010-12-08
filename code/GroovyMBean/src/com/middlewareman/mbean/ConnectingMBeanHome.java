@@ -18,13 +18,13 @@ import javax.management.remote.JMXServiceURL;
 import javax.security.auth.Subject;
 
 /**
- * MBeanHome that maintains parameters to connect lazily and reconnect on
- * demand.
+ * Serializable RemoteMBeanHome that maintains parameters to connect lazily,
+ * monitors any open connection and reconnect on demand.
  * 
  * @author Andreas Nyberg
  */
-public class ConnectingMBeanHome extends MBeanHome implements Serializable,
-		NotificationListener {
+public class ConnectingMBeanHome extends RemoteMBeanHome implements
+		Serializable, NotificationListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -34,16 +34,19 @@ public class ConnectingMBeanHome extends MBeanHome implements Serializable,
 	private transient JMXConnector connector;
 	private transient MBeanServerConnection connection;
 
-	protected ConnectingMBeanHome() {
-		/* Serialization */
-	}
-
 	public ConnectingMBeanHome(JMXServiceURL url, Map<String, ?> env,
 			Subject subject) {
-		super(url);
 		this.url = url;
 		this.env = env;
 		this.subject = subject;
+	}
+
+	public Object getServerId() {
+		return url;
+	}
+
+	public JMXConnector getConnector() {
+		return connector;
 	}
 
 	public synchronized MBeanServerConnection getMBeanServerConnection()
@@ -53,27 +56,8 @@ public class ConnectingMBeanHome extends MBeanHome implements Serializable,
 		if (connector == null) {
 			connector = JMXConnectorFactory.connect(url, env);
 			connector.addConnectionNotificationListener(this, null, null);
-			addShutdownHook(connector);
 		}
 		return connector.getMBeanServerConnection(subject);
-	}
-
-	public void close() throws IOException {
-		if (connector != null)
-			connector.close();
-	}
-
-	private void addShutdownHook(final JMXConnector connector) {
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
-				try {
-					close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		});
 	}
 
 	public void handleNotification(Notification notification, Object handback) {
@@ -86,7 +70,7 @@ public class ConnectingMBeanHome extends MBeanHome implements Serializable,
 		}
 	}
 
-	public synchronized void reset() {
+	private synchronized void reset() {
 		connector = null;
 		connection = null;
 	}

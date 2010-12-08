@@ -1,15 +1,33 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean;
+
+import java.io.IOException;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerConnection;
 
-public class LocalMBeanHome extends CachingMBeanHome {
+/**
+ * MBeanHome for a local MBeanServer. (Any future support for
+ * {@link MBeanServer}-specific functionality such as instantiating and
+ * registering MBeans will go here.)
+ * 
+ * @author Andreas Nyberg
+ */
+public class LocalMBeanHome extends MBeanHome {
 
+	private final Object serverId;
 	private final MBeanServer mbeanServer;
 
-	public LocalMBeanHome(Object url, MBeanServer mbeanServer) {
-		super(url, true, false);
+	public LocalMBeanHome(Object serverId, MBeanServer mbeanServer) {
+		this.serverId = serverId;
 		this.mbeanServer = mbeanServer;
+	}
+
+	public Object getServerId() {
+		return serverId;
 	}
 
 	public MBeanServer getMBeanServer() {
@@ -17,10 +35,10 @@ public class LocalMBeanHome extends CachingMBeanHome {
 	}
 
 	public MBeanServerConnection getMBeanServerConnection() {
-		return getMBeanServer();
+		return mbeanServer;
 	}
-	
-	public void close() {
+
+	public void close() throws IOException {
 	}
 
 }

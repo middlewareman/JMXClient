@@ -4,27 +4,51 @@
  */
 package com.middlewareman.mbean;
 
+import java.io.IOException;
+import java.util.Map;
+
 import javax.management.MBeanServerConnection;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
+import javax.security.auth.Subject;
 
 /**
- * (Remote)MBeanHome that maintains an open MBeanServerConnection only without the ability to reconnect.
+ * RemoteMBeanHome that has an open MBeanServerConnection without the ability to
+ * reconnect.
  * 
  * @author Andreas Nyberg
  */
-public class ConnectedMBeanHome extends MBeanHome {
+public class ConnectedMBeanHome extends RemoteMBeanHome {
 
-	private final MBeanServerConnection sc;
-	
-	public ConnectedMBeanHome(Object url, MBeanServerConnection connection) {
-		super(url);
-		this.sc = connection;
+	private final Object server;
+	private final JMXConnector connector;
+	private final MBeanServerConnection connection;
+
+	public ConnectedMBeanHome(JMXServiceURL url, Map<String, ?> env,
+			Subject subject) throws IOException {
+		this.server = url;
+		connector = JMXConnectorFactory.connect(url, env);
+		connection = connector.getMBeanServerConnection(subject);
+	}
+
+	public ConnectedMBeanHome(Object server, JMXConnector connector,
+			MBeanServerConnection connection) {
+		this.server = server;
+		this.connector = connector;
+		this.connection = connection;
+	}
+
+	public Object getServerId() {
+		return server;
+	}
+
+	public JMXConnector getConnector() {
+		return connector;
 	}
 
 	public MBeanServerConnection getMBeanServerConnection() {
-		return sc;
-	}
-
-	public void close() {
+		return connection;
 	}
 
 }

@@ -34,36 +34,7 @@ import com.middlewareman.mbean.type.SimpleAttributeFilter;
  * @author Andreas Nyberg
  */
 public abstract class MBeanHome implements MBeanServerConnectionFactory,
-		Closeable {
-
-	private static final Object[] NOARGS = new Object[0];
-
-	static Object[] argsArray(Object obj) {
-		if (obj == null)
-			return NOARGS;
-		else if (obj instanceof Object[])
-			return (Object[]) obj;
-		else
-			return new Object[] { obj };
-	}
-
-	static String capitalise(String string) {
-		char first = string.charAt(0);
-		if (!Character.isUpperCase(first)) {
-			char[] ca = string.toCharArray();
-			ca[0] = Character.toUpperCase(first);
-			return new String(ca);
-		} else {
-			return string;
-		}
-	}
-
-	static String decapitalise(String name) {
-		return java.beans.Introspector.decapitalize(name);
-	}
-
-	/** Used equality and logging etc. */
-	protected Object url;
+		MBeanFactory, MBeanInfoFactory, Closeable {
 
 	/**
 	 * If true, the existence of an MBean with a given ObjectName is verified
@@ -73,23 +44,98 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	 */
 	public boolean assertRegistered = false;
 
-	private boolean blind = true;
+	/** Defaults to <code>this</code>. */
+	public MBeanFactory mbeanFactory;
+
+	/** Defaults to <code>this</code>. */
+	public MBeanInfoFactory mbeanInfoFactory;
 
 	/** Filter to use for {@link #GetPropertiesAttributeFilter}. */
 	public final AttributeFilter getPropertiesFilter = SimpleAttributeFilter
 			.getSafe();
 
-	/** Serialization only. */
-	protected MBeanHome() {
+	public MBeanHome() {
+		this.mbeanFactory = this;
+		this.mbeanInfoFactory = this;
+	}
+
+	public void enableMBeanCache() {
+		mbeanFactory = new CachingMBeanFactory(this);
+	}
+
+	public void disableMBeanCache() {
+		mbeanFactory = this;
+	}
+
+	public void enableMBeanInfoCache(Long timeout) {
+		mbeanInfoFactory = new CachingMBeanInfoFactory(this, timeout);
+	}
+
+	public void disableMBeanInfoCache() {
+		mbeanInfoFactory = this;
 	}
 
 	/**
-	 * @param url
-	 *            Arbitrary object to identify the server instance used for
-	 *            logging and equality.
+	 * Default implementation to create {@link MBean} instances. Client should
+	 * use {@link #getMBean(ObjectName)} or {@link #getMBean(String)} to benefit
+	 * from caching etc.
+	 * 
+	 * @see #mbeanFactory
 	 */
-	public MBeanHome(Object url) {
-		this.url = url;
+	public MBean createMBean(ObjectName objectName)
+			throws InstanceNotFoundException, IOException {
+		if (assertRegistered) {
+			if (getMBeanServerConnection().isRegistered(objectName))
+				throw new InstanceNotFoundException(objectName.toString());
+		}
+		return new BlindMBean(this, objectName);
+	}
+
+	/**
+	 * Default implementation to retrieve {@link MBeanHome} instances. Clients
+	 * should use {@link #getInfo(ObjectName)} to benefit from caching etc.
+	 * 
+	 * @see #mbeanInfoFactory
+	 */
+	public MBeanInfo createMBeanInfo(ObjectName objectName)
+			throws InstanceNotFoundException, IntrospectionException,
+			ReflectionException, IOException {
+		return getMBeanServerConnection().getMBeanInfo(objectName);
+	}
+
+	/**
+	 * Returns an {@link MBean} instance.
+	 * 
+	 * @throws InstanceNotFoundException
+	 * @throws IOException
+	 */
+	public MBean getMBean(ObjectName objectName)
+			throws InstanceNotFoundException, IOException {
+		return mbeanFactory.createMBean(objectName);
+	}
+
+	/**
+	 * Returns an {@link MBean} instance.
+	 * 
+	 * @throws InstanceNotFoundException
+	 * @throws MalformedObjectNameException
+	 * @throws IOException
+	 */
+	public MBean getMBean(String objectName) throws InstanceNotFoundException,
+			MalformedObjectNameException, IOException {
+		return getMBean(new ObjectName(objectName));
+	}
+
+	/**
+	 * Returns an {@link MBeanInfo} instance.
+	 * 
+	 * @throws InstanceNotFoundException
+	 * @throws IOException
+	 */
+	public MBeanInfo getInfo(ObjectName objectName)
+			throws InstanceNotFoundException, IntrospectionException,
+			ReflectionException, IOException {
+		return mbeanInfoFactory.createMBeanInfo(objectName);
 	}
 
 	/**
@@ -98,49 +144,6 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	 */
 	public void ping() throws IOException {
 		assert getMBeanServerConnection().getDefaultDomain() != null;
-	}
-
-	/**
-	 * Creates an {@link MBean} instance. Subclass may override to provide
-	 * different implementation or caching.
-	 */
-	protected MBean createMBean(ObjectName objectName) {
-		if (blind)
-			return new BlindMBean(this, objectName);
-		else
-			return new BackedMBean(this, objectName);
-	}
-
-	/**
-	 * @param objectName
-	 *            Uniquely identifies the MBean on this MBeanServer.
-	 * @throws InstanceNotFoundException
-	 *             if {@link #assertRegistered} and the MBean does not exist.
-	 * @throws IOException
-	 *             if access to MBeanServer failed.
-	 */
-	public MBean getMBean(ObjectName objectName)
-			throws InstanceNotFoundException, IOException {
-		if (assertRegistered) {
-			if (!getMBeanServerConnection().isRegistered(objectName))
-				throw new InstanceNotFoundException(objectName.toString());
-		}
-		return createMBean(objectName);
-	}
-
-	/**
-	 * @param objectName
-	 *            Uniquely identifies the MBean on this MBeanServer.
-	 * @throws InstanceNotFoundException
-	 *             if {@link #assertRegistered} and the MBean does not exist.
-	 * @throws IOException
-	 *             if access to MBeanServer failed.
-	 * @throws MalformedObjectNameException
-	 *             of the object name was invalid.
-	 */
-	public MBean getMBean(String objectName) throws InstanceNotFoundException,
-			MalformedObjectNameException, IOException {
-		return getMBean(ObjectName.getInstance(objectName));
 	}
 
 	/**
@@ -168,13 +171,6 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 			throws InstanceNotFoundException, MalformedObjectNameException,
 			IOException {
 		return getMBeans(new ObjectName(objectName), null);
-	}
-
-	/** Delegates to {@link MBeanServerConnection#getMBeanInfo(ObjectName)}. */
-	public MBeanInfo getInfo(ObjectName objectName)
-			throws InstanceNotFoundException, IntrospectionException,
-			ReflectionException, IOException {
-		return getMBeanServerConnection().getMBeanInfo(objectName);
 	}
 
 	/**
@@ -254,8 +250,14 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 		getMBeanServerConnection().setAttributes(objectName, attributeList);
 	}
 
-	/** Returns a wrapped object. */
-	private Object wrap(Object unwrapped) {
+	/**
+	 * Returns a wrapped object.
+	 * 
+	 * @throws IOException
+	 * @throws InstanceNotFoundException
+	 */
+	private Object wrap(Object unwrapped) throws InstanceNotFoundException,
+			IOException {
 		if (unwrapped == null)
 			return null;
 		assert !(unwrapped instanceof Collection); // TODO Can this happen?
@@ -264,7 +266,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 			MBean[] wrapped = new MBean[objectNames.length];
 			for (int i = 0; i < objectNames.length; i++)
 				if (objectNames[i] != null)
-					wrapped[i] = createMBean(objectNames[i]);
+					wrapped[i] = getMBean(objectNames[i]);
 			return wrapped;
 		} else if (unwrapped instanceof Object[]) {
 			Object[] objects = (Object[]) unwrapped;
@@ -272,7 +274,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 				objects[i] = wrap(objects[i]);
 			return objects;
 		} else if (unwrapped instanceof ObjectName)
-			return createMBean((ObjectName) unwrapped);
+			return getMBean((ObjectName) unwrapped);
 		else
 			return OpenTypeWrapper.wrap(unwrapped);
 	}
@@ -302,21 +304,22 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	}
 
 	public String toString() {
-		return getClass().getSimpleName() + "(" + url.toString() + ")";
+		return getClass().getSimpleName() + "(" + getServerId().toString()
+				+ ")";
 	}
 
-	/** Returns true if the other object is an MBeanHome with the same url. */
+	/** Returns true if the other object is an MBeanHome with the same server. */
 	public boolean equals(Object other) {
 		if (other instanceof MBeanHome) {
 			MBeanHome mhother = (MBeanHome) other;
-			return url.equals(mhother.url);
+			return getServerId().equals(mhother.getServerId());
 		}
 		return false;
 	}
 
-	/** Returns hashCode of url. */
+	/** Returns hashCode of server. */
 	public int hashCode() {
-		return url.hashCode();
+		return getServerId().hashCode();
 	}
 
 	/**
@@ -367,7 +370,8 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 						// TODO logging?
 						break;
 					case THROW:
-						throw new InstanceException(url, objectName, e);
+						throw new InstanceException(getServerId(), objectName,
+								e);
 						// TODO AttributeException?
 					case OMIT:
 						// TODO logging?
@@ -376,5 +380,31 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 			}
 		}
 		return map;
+	}
+
+	private static final Object[] NOARGS = new Object[0];
+
+	static Object[] argsArray(Object obj) {
+		if (obj == null)
+			return NOARGS;
+		else if (obj instanceof Object[])
+			return (Object[]) obj;
+		else
+			return new Object[] { obj };
+	}
+
+	static String capitalise(String string) {
+		char first = string.charAt(0);
+		if (!Character.isUpperCase(first)) {
+			char[] ca = string.toCharArray();
+			ca[0] = Character.toUpperCase(first);
+			return new String(ca);
+		} else {
+			return string;
+		}
+	}
+
+	static String decapitalise(String name) {
+		return java.beans.Introspector.decapitalize(name);
 	}
 }
