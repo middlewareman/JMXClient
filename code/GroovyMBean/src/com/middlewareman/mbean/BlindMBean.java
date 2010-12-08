@@ -96,7 +96,7 @@ public class BlindMBean extends MBean implements GroovyObject {
 			if (propertyName.equals("info"))
 				return getInfo();
 			if (attributeCapitalisation)
-				propertyName = MBeanHome.capitalise(propertyName);
+				propertyName = capitalise(propertyName);
 			return home.getAttribute(objectName, propertyName);
 		} catch (AttributeNotFoundException e) {
 			throw new RuntimeException(e);
@@ -120,7 +120,7 @@ public class BlindMBean extends MBean implements GroovyObject {
 	 */
 	public void setProperty(String propertyName, Object value) {
 		if (attributeCapitalisation)
-			propertyName = MBeanHome.capitalise(propertyName);
+			propertyName = capitalise(propertyName);
 		try {
 			home.setAttribute(objectName, propertyName, value);
 		} catch (InstanceNotFoundException e) {
@@ -157,6 +157,17 @@ public class BlindMBean extends MBean implements GroovyObject {
 			IntrospectionException, AttributeNotFoundException,
 			ReflectionException, MBeanException, IOException {
 		return home.getProperties(objectName);
+	}
+	
+	private static String capitalise(String string) {
+		char first = string.charAt(0);
+		if (!Character.isUpperCase(first)) {
+			char[] ca = string.toCharArray();
+			ca[0] = Character.toUpperCase(first);
+			return new String(ca);
+		} else {
+			return string;
+		}
 	}
 
 }

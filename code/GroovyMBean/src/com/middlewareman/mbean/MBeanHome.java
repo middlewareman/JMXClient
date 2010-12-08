@@ -59,6 +59,25 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 		this.mbeanInfoFactory = this;
 	}
 
+	/** Returns true if the other object is an MBeanHome with the same server. */
+	public boolean equals(Object other) {
+		if (other instanceof MBeanHome) {
+			MBeanHome mhother = (MBeanHome) other;
+			return getServerId().equals(mhother.getServerId());
+		}
+		return false;
+	}
+
+	/** Returns hashCode of server. */
+	public int hashCode() {
+		return getServerId().hashCode();
+	}
+
+	public String toString() {
+		return getClass().getSimpleName() + "(" + getServerId().toString()
+				+ ")";
+	}
+
 	public void enableMBeanCache() {
 		mbeanFactory = new CachingMBeanFactory(this);
 	}
@@ -303,25 +322,6 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 			return OpenTypeWrapper.unwrap(wrapped);
 	}
 
-	public String toString() {
-		return getClass().getSimpleName() + "(" + getServerId().toString()
-				+ ")";
-	}
-
-	/** Returns true if the other object is an MBeanHome with the same server. */
-	public boolean equals(Object other) {
-		if (other instanceof MBeanHome) {
-			MBeanHome mhother = (MBeanHome) other;
-			return getServerId().equals(mhother.getServerId());
-		}
-		return false;
-	}
-
-	/** Returns hashCode of server. */
-	public int hashCode() {
-		return getServerId().hashCode();
-	}
-
 	/**
 	 * {@link #getProperties(ObjectName, AttributeFilter)} with default
 	 * {@link #getPropertiesFilter}.
@@ -352,8 +352,8 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 		for (MBeanAttributeInfo attribute : getInfo(objectName).getAttributes()) {
 			if (attributeFilter.acceptAttribute(attribute)) {
 				String name = attribute.getName();
-				String newName = attributeFilter.isDecapitalise() ? MBeanHome
-						.decapitalise(name) : name;
+				String newName = attributeFilter.isDecapitalise() ? decapitalise(name)
+						: name;
 				// TODO any other criteria for exceptions to pass through?
 				try {
 					Object value = getAttribute(objectName, name);
@@ -384,7 +384,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 
 	private static final Object[] NOARGS = new Object[0];
 
-	static Object[] argsArray(Object obj) {
+	private static Object[] argsArray(Object obj) {
 		if (obj == null)
 			return NOARGS;
 		else if (obj instanceof Object[])
@@ -393,18 +393,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 			return new Object[] { obj };
 	}
 
-	static String capitalise(String string) {
-		char first = string.charAt(0);
-		if (!Character.isUpperCase(first)) {
-			char[] ca = string.toCharArray();
-			ca[0] = Character.toUpperCase(first);
-			return new String(ca);
-		} else {
-			return string;
-		}
-	}
-
-	static String decapitalise(String name) {
+	private static String decapitalise(String name) {
 		return java.beans.Introspector.decapitalize(name);
 	}
 }
