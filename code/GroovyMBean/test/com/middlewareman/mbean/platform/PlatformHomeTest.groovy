@@ -1,4 +1,44 @@
+/*
+ * $Id$
+ * Copyright © 2010 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.mbean.platform
+
+import com.middlewareman.mbean.LocalPlatformMBeanHome 
+import com.middlewareman.mbean.MBeanHome 
+
+class LocalPlatformHomeTest extends PlatformHomeTest {
+	
+	final ph = new LocalPlatformHome()
+}
+
+class ProxyPlatformHomeTest extends PlatformHomeTest {
+	
+	final ph = new ProxyPlatformHome(new LocalPlatformMBeanHome())
+}
+
+class MBeanPlatformHomeTest extends PlatformHomeTest {
+	
+	final ph = new MBeanPlatformHome(new LocalPlatformMBeanHome())
+}
+
+class CachingMBeanPlatformHomeTest extends PlatformHomeTest {
+	
+	final MBeanHome mbh
+	final ph
+	
+	CachingMBeanPlatformHomeTest() {
+		mbh = new LocalPlatformMBeanHome()
+		mbh.enableMBeanCache()
+		mbh.enableMBeanInfoCache 0
+		ph = new MBeanPlatformHome(mbh)
+	}
+	
+	void tearDown() {
+		println "after $name:\n\t$mbh.mbeanFactory\n\t$mbh.mbeanInfoFactory"
+		super.tearDown()
+	}
+}
 
 abstract class PlatformHomeTest extends GroovyTestCase {
 	
@@ -42,7 +82,6 @@ abstract class PlatformHomeTest extends GroovyTestCase {
 		def cp = xx.classPath
 		assert cp
 		assert cp instanceof String
-		assert cp == ph.runtime.systemProperties['java.class.path']
 		assert cp == ph.runtime.systemProperties.'java.class.path'
 		def args = ph.runtime.inputArguments
 		assert args instanceof List<String> || args instanceof String[], args.dump()
