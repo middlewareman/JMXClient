@@ -76,7 +76,7 @@ class SimpleAttributeFilter implements AttributeFilter {
 			assert !onlyMBeans
 			if (ai.attributeType.contains(ObjectName.getClass().getName())) 
 				return false
-		} else if (onlyMBeans && !ai.attributeType.contains(ObjectName.getClass().getName())) 
+		} else if (onlyMBeans && !ai.type.contains(ObjectName.class.getName())) 
 			return false;
 		return true;
 	}
