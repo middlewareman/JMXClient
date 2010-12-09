@@ -4,6 +4,9 @@
  */
 package com.middlewareman.mbean.weblogic
 
+import java.io.IOException;
+
+import com.middlewareman.mbean.MBeanHome;
 import com.middlewareman.mbean.MBeanHomeFactory 
 import javax.management.remote.JMXConnectorFactory 
 import javax.management.remote.JMXServiceURL 
@@ -77,6 +80,13 @@ public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 	
 	JMXServiceURL surl(String path) throws MalformedURLException {
 		new JMXServiceURL("service:jmx:${url}/jndi/${path}");
+	}
+	
+	MBeanHome createMBeanHome(String urlPart) throws IOException {
+		MBeanHome home = super.createMBeanHome(urlPart)
+		home.enableMBeanCache()
+		home.enableMBeanInfoCache null
+		return home
 	}
 	
 	Map<String,?> env() {
