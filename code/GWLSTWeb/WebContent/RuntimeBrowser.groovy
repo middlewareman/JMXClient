@@ -6,16 +6,17 @@
 import com.middlewareman.mbean.MBean
 import com.middlewareman.mbean.weblogic.RuntimeServer 
 import com.middlewareman.mbean.weblogic.builder.HtmlExporter 
+import javax.management.modelmbean.ModelMBeanInfo 
 
 if (params.objectName) {
+	response.bufferSize = 350000
 	
-	def objectName = params.objectName
 	def home = RuntimeServer.localMBeanHome
 	assert home
-	def mbean = home.getMBean(objectName)
+	def mbean = home.getMBean(params.objectName)
 	assert mbean
 	
-	def htmlExporter = new HtmlExporter(html:html)	
+	def htmlExporter = new HtmlExporter(html)	
 	// TODO any additional parameters or preferences
 	
 	def timestamp = new Date()
@@ -26,14 +27,21 @@ if (params.objectName) {
 				'principal':request.userPrincipal]
 	htmlExporter.mbean mbean, extras
 	
-} else {
+} else if (params.interfaceClassName) { 
 	
+	def typeService = RuntimeServer.localRuntimeServer.typeService
+	assert typeService
+	ModelMBeanInfo info = typeService.getMBeanInfo(params.interfaceClassName)
+	//String[] subTypes = typeService.getSubTypes(params.interfaceClassName)
+	
+	def htmlExporter = new HtmlExporter(html)
+	htmlExporter.mbean info
+} else {
 	def runtimeServer = RuntimeServer.localRuntimeServer
 	html.html {
-		head { title 'WebLogic RuntimeMBeanServer Browser' }
+		head { title 'GWLST RuntimeMBeanServer Browser' }
 		body {
-			h1 'WebLogic RuntimeMBeanServer Browser'
-			
+			h1 'GWLST RuntimeMBeanServer Browser'
 			h2 'WebLogic Services'
 			for (name in [
 				'runtimeService',

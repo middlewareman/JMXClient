@@ -8,6 +8,7 @@ import com.middlewareman.mbean.weblogic.DomainRuntimeServer
 import com.middlewareman.mbean.weblogic.builder.HtmlExporter 
 
 if (params.objectName) {
+	response.bufferSize = 350000
 	
 	def objectName = params.objectName
 	def home = DomainRuntimeServer.localMBeanHome
@@ -15,7 +16,7 @@ if (params.objectName) {
 	def mbean = home.getMBean(objectName)
 	assert mbean
 	
-	def htmlExporter = new HtmlExporter(html:html)	
+	def htmlExporter = new HtmlExporter(html)	
 	// TODO any additional parameters or preferences
 	
 	def timestamp = new Date()
@@ -33,10 +34,9 @@ if (params.objectName) {
 	def adminServerName = service.DomainConfiguration.AdminServerName
 	def serverNames = service.ServerRuntimes.Name 
 	html.html {
-		head { title 'WebLogic RuntimeMBeanServer Browser' }
+		head { title 'GWLST RuntimeMBeanServer Browser' }
 		body {
-			h1 'WebLogic RuntimeMBeanServer Browser'
-			
+			h1 'GWLST RuntimeMBeanServer Browser'
 			h2 'WebLogic Services'
 			for (name in [
 				'domainRuntimeService',
@@ -59,7 +59,7 @@ if (params.objectName) {
 						} else {
 							option serverName
 						}
-					}	
+					}
 				}
 				input type:'submit'
 			}

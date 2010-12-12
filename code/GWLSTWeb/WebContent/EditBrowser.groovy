@@ -25,12 +25,13 @@ def getEditServer() {
 }
 
 if (params.objectName) {
+	response.bufferSize = 350000
 	
 	assert editServer
 	def mbean = editServer.home.getMBean(params.objectName)
 	assert mbean
 	
-	def htmlExporter = new HtmlExporter(html:html)
+	def htmlExporter = new HtmlExporter(html)
 	// TODO any additional parameters or preferences
 	
 	def timestamp = new Date()
@@ -44,9 +45,9 @@ if (params.objectName) {
 } else { 
 	
 	html.html {
-		head { title 'WebLogic EditMBeanServer Browser' }
+		head { title 'GWLST EditMBeanServer Browser' }
 		body {
-			h1 'WebLogic EditMBeanServer Browser'
+			h1 'GWLST EditMBeanServer Browser'
 			h2 'WebLogic Services'
 			for (name in [
 				'editService',

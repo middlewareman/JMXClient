@@ -24,7 +24,20 @@ import com.middlewareman.mbean.type.TabularDataWrapper
  */
 class HtmlExporter {
 	
-	MarkupBuilder html = new MarkupBuilder()
+	final MarkupBuilder html
+	
+	HtmlExporter() {
+		html = new MarkupBuilder()
+	}
+	
+	HtmlExporter(PrintWriter pw) {
+		html = new MarkupBuilder(pw)
+	}
+	
+	HtmlExporter(MarkupBuilder mb) {
+		html = mb
+	}
+	
 	AttributeFilter attributeFilter = SimpleAttributeFilter.verbose
 	
 	boolean operationInfoFilter(MBeanOperationInfo oi) {
@@ -43,14 +56,23 @@ class HtmlExporter {
 		true
 	}
 	
+	static void notice(delegate) {
+		delegate.p {
+			mkp.yield 'This page is generated using '
+			a(href:'http://www.middlewareman.com/gwlst', title:'Groovy WebLogic Scripting Tool', 'GWLST')
+			mkp.yield '.'
+		}
+	}
+	
 	void mbean(MBean mbean, Map extras = null) {
 		long time0 = System.currentTimeMillis()
 		def info = mbean.info
 		long time1 = System.currentTimeMillis()
 		html.html {
-			head { title 'WebLogic MBean Browser' }
+			head { title 'GWLST MBean Browser' }
 			body {
-				h1 'WebLogic MBean Browser'
+				notice delegate
+				h1 'GWLST MBean Browser'
 				if (extras) {
 					table(border:'1') {
 						extras.each { key, value ->
@@ -100,7 +122,8 @@ class HtmlExporter {
 	void mbean(MBeanInfo info) {
 		long time0 = System.currentTimeMillis()
 		html.html {
-			head { title 'MBeanInfo Browser' }
+			head { title 'GWLST MBeanInfo Browser' }
+			a(href:'http://www.middlewareman.com/gwlst', 'Groovy WebLogic Scripting Tool (GWLST)')
 			body {
 				h2 'Description'
 				div mkp.yieldUnescaped(info.description)	// TODO dangerous?
