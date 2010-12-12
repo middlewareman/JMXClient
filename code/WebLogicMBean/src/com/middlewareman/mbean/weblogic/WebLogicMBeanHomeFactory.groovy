@@ -42,13 +42,13 @@ public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 	
 	void loadSystemProperties() {
 		String value
-		value = System.getenv('gwlst.url')
+		value = System.getProperty('gwlst.url')
 		if (value) url = value
-		value = System.getenv('gwlst.username')
+		value = System.getProperty('gwlst.username')
 		if (value) username = value
-		value = System.getenv('gwlst.password')
+		value = System.getProperty('gwlst.password')
 		if (value) password = value
-		value = System.getenv('gwlst.timeout')
+		value = System.getProperty('gwlst.timeout')
 		if (value) timeout = value as Long
 		// TODO gwlst.env.*
 	}
