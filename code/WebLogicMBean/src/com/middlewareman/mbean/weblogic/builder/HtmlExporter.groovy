@@ -14,7 +14,9 @@ import javax.management.*;
 import com.middlewareman.mbean.MBean;
 import com.middlewareman.mbean.type.AttributeFilter;
 import com.middlewareman.mbean.type.CompositeDataWrapper 
+import com.middlewareman.mbean.type.DescriptorFilter 
 import com.middlewareman.mbean.type.SimpleAttributeFilter 
+import com.middlewareman.mbean.type.SimpleDescriptorFilter 
 import com.middlewareman.mbean.type.TabularDataWrapper 
 
 /**
@@ -39,6 +41,7 @@ class HtmlExporter {
 	}
 	
 	AttributeFilter attributeFilter = SimpleAttributeFilter.verbose
+	DescriptorFilter descriptorFilter = new SimpleDescriptorFilter()	// TODO
 	
 	boolean operationInfoFilter(MBeanOperationInfo oi) {
 		true
@@ -49,10 +52,6 @@ class HtmlExporter {
 	}
 	
 	boolean notificationInfoFilter(MBeanNotificationInfo ni) {
-		true
-	}
-	
-	boolean descriptorFieldNameFilter(String name) {
 		true
 	}
 	
@@ -67,7 +66,6 @@ class HtmlExporter {
 	void mbean(MBean mbean, Map extras = null) {
 		long time0 = System.currentTimeMillis()
 		def info = mbean.info
-		long time1 = System.currentTimeMillis()
 		html.html {
 			head { title 'GWLST MBean Browser' }
 			body {
@@ -88,7 +86,9 @@ class HtmlExporter {
 				h2 'ObjectName'
 				pre mbean.@objectName
 				h2 'Description'
-				div mkp.yieldUnescaped(info.description)	// TODO dangerous?
+				blockquote {
+					mkp.yieldUnescaped(info.description)	// TODO dangerous?
+				}
 				h2 'Attributes'
 				long timeBeforeAttr = System.currentTimeMillis()
 				attributes mbean, info, delegate
@@ -101,20 +101,7 @@ class HtmlExporter {
 				notifications info, delegate
 				h2 'Done'
 				long timeEnd = System.currentTimeMillis()
-				table(border:1) {
-					tr {
-						td "info"
-						td align:'right', time1-time0
-					}
-					tr {
-						td 'attributes'
-						td align:'right', timeAfterAttr - timeBeforeAttr
-					}
-					tr {
-						td 'all'
-						td align:'right', timeEnd - time0
-					}
-				}
+				div "Done in ${timeEnd - time0} ms"
 			}
 		}
 	}
@@ -126,7 +113,9 @@ class HtmlExporter {
 			a(href:'http://www.middlewareman.com/gwlst', 'Groovy WebLogic Scripting Tool (GWLST)')
 			body {
 				h2 'Description'
-				div mkp.yieldUnescaped(info.description)	// TODO dangerous?
+				blockquote {
+					mkp.yieldUnescaped(info.description)	// TODO dangerous?
+				}
 				h2 'Attributes'
 				attributes info, delegate
 				h2 'Constructors'
@@ -136,7 +125,7 @@ class HtmlExporter {
 				h2 'Notifications'
 				notifications info, delegate
 				h2 'Done'
-				div "Total time: ${System.currentTimeMillis() - time0} ms"
+				div "Done in ${System.currentTimeMillis() - time0} ms"
 			}
 		}
 	}
@@ -278,12 +267,9 @@ class HtmlExporter {
 	}
 	
 	void descriptor(MBeanFeatureInfo info, delegate) {
-		def names = info.descriptor.fieldNames
-		def values = info.descriptor.getFieldValues(names)
-		assert names.size() == values.size()
-		for (i in 0..<names.length) {
-			if (descriptorFieldNameFilter(names[i]))
-				delegate.div title:values[i], names[i]
+		for (fieldName in info.descriptor.fieldNames) {
+			if (!descriptorFilter || descriptorFilter.accept(info,fieldName))
+				delegate.div title:info[fieldName].inspect(), fieldName
 		}
 	}
 	
