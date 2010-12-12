@@ -8,6 +8,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import javax.management.*;
 import javax.management.openmbean.CompositeData;
@@ -35,6 +36,8 @@ import com.middlewareman.mbean.type.SimpleAttributeFilter;
  */
 public abstract class MBeanHome implements MBeanServerConnectionFactory,
 		MBeanFactory, MBeanInfoFactory, Closeable {
+
+	public final Logger logger = Logger.getLogger(this.getClass().getName());
 
 	/**
 	 * If true, the existence of an MBean with a given ObjectName is verified
