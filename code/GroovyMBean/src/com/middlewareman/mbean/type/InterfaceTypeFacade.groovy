@@ -5,7 +5,8 @@
 package com.middlewareman.mbean.type
 
 import javax.management.JMX 
-import javax.management.MBeanAttributeInfo
+import javax.management.MBeanAttributeInfo 
+import javax.management.MBeanParameterInfo 
 
 /**
  * TypeFacade that also considers any {@link JMX#INTERFACE_CLASS_NAME_FIELD interfaceClassName} 
@@ -19,6 +20,10 @@ class InterfaceTypeFacade extends TypeFacade {
 	
 	InterfaceTypeFacade(MBeanAttributeInfo ai) {
 		this(ai.type, ai.descriptor.getFieldValue(JMX.INTERFACE_CLASS_NAME_FIELD))
+	}
+	
+	InterfaceTypeFacade(MBeanParameterInfo pi) {
+		this(pi.type, pi.descriptor.getFieldValue(JMX.INTERFACE_CLASS_NAME_FIELD))
 	}
 	
 	/**

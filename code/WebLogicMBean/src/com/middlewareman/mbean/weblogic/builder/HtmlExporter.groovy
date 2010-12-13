@@ -14,6 +14,8 @@ import com.middlewareman.mbean.MBean;
 import com.middlewareman.mbean.type.AttributeFilter;
 import com.middlewareman.mbean.type.CompositeDataWrapper 
 import com.middlewareman.mbean.type.DescriptorFilter 
+import com.middlewareman.mbean.type.InterfaceTypeFacade 
+import com.middlewareman.mbean.type.MBeanInfoCategory 
 import com.middlewareman.mbean.type.SimpleAttributeFilter 
 import com.middlewareman.mbean.type.SimpleDescriptorFilter 
 import com.middlewareman.mbean.type.TabularDataWrapper 
@@ -25,6 +27,10 @@ import com.middlewareman.mbean.type.TypeFacade
  * @author Andreas Nyberg
  */
 class HtmlExporter {
+	
+	static {	// TODO
+		MBeanFeatureInfo.mixin MBeanInfoCategory
+	}
 	
 	final MarkupBuilder html
 	
@@ -195,7 +201,7 @@ class HtmlExporter {
 			}
 			for (op in info.operations) {
 				tr {
-					td { type op.returnType, delegate }
+					td { type op.returnType, delegate }		// TODO
 					td { name op, delegate }
 					td { descriptor op, delegate }
 					td { signature op.signature, delegate }
@@ -343,13 +349,14 @@ class HtmlExporter {
 		delegate.a(href:"?objectName=${mbean.@objectName}") { pre mbean.@objectName }
 	}
 	
+	// TODO
 	void type(String name, delegate) {
 		def tf = new TypeFacade(name)
 		delegate.pre title:name, tf.shortString
 	}
 	
 	void type(MBeanFeatureInfo fi, delegate) {
-		def tf = new TypeFacade(fi.type)	// TODO include interfaceClassName
+		def tf = new InterfaceTypeFacade(fi)
 		delegate.pre title:tf.originalTypeName, tf.shortString
 	}
 	
