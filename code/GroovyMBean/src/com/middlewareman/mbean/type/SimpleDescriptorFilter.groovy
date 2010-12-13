@@ -8,10 +8,6 @@ import javax.management.MBeanFeatureInfo
 
 public class SimpleDescriptorFilter implements DescriptorFilter {
 	
-	//	static {	// TODO
-	//		MBeanFeatureInfo.mixin MBeanInfoCategory	// TODO Configure where?
-	//	}
-	
 	boolean accept(MBeanFeatureInfo fi, String fieldName) {
 		use(MBeanInfoCategory) {
 			// TODO precompile regex?
@@ -19,7 +15,7 @@ public class SimpleDescriptorFilter implements DescriptorFilter {
 			if (fieldName ==~ /.*Name/ && fi[fieldName] == fi.name) return false
 			if (fieldName ==~ /.*description/ && fi[fieldName] == fi.description) return false
 			if (fieldName ==~ /.+(?:R|r)ole/ && fi[fieldName] == fi['role']) return false
+			return true
 		}
-		return true;
 	}
 }
