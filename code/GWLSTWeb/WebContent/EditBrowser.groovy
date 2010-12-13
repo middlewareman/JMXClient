@@ -25,13 +25,13 @@ def getEditServer() {
 }
 
 if (params.objectName) {
-	response.bufferSize = 350000
-	
 	assert editServer
 	def mbean = editServer.home.getMBean(params.objectName)
 	assert mbean
 	
-	def htmlExporter = new HtmlExporter(html)
+	response.bufferSize = 350000
+	def htmlExporter = new HtmlExporter(response.writer)
+	
 	// TODO any additional parameters or preferences
 	
 	def timestamp = new Date()

@@ -8,15 +8,15 @@ import com.middlewareman.mbean.weblogic.DomainRuntimeServer
 import com.middlewareman.mbean.weblogic.builder.HtmlExporter 
 
 if (params.objectName) {
-	response.bufferSize = 350000
-	
 	def objectName = params.objectName
 	def home = DomainRuntimeServer.localMBeanHome
 	assert home
 	def mbean = home.getMBean(objectName)
 	assert mbean
 	
-	def htmlExporter = new HtmlExporter(html)	
+	response.bufferSize = 350000
+	def htmlExporter = new HtmlExporter(response.writer)
+		
 	// TODO any additional parameters or preferences
 	
 	def timestamp = new Date()

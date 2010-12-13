@@ -3,20 +3,21 @@
  * Copyright © 2010 Middlewareman Limited. All rights reserved.
  */
 
-import com.middlewareman.mbean.MBean
+import com.middlewareman.mbean.MBean 
 import com.middlewareman.mbean.weblogic.RuntimeServer 
 import com.middlewareman.mbean.weblogic.builder.HtmlExporter 
 import javax.management.modelmbean.ModelMBeanInfo 
+import groovy.xml.MarkupBuilder
 
 if (params.objectName) {
-	response.bufferSize = 350000
-	
 	def home = RuntimeServer.localMBeanHome
 	assert home
 	def mbean = home.getMBean(params.objectName)
 	assert mbean
+
+	response.bufferSize = 350000
+	def htmlExporter = new HtmlExporter(response.writer)	
 	
-	def htmlExporter = new HtmlExporter(html)	
 	// TODO any additional parameters or preferences
 	
 	def timestamp = new Date()
