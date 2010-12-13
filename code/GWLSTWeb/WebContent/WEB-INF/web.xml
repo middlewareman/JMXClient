@@ -24,4 +24,8 @@
 	<security-role>
 		<role-name>Admin</role-name>
 	</security-role>
+	<error-page>
+		<exception-type>java.lang.Exception</exception-type>
+		<location>/Exception.groovy</location>
+	</error-page>
 </web-app>
