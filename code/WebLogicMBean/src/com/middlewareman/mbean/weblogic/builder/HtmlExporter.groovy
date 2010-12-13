@@ -7,7 +7,6 @@ package com.middlewareman.mbean.weblogic.builder
 import groovy.xml.MarkupBuilder;
 
 import java.util.Map;
-import java.util.regex.Matcher 
 
 import javax.management.*;
 
@@ -18,6 +17,7 @@ import com.middlewareman.mbean.type.DescriptorFilter
 import com.middlewareman.mbean.type.SimpleAttributeFilter 
 import com.middlewareman.mbean.type.SimpleDescriptorFilter 
 import com.middlewareman.mbean.type.TabularDataWrapper 
+import com.middlewareman.mbean.type.TypeFacade 
 
 /**
  * Generates an HTML report from an MBean or MBeanInfo.
@@ -154,7 +154,7 @@ class HtmlExporter {
 				tr {
 					td { name ai, delegate }
 					td { descriptor ai, delegate }
-					td { type ai.type, delegate }
+					td { type ai, delegate }
 					td {
 						if (val != null) 
 							type val.getClass(), delegate
@@ -179,7 +179,7 @@ class HtmlExporter {
 				tr {
 					td { name ai, delegate }
 					td { descriptor ai, delegate }
-					td { type ai.type, delegate }
+					td { type ai, delegate }
 				}
 			}
 		}
@@ -226,7 +226,7 @@ class HtmlExporter {
 			delegate.table(border:'1') {
 				for (pi in pis) {
 					tr {
-						td { type pi.type, delegate }
+						td { type pi, delegate }
 						td { descriptor pi, delegate }
 						td { name pi, delegate }
 					}
@@ -343,24 +343,14 @@ class HtmlExporter {
 		delegate.a(href:"?objectName=${mbean.@objectName}") { pre mbean.@objectName }
 	}
 	
-	def primitiveRE = ~/^(boolean|byte|char|double|float|int|long|short|void)((\[\])*)$/
-	def binaryClassRE = ~/^(\[*)L(.*);$/
-	
 	void type(String name, delegate) {
-		Matcher matcher
-		if (name ==~ primitiveRE) {
-			delegate.pre name
-		} else if ((matcher = name =~ binaryClassRE)) {
-			assert matcher.hasGroup()
-			def dim = matcher[0][1].size()
-			String className = matcher[0][2]
-			className = className.substring(className.lastIndexOf('.')+1)
-			if (dim) className += '[]' * dim
-			delegate.pre title:name, className
-		} else {
-			String className = name.substring(name.lastIndexOf('.')+1)
-			delegate.pre title:name, className
-		}
+		def tf = new TypeFacade(name)
+		delegate.pre title:name, tf.shortString
+	}
+	
+	void type(MBeanFeatureInfo fi, delegate) {
+		def tf = new TypeFacade(fi.type)	// TODO include interfaceClassName
+		delegate.pre title:tf.originalTypeName, tf.shortString
 	}
 	
 	void type(Class clazz, delegate) {

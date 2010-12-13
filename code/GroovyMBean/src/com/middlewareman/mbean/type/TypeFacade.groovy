@@ -12,6 +12,7 @@ import javax.management.openmbean.OpenType
 
 
 /**
+ * Interpreter of type specifications that provides classification and readable string representation.
  * 
  * @author Andreas Nyberg
  */
@@ -41,6 +42,7 @@ class TypeFacade {
 	private static final objectNameName = ObjectName.class.name
 	private static final mbeanName = MBean.class.name
 	
+	final String originalTypeName
 	final Type type
 	final String typeName
 	final int dim
@@ -49,21 +51,22 @@ class TypeFacade {
 		this(ai.type)
 	}
 	
-	TypeFacade(String typeName) {
+	TypeFacade(String spec) {
+		this.originalTypeName = spec
 		Matcher matcher
-		if ((matcher = typeName =~ primitiveRE)) {
+		if ((matcher = spec =~ primitiveRE)) {
 			this.type = Type.PRIMITIVE
 			this.typeName = matcher.group(1)
 			this.dim = matcher.group(2).size()/2
-		} else if ((matcher = typeName =~ classRE)) {
+		} else if ((matcher = spec =~ classRE)) {
 			this.type = (typeName ==~ objectNameRE) ? Type.MBEAN : Type.OBJECT
 			this.typeName = matcher.group(1)
 			this.dim = matcher.group(2).size()/2
-		} else if ((matcher = typeName =~ binPrimitiveRE)) {
+		} else if ((matcher = spec =~ binPrimitiveRE)) {
 			this.type = Type.PRIMITIVE
 			this.typeName = binMap[matcher.group(2)]
 			this.dim = matcher.group(1).size()
-		} else if ((matcher = typeName =~ binClassRE)) {
+		} else if ((matcher = spec =~ binClassRE)) {
 			this.type = (typeName ==~ objectNameRE) ? Type.MBEAN : Type.OBJECT
 			this.typeName = matcher.group(2)
 			this.dim = matcher.group(1).size()
@@ -96,7 +99,7 @@ class TypeFacade {
 		type == Type.PRIMITIVE || (type == Type.OBJECT && isCertainlySimple())
 	}
 	
-	def getStats() {
+	List getStats() {
 		def buf = []
 		if (isPrimitive()) buf << 'primitive'
 		if (isArray()) buf << 'array'
@@ -104,7 +107,7 @@ class TypeFacade {
 		if (isCertainlyMBean()) buf << 'certainlyMBean'
 		if (isMaybeMBean()) buf << 'maybeMBean'
 		if (isCertainlyNotMBean()) buf << 'certainlyNotMBean'
-		return buf.join('\t')
+		return buf
 	}
 	
 	String getLongName() {
