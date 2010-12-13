@@ -4,10 +4,8 @@
  */
 package com.middlewareman.mbean.type
 
-import com.middlewareman.mbean.MBean 
 import java.util.regex.Matcher 
 import javax.management.MBeanAttributeInfo 
-import javax.management.ObjectName 
 import javax.management.openmbean.OpenType
 
 
@@ -18,7 +16,7 @@ import javax.management.openmbean.OpenType
  */
 class TypeFacade {
 	
-	enum Type { 
+	static enum Type { 
 		PRIMITIVE, OBJECT, MBEAN
 	}
 	
@@ -39,12 +37,12 @@ class TypeFacade {
 		'J':'long',
 		'S':'short']
 	
-	private static final objectNameName = ObjectName.class.name
-	private static final mbeanName = MBean.class.name
+	//private static final objectNameName = ObjectName.class.name
+	//private static final mbeanName = MBean.class.name
 	
 	final String originalTypeName
-	final Type type
-	final String typeName
+	Type type
+	String typeName
 	final int dim
 	
 	TypeFacade(MBeanAttributeInfo ai) {
@@ -59,7 +57,7 @@ class TypeFacade {
 			this.typeName = matcher.group(1)
 			this.dim = matcher.group(2).size()/2
 		} else if ((matcher = spec =~ classRE)) {
-			this.type = (typeName ==~ objectNameRE) ? Type.MBEAN : Type.OBJECT
+			this.type = (spec ==~ objectNameRE) ? Type.MBEAN : Type.OBJECT
 			this.typeName = matcher.group(1)
 			this.dim = matcher.group(2).size()/2
 		} else if ((matcher = spec =~ binPrimitiveRE)) {
@@ -67,13 +65,21 @@ class TypeFacade {
 			this.typeName = binMap[matcher.group(2)]
 			this.dim = matcher.group(1).size()
 		} else if ((matcher = spec =~ binClassRE)) {
-			this.type = (typeName ==~ objectNameRE) ? Type.MBEAN : Type.OBJECT
+			this.type = (spec ==~ objectNameRE) ? Type.MBEAN : Type.OBJECT
 			this.typeName = matcher.group(2)
 			this.dim = matcher.group(1).size()
 		} else {
 			assert false, typeName
 		}
 	}
+	
+	//	Type getType() { 
+	//		type
+	//	}
+	//	
+	//	String getTypeName() { 
+	//		typeName
+	//	}
 	
 	boolean isPrimitive() { 
 		type == Type.PRIMITIVE
@@ -96,7 +102,7 @@ class TypeFacade {
 	}
 	
 	boolean isCertainlyNotMBean() {
-		type == Type.PRIMITIVE || (type == Type.OBJECT && isCertainlySimple())
+		type == Type.PRIMITIVE || isCertainlySimple()
 	}
 	
 	List getStats() {
@@ -111,11 +117,11 @@ class TypeFacade {
 	}
 	
 	String getLongName() {
-		isCertainlyMBean() ? mbeanName : typeName
+		isCertainlyMBean() ? 'MBean' : typeName
 	}
 	
 	String getShortName() {
-		longName.substring(longName.lastIndexOf('.')+1)
+		isCertainlyMBean() ? 'MBean' : longName.substring(longName.lastIndexOf('.')+1)
 	}
 	
 	String getLongString() {

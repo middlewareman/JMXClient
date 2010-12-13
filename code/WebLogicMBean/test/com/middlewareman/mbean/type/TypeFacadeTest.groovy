@@ -10,8 +10,6 @@ import com.middlewareman.mbean.weblogic.DomainRuntimeServer
 import com.middlewareman.mbean.weblogic.EditServer 
 import com.middlewareman.mbean.weblogic.RuntimeServer 
 import com.middlewareman.mbean.weblogic.WebLogicMBeanHomeFactory 
-import javax.management.MBeanAttributeInfo 
-import javax.management.ObjectName;
 
 
 class TypeFacadeTest extends GroovyTestCase {
@@ -44,17 +42,15 @@ class TypeFacadeTest extends GroovyTestCase {
 		Set<String> descriptions = new HashSet<String>()
 		for (MBean mbean in iter) {
 			for (attr in mbean.info.attributes) {
-				def tf = create(attr)
-				def desc = tf.toString()
-				if (descriptions.add(desc)) {
-					println "$attr.name in $mbean\n\t$attr.type\n\t$tf.longString \t$tf.shortString\n\t$tf.stats"
-				}
+				def tf = new TypeFacade(attr)
+				def itf = new InterfaceTypeFacade(attr)
+				//def key = tf.toString() //"$tf/$itf".toString()
+				//if (descriptions.add(key)) {
+					println "$attr.name type $attr.type in $mbean"
+					println "\t$tf.longString \t$tf.shortString \t$tf.stats"
+					println "\t$itf.longString \t$itf.shortString \t$itf.stats"
+				//}
 			}
 		}
 	}
-	
-	protected TypeFacade create(MBeanAttributeInfo ai) {
-		new TypeFacade(ai)
-	}
-	
 }
