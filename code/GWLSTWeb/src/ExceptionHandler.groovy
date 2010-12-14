@@ -3,8 +3,11 @@
  * Copyright © 2010 Middlewareman Limited. All rights reserved.
  */
 import javax.servlet.RequestDispatcher 
+import javax.servlet.ServletContext 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.middlewareman.groovy.StackTraceCleaner;
 
 /**
  * Handles forwarding to error page for groovlets that are not happy with GroovyServlet behaviour.
@@ -42,9 +45,21 @@ class ExceptionHandler {
 		assert request
 		HttpServletResponse response = binding.response
 		assert response
-		RequestDispatcher dispatcher = request.getRequestDispatcher(errorPage)
-		assert dispatcher
-		exception t, request, response, dispatcher
+		if (response.isCommitted()) {
+			def message = "${getClass().getName()} response already committed bufferSize=$response.bufferSize"
+			new StackTraceCleaner().deepClean t
+			ServletContext context = binding.context
+			if (context) {
+				context.log message, t
+			} else {
+				System.err.println message
+				t.printStackTrace(System.err)
+			}
+		} else {
+			RequestDispatcher dispatcher = request.getRequestDispatcher(errorPage)
+			assert dispatcher
+			exception t, request, response, dispatcher
+		}
 	}
 	
 	void wrap(Closure script) {
