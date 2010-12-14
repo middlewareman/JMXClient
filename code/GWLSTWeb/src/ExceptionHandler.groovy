@@ -35,7 +35,7 @@ class ExceptionHandler {
 	private binding;
 	private errorPage;
 	
-	ExceptionHandler(Binding binding, String errorPage = 'Exception.groovy') {
+	ExceptionHandler(Binding binding, String errorPage = '/Exception.groovy') {
 		this.binding = binding;
 		this.errorPage = errorPage;
 	}
