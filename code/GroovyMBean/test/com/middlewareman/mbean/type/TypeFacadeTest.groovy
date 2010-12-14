@@ -4,7 +4,6 @@
  */
 package com.middlewareman.mbean.type
 
-import com.middlewareman.mbean.MBean 
 import javax.management.ObjectName 
 
 class TypeFacadeTest extends GroovyTestCase {
@@ -95,7 +94,7 @@ class TypeFacadeTest extends GroovyTestCase {
 	
 	void testMBean(TypeFacade tf) {
 		assert tf.typeName == "javax.management.ObjectName"
-		assert tf.longString == MBean.class.name
+		assert tf.longString == "MBean"
 		assert tf.shortString == "MBean"
 		assert !tf.isPrimitive()
 		assert !tf.isArray()
