@@ -75,13 +75,21 @@ if (params.objectName) {
 				h3 name
 				if (mbeans instanceof MBean) {
 					def objectName = mbeans.@objectName
-					a(href:"?objectName=$objectName") { pre objectName }
+					if (mbeans) {
+						a(href:"?objectName=$objectName") { pre objectName }
+					} else {
+						pre objectName
+					}
 				} else if (mbeans instanceof Collection<MBean>) {
 					ul {
 						mbeans.each { mbean ->
 							def objectName = mbean.@objectName
 							li {
-								a(href:"?objectName=$objectName") { pre objectName }
+								if (mbean) {
+									a(href:"?objectName=$objectName") { pre objectName }
+								} else {
+									pre objectName
+								}
 							}
 						}
 					}
