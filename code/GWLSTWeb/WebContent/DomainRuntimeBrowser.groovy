@@ -3,20 +3,27 @@
  * Copyright © 2010 Middlewareman Limited. All rights reserved.
  */
 
-import com.middlewareman.mbean.MBean
+import com.middlewareman.mbean.MBean 
 import com.middlewareman.mbean.weblogic.DomainRuntimeServer 
 import com.middlewareman.mbean.weblogic.builder.HtmlExporter 
 
+/* Pick up RuntimeServer from session or use local. */
+// TODO Cache instance within page?
+DomainRuntimeServer getDomainRuntimeServer() {
+	def session = request.getSession(false)
+	session?.domainRuntimeServer ?: DomainRuntimeServer.localRuntimeServer
+}
+
 if (params.objectName) {
 	def objectName = params.objectName
-	def home = DomainRuntimeServer.localMBeanHome
+	def home = domainRuntimeServer.home
 	assert home
 	def mbean = home.getMBean(objectName)
 	assert mbean
 	
 	response.bufferSize = 350000
 	def htmlExporter = new HtmlExporter(response.writer)
-		
+	
 	// TODO any additional parameters or preferences
 	
 	def timestamp = new Date()
@@ -29,7 +36,7 @@ if (params.objectName) {
 	
 } else {
 	
-	def server = DomainRuntimeServer.localDomainRuntimeServer
+	def server = domainRuntimeServer
 	def service = server.domainRuntimeService
 	def adminServerName = service.DomainConfiguration.AdminServerName
 	def serverNames = service.ServerRuntimes.Name 
@@ -37,6 +44,8 @@ if (params.objectName) {
 		head { title 'GWLST RuntimeMBeanServer Browser' }
 		body {
 			h1 'GWLST RuntimeMBeanServer Browser'
+			h2 'MBeanHome'
+			pre domainRuntimeServer.home
 			h2 'WebLogic Services'
 			for (name in [
 				'domainRuntimeService',
@@ -50,6 +59,19 @@ if (params.objectName) {
 			
 			def selectedServerName = params.serverName ?: adminServerName
 			h2 "Java Platform MXBeans ($selectedServerName)"
+			def used = null
+			def enabled = null
+			try {
+				def jmx = runtimeServer.runtimeService.DomainConfiguration.JMX
+				enabled = jmx.PlatformMBeanServerEnabled
+				used = jmx.PlatformMBeanServerUsed	// Only from 10.3.3 ?
+			}
+			catch(Exception e) {
+				context.log "Could not get DomainConfiguration.JMX.PlatformMBeanServer{Enabled,Used}", e
+			}
+			if (!enabled && !used) {
+				i 'PlatformMBeanServer probably needs to be enabled in your domain configuration to see the beans below.'
+			}
 			
 			form {
 				select(name:'serverName') {

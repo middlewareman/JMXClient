@@ -3,36 +3,36 @@
  * Copyright © 2010 Middlewareman Limited. All rights reserved.
  */
 
-import com.middlewareman.mbean.weblogic.RuntimeServer 
+import com.middlewareman.mbean.weblogic.DomainRuntimeServer 
 import com.middlewareman.mbean.weblogic.WebLogicMBeanHomeFactory 
 
 new ExceptionHandler(binding).wrap {
 	
 	if (params.url) {
 		def hf = new WebLogicMBeanHomeFactory(url:params.url,username:params.username,password:params.password)
-		def rs = new RuntimeServer(hf)
-		rs.home.ping()	// Provoke exception
-		request.getSession(true).runtimeServer = rs
-		redirect 'RuntimeBrowser.groovy'
+		def drs = new DomainRuntimeServer(hf)
+		drs.home.ping()	// Provoke exception
+		request.getSession(true).domainRuntimeServer = drs
+		redirect 'DomainRuntimeBrowser.groovy'
 	} else if (params.logout) {
-		session.removeAttribute('runtimeServer')
+		session.removeAttribute('domainRuntimeServer')
 	}
 	
-	def currentRemote = session?.runtimeServer
+	def currentRemote = session?.domainRuntimeServer
 	html.html {
-		head { title 'Remote RuntimeServer Login' }
+		head { title 'Remote DomainRuntimeServer Login' }
 		body {
-			h1 'Remote RuntimeServer Login'
+			h1 'Remote DomainRuntimeServer Login'
 			h2 'Current remote connection'
 			if (currentRemote) {
 				pre currentRemote.home
 				ul {
 					li { a href:'?logout=yes', "Log out" }
-					li { a href:'RuntimeBrowser.groovy', "Proceed" }
+					li { a href:'DomainRuntimeBrowser.groovy', "Proceed" }
 				}
 			} else {
 				div 'Not logged in to a remote server'
-				a(href:'RuntimeBrowser.groovy', 'Proceed to local server')
+				a(href:'DomainRuntimeBrowser.groovy', 'Proceed to local server')
 			}
 			h2 'Log in to a remote server'
 			form {
