@@ -27,10 +27,10 @@ if (params.objectName) {
 	
 	def timestamp = new Date()
 	def extras = [
-		'URL':request.requestURL,
-		'Timestamp':timestamp,
-		'user':request.remoteUser, 
-		'principal':request.userPrincipal]
+				'URL':request.requestURL,
+				'Timestamp':timestamp,
+				'user':request.remoteUser, 
+				'principal':request.userPrincipal]
 	htmlExporter.mbean mbean, extras
 	
 } else {
@@ -52,7 +52,6 @@ if (params.objectName) {
 				a(href:"?objectName=$objectName") { pre objectName }
 			}
 			
-			// TODO check if platform is available?
 			h2 'Java Platform MXBeans'
 			def used = null
 			def enabled = null
@@ -67,10 +66,11 @@ if (params.objectName) {
 			if (!enabled && !used) {
 				i 'PlatformMBeanServer probably needs to be enabled in your domain configuration to see the beans below.'
 			}
-
-						def map = runtimeServer.getMBeanPlatformHome().properties.findAll { key, value ->
+			
+			def map = runtimeServer.getMBeanPlatformHome().properties.findAll { key, value ->
 				value instanceof MBean || value instanceof Collection<MBean>
 			}
+			
 			map.each { name, mbeans -> 
 				h3 name
 				if (mbeans instanceof MBean) {
@@ -89,5 +89,4 @@ if (params.objectName) {
 			}
 		}
 	}
-	
 }
