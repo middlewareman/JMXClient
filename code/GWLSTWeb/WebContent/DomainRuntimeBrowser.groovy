@@ -4,17 +4,13 @@
  */
 
 import com.middlewareman.mbean.MBean 
-import com.middlewareman.mbean.weblogic.DomainRuntimeServer 
+import com.middlewareman.mbean.weblogic.access.HttpServletRequestAdapter 
 import com.middlewareman.mbean.weblogic.builder.HtmlExporter 
 
-/* Pick up RuntimeServer from session or use local. */
-// TODO Cache instance within page?
-DomainRuntimeServer getDomainRuntimeServer() {
-	def session = request.getSession(false)
-	session?.domainRuntimeServer ?: DomainRuntimeServer.localRuntimeServer
-}
-
 new ExceptionHandler(binding).wrap {
+	
+	def adapter = new HttpServletRequestAdapter(request)	
+	def domainRuntimeServer = adapter.domainRuntimeServer
 	
 	if (params.objectName) {
 		def objectName = params.objectName
