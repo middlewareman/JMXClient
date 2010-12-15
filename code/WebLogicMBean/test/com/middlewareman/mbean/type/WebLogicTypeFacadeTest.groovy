@@ -12,7 +12,7 @@ import com.middlewareman.mbean.weblogic.RuntimeServer
 import com.middlewareman.mbean.weblogic.WebLogicMBeanHomeFactory 
 
 
-class TypeFacadeTest extends GroovyTestCase {
+class WebLogicTypeFacadeTest extends GroovyTestCase {
 	
 	RuntimeServer getRuntimeServer() {
 		new RuntimeServer(WebLogicMBeanHomeFactory.default)
