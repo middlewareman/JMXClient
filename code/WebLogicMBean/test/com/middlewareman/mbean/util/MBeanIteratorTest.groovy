@@ -25,7 +25,7 @@ class MBeanIteratorTest extends GroovyTestCase {
 		def rs = runtimeServer.runtimeService
 		int counter = 0;
 		for (mbean in new MBeanIterator(rs)) {
-			println mbean
+			//println mbean
 			++counter
 		} 
 		println counter
