@@ -70,9 +70,9 @@ class HttpServletRequestAdapter {
 			if (rs != null)	// broken
 				removeattr runtimeServerName
 		} catch(Exception e) {
-			new StackTraceCleaner().deepClean e
+			//new StackTraceCleaner().deepClean e
 			def session = request.getSession(false)?.id
-			logger.log(Level.WARNING, "Could not getRemoteRuntimeServer from $session", e);
+			logger.logp(Level.WARNING, getClass().getName(), 'getRemoteRuntimeServer', "Could not get from $session", e);
 			removeattr runtimeServerName
 		}
 		return null
@@ -110,9 +110,9 @@ class HttpServletRequestAdapter {
 			if (drs != null)	// broken
 				removeattr domainRuntimeServerName
 		} catch(Exception e) {
-			new StackTraceCleaner().deepClean e
+			//new StackTraceCleaner().deepClean e
 			def session = request.getSession(false)?.id
-			logger.log(Level.WARNING, "Could not getRemoteDomainRuntimeServer from $session", e);
+			logger.logp(Level.WARNING, getClass().getName(), 'getRemoteDomainRuntimeServer', "Could not get from $session", e);
 			removeattr runtimeServerName
 		}
 		return null
@@ -157,9 +157,9 @@ class HttpServletRequestAdapter {
 			if (es != null)	// broken
 				removeattr editServerName
 		} catch(Exception e) {
-			new StackTraceCleaner().deepClean e
+			//new StackTraceCleaner().deepClean e
 			def session = request.getSession(false)?.id
-			logger.log(Level.WARNING, "Could not getRemoteEditServer from $session", e);
+			logger.logp(Level.WARNING, this.getClass().getName(), 'getRemoteEditServer', "Could not from $session", e);
 			removeattr runtimeServerName
 		}
 		return null
