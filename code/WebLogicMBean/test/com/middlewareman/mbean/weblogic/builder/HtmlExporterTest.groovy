@@ -62,16 +62,20 @@ class HtmlExporterTest extends GroovyTestCase {
 		def ais = mbean.info.attributes
 		for (ai in ais) {
 			if (ai.type.contains('javax.management.ObjectName')) {
-				def child = mbean.getProperty(ai.name)
-				if (child != null) {
-					if (child instanceof MBean) {
-						recurse child, he, visited
-					} else if (child instanceof MBean[] || child instanceof Collection<MBean>) {
-						for (mb in child) 
-							recurse mb, he, visited
-					} else {
-						System.err.println "ignoring $child"
+				try {
+					def child = mbean.getProperty(ai.name)
+					if (child != null) {
+						if (child instanceof MBean) {
+							recurse child, he, visited
+						} else if (child instanceof MBean[] || child instanceof Collection<MBean>) {
+							for (mb in child) 
+								recurse mb, he, visited
+						} else {
+							System.err.println "ignoring $child"
+						}
 					}
+				} catch(Exception e) {
+					System.err.println "$name $ai.name $ai.type failed on $mbean"
 				}
 			}
 		}
@@ -108,5 +112,4 @@ class HtmlExporterTest extends GroovyTestCase {
 		def iter = new MBeanIterator(editServer.editService)
 		maxSize iter
 	}
-
 }
