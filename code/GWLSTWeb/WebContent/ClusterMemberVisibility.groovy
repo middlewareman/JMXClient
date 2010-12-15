@@ -3,8 +3,9 @@
  * Copyright © 2010 Middlewareman Limited. All rights reserved.
  */ 
 
-import com.middlewareman.mbean.weblogic.access.HttpServletRequestAdapter
-import com.middlewareman.mbean.weblogic.builder.HtmlExporter
+import com.middlewareman.mbean.MBean
+import com.middlewareman.mbean.weblogic.access.HttpServletRequestAdapter 
+import com.middlewareman.mbean.weblogic.builder.HtmlExporter 
 
 def desc = """Cluster members maintain their dynamic view of the \
 cluster by receiving heartbeat messages from other cluster members. \
@@ -16,6 +17,10 @@ from another source."""
 
 def show(collection) {
 	collection ? collection.sort().join(' ') : ''
+}
+
+void browse(MBean mbean, text) {
+	if (mbean) html.a(href:"DomainRuntimeBrowser.groovy?objectName=${mbean.@objectName}", text)
 }
 
 new ExceptionHandler(binding).wrap {
@@ -58,6 +63,8 @@ new ExceptionHandler(binding).wrap {
 						td show(clusterMemberConfigNames - clusterMemberRuntimeNames)
 					}
 				}
+				
+				def dodgyServerNames = new HashSet()
 				h3 'Per configured cluster member'
 				table(border:1) {
 					tr {
@@ -72,11 +79,12 @@ new ExceptionHandler(binding).wrap {
 							def clusterRuntime = clusterMemberRuntime.clusterRuntime
 							Set sees = clusterRuntime.serverNames as Set
 							Set shouldAlsoSee = clusterMemberRuntimeNames - sees
+							dodgyServerNames += shouldAlsoSee
 							tr {
 								td name
 								td clusterMemberRuntime.state
 								td show(sees)
-								td { strong show(shouldAlsoSee) } 
+								td { strong show(shouldAlsoSee) }
 							}
 						} else {
 							tr {
@@ -88,8 +96,25 @@ new ExceptionHandler(binding).wrap {
 						}
 					}
 				}
+				
+				if (dodgyServerNames) {
+					h3 'Dodgy servers'
+					a href:"DomainRuntimeBrowser.groovy?objectName=$clusterConfig.@objectname", 'Cluster configuration'
+					for (name in dodgyServerNames?.sort()) {
+						def serverConfig = drs.findServerConfiguration(name)
+						def serverRuntime = drs.lookupServerRuntime(name)
+						def clusterRuntime = serverRuntime?.clusterRuntime
+						h5 name
+						ul {
+							li { browse serverConfig, "$name config" }
+							li { browse serverRuntime, "$name runtime" }
+							li { browse clusterRuntime, "$name's cluster runtime" }
+						}
+					}
+				}
 			}
-			h2 'Done.'
+			h2 'Done'
 		}
 	}
 }
+	
