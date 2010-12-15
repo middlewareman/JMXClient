@@ -9,7 +9,7 @@
         <dependent-module archiveName="GroovyMBean.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/GroovyMBean/GroovyMBean">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <property name="context-root" value="GWLSTWeb"/>
         <property name="java-output-path" value="/GWLSTWeb/build/classes"/>
+        <property name="context-root" value="gwlst"/>
     </wb-module>
 </project-modules>
