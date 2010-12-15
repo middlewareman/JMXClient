@@ -6,8 +6,6 @@ package com.middlewareman.mbean.weblogic.builder
 
 import groovy.xml.MarkupBuilder;
 
-import java.util.Map;
-
 import javax.management.*;
 
 import com.middlewareman.mbean.MBean;
@@ -27,10 +25,6 @@ import com.middlewareman.mbean.type.TypeFacade
  * @author Andreas Nyberg
  */
 class HtmlExporter {
-	
-	static {	// TODO
-		MBeanFeatureInfo.mixin MBeanInfoCategory
-	}
 	
 	final MarkupBuilder html
 	
@@ -273,9 +267,11 @@ class HtmlExporter {
 	}
 	
 	void descriptor(MBeanFeatureInfo info, delegate) {
-		for (fieldName in info.descriptor.fieldNames) {
-			if (!descriptorFilter || descriptorFilter.accept(info,fieldName))
-				delegate.div title:info[fieldName].inspect(), fieldName
+		use(MBeanInfoCategory) {	// TODO Global solution?
+			for (fieldName in info.descriptor.fieldNames) {
+				if (!descriptorFilter || descriptorFilter.accept(info,fieldName))
+					delegate.div title:info[fieldName].inspect(), fieldName
+			}
 		}
 	}
 	
