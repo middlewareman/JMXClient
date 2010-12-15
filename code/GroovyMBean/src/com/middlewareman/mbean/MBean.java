@@ -5,6 +5,8 @@
 package com.middlewareman.mbean;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.management.*;
 
@@ -15,6 +17,8 @@ import javax.management.*;
  * @author Andreas Nyberg
  */
 public abstract class MBean {
+
+	static final Logger logger = Logger.getLogger(MBean.class.getName());
 
 	/**
 	 * Returns the object that identifies and provides access to the MBeanServer
@@ -69,9 +73,15 @@ public abstract class MBean {
 	 */
 	boolean asBoolean() {
 		try {
-			return home.getMBeanServerConnection().isRegistered(objectName);
+			boolean isreg = home.getMBeanServerConnection().isRegistered(
+					objectName);
+			if (logger.isLoggable(Level.FINER))
+				logger.log(Level.FINER, "isRegistered " + this + " -> " + isreg);
+			return isreg;
 		} catch (IOException e) {
-			// TODO Log error?
+			// TODO clean exception before logging
+			if (logger.isLoggable(Level.FINE))
+				logger.log(Level.INFO, "exception " + this + " -> false", e);
 			return false;
 		}
 	}
