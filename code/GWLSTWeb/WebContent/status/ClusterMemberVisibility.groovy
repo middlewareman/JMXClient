@@ -6,13 +6,17 @@
 import com.middlewareman.mbean.weblogic.access.HttpServletRequestAdapter
 import com.middlewareman.mbean.weblogic.builder.HtmlExporter
 
-final desc = """Cluster members maintain their dynamic view of the \
+def desc = """Cluster members maintain their dynamic view of the \
 cluster by receiving heartbeat messages from other cluster members. \
 Because these messages are broadcast (whether with multicast or unicast), \
 the failure in receiving these messages is not readily detected by the sender. \
 This monitoring utility compares the view of the cluster from each cluster member \
 to that which would be expected based on a list of running cluster members retrieved \
 from another source."""
+
+def show(collection) {
+	collection ? collection.sort().join(' ') : ''
+}
 
 new ExceptionHandler(binding).wrap {
 	
@@ -21,12 +25,12 @@ new ExceptionHandler(binding).wrap {
 	
 	def drs = domainRuntimeServer.domainRuntimeService
 	
-	def allServerConfigNames = drs.domainConfiguration.servers.name
+	Set allServerConfigNames = drs.domainConfiguration.servers.name as Set
 	def allServerRuntimes = drs.serverRuntimes
-	def allServerRuntimeNames = allServerRuntimes.name
+	Set allServerRuntimeNames = allServerRuntimes.name as Set
 	
 	html.html {
-		head { title '$Id$' }
+		head { title 'GWLST Cluster Member Visibility' }
 		body {
 			HtmlExporter.notice delegate
 			h1 'Cluster Member Visibility'
@@ -34,26 +38,53 @@ new ExceptionHandler(binding).wrap {
 			p desc
 			for (clusterConfig in drs.domainConfiguration.clusters) {
 				h2 "Cluster $clusterConfig.name"
-				def clusterMemberConfigMap = [:]
+				Map clusterMemberConfigMap = [:]
 				for (serverConfig in clusterConfig.servers)
 					clusterMemberConfigMap[serverConfig.name] = serverConfig
-				def clusterMemberConfigNames = clusterMemberConfigMap.keySet().sort()
+				Set clusterMemberConfigNames = clusterMemberConfigMap.keySet()
+				Set clusterMemberRuntimeNames = allServerRuntimeNames.intersect(clusterMemberConfigNames)
+				h3 'Overview'
 				table(border:1) {
 					tr {
-						th 'Server Name'
+						td 'Configured members'
+						td show(clusterMemberConfigNames)
+					}
+					tr {
+						td 'Running members'
+						td show(clusterMemberRuntimeNames)
+					}
+					tr {
+						td 'Not running members'
+						td show(clusterMemberConfigNames - clusterMemberRuntimeNames)
+					}
+				}
+				h3 'Per configured cluster member'
+				table(border:1) {
+					tr {
+						th 'Cluster member'
 						th 'State'
 						th 'Sees'
-						th 'Does not see'
+						th 'Should also see'
 					}
-					for (name in clusterMemberConfigNames) {
+					for (name in clusterMemberConfigNames?.sort()) {
 						def clusterMemberRuntime = drs.lookupServerRuntime(name)
-						def clusterRuntime = clusterMemberRuntime.clusterRuntime
-						def sees = clusterRuntime.serverNames
-						tr {
-							td name
-							td clusterMemberRuntime?.state
-							td sees.join(' ')
-							td '?'
+						if (clusterMemberRuntime) {
+							def clusterRuntime = clusterMemberRuntime.clusterRuntime
+							Set sees = clusterRuntime.serverNames as Set
+							Set shouldAlsoSee = clusterMemberRuntimeNames - sees
+							tr {
+								td name
+								td clusterMemberRuntime.state
+								td show(sees)
+								td { strong show(shouldAlsoSee) } 
+							}
+						} else {
+							tr {
+								td name
+								td { i 'unavailable' }
+								td()
+								td()
+							}
 						}
 					}
 				}
