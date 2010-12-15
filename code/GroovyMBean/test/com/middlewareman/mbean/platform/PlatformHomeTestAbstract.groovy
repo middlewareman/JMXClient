@@ -7,22 +7,22 @@ package com.middlewareman.mbean.platform
 import com.middlewareman.mbean.LocalPlatformMBeanHome 
 import com.middlewareman.mbean.MBeanHome 
 
-class LocalPlatformHomeTest extends PlatformHomeTest {
+class LocalPlatformHomeTest extends PlatformHomeTestAbstract {
 	
 	final ph = new LocalPlatformHome()
 }
 
-class ProxyPlatformHomeTest extends PlatformHomeTest {
+class ProxyPlatformHomeTest extends PlatformHomeTestAbstract {
 	
 	final ph = new ProxyPlatformHome(new LocalPlatformMBeanHome())
 }
 
-class MBeanPlatformHomeTest extends PlatformHomeTest {
+class MBeanPlatformHomeTest extends PlatformHomeTestAbstract {
 	
 	final ph = new MBeanPlatformHome(new LocalPlatformMBeanHome())
 }
 
-class CachingMBeanPlatformHomeTest extends PlatformHomeTest {
+class CachingMBeanPlatformHomeTest extends PlatformHomeTestAbstract {
 	
 	final MBeanHome mbh
 	final ph
@@ -40,7 +40,7 @@ class CachingMBeanPlatformHomeTest extends PlatformHomeTest {
 	}
 }
 
-abstract class PlatformHomeTest extends GroovyTestCase {
+abstract class PlatformHomeTestAbstract extends GroovyTestCase {
 	
 	abstract getPh();
 	

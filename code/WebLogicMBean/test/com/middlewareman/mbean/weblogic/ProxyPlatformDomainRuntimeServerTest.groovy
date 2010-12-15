@@ -4,9 +4,9 @@
  */
 package com.middlewareman.mbean.weblogic
 
-import com.middlewareman.mbean.platform.PlatformHomeTest
+import com.middlewareman.mbean.platform.PlatformHomeTestAbstract 
 
-class ProxyPlatformDomainRuntimeServerTest extends PlatformHomeTest {
+class ProxyPlatformDomainRuntimeServerTest extends PlatformHomeTestAbstract {
 	
 	final ph
 	
