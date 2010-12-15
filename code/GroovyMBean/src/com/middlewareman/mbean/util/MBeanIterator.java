@@ -7,14 +7,11 @@ package com.middlewareman.mbean.util;
 import java.io.IOException;
 import java.util.*;
 
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
+import javax.management.*;
 
 import com.middlewareman.mbean.MBean;
-import com.middlewareman.mbean.type.SimpleAttributeFilter;
 import com.middlewareman.mbean.type.AttributeFilter.OnException;
+import com.middlewareman.mbean.type.SimpleAttributeFilter;
 
 /**
  * Iterates breadth-first over all children reachable from a parent MBean.
@@ -58,8 +55,7 @@ public class MBeanIterator implements Iterator<MBean> {
 							add(mbean);
 						}
 					} else {
-						System.out.println("UNEXPECTED "
-								+ value.getClass().getName());
+						System.err.println("UNEXPECTED " + value);
 					}
 				}
 			}
