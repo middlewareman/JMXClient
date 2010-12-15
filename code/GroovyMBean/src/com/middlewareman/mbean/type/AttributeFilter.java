@@ -40,7 +40,7 @@ public interface AttributeFilter {
 	 * exception itself as the value. {@link #OMIT} omits the attribute from the
 	 * result.
 	 */
-	enum OnException {
+	public enum OnException {
 		THROW, RETURN, OMIT
 	}
 
