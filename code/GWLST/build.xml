@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="default" name="GWLST">
+
+	<property name="top.dir" location="${basedir}/.." />
+
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="target" value="1.6" />
+	<property name="source" value="1.6" />
+
+	<property name="groovy.dir" location="C:\Dev\groovy-1.7.5" />
+
+	<property name="groovy.lib" location="${groovy.dir}/lib" />
+
+	<property name="groovy-all.location" location="${groovy.dir}/embeddable/groovy-all-1.7.5.jar" />
+
+	<path id="groovy.classpath">
+		<pathelement location="${groovy-all.location}" />
+	</path>
+
+	<property name="weblogic.location" location="C:\Oracle\Middleware\10.3.3.0\wlserver_10.3\server" />
+	<property name="wlfullclient.location" location="${weblogic.location}/lib/wlfullclient.jar" />
+
+	<property name="commons-collections.location" location="${top.dir}/GroovyMBean/lib/commons-collections-3.2.1.jar" />
+
+	<path id="build.classpath">
+		<pathelement location="${groovy.lib}/ant-1.8.1.jar" />
+		<pathelement location="${groovy.lib}/ant-launcher-1.8.1.jar" />
+		<pathelement location="${groovy.lib}/ant-junit-1.8.1.jar" />
+		<pathelement location="${groovy.lib}/junit-4.8.1.jar" />
+	</path>
+
+	<path id="compile.classpath">
+		<path refid="groovy.classpath" />
+		<path refid="build.classpath" />
+		<pathelement location="${commons-collections.location}" />
+		<pathelement location="${wlfullclient.location}" />
+	</path>
+
+	<path id="source.main.path">
+		<pathelement location="${top.dir}/GroovyMBean/src" />
+		<pathelement location="${top.dir}/WebLogicMBean/src" />
+	</path>
+
+	<path id="source.test.path">
+		<pathelement location="${top.dir}/GroovyMBean/test" />
+		<pathelement location="${top.dir}/WebLogicMBean/test" />
+	</path>
+
+	<taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc">
+		<classpath refid="groovy.classpath" />
+	</taskdef>
+
+	<taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc">
+		<classpath refid="groovy.classpath" />
+	</taskdef>
+
+
+	<target depends="init,compile,test" name="build" />
+
+	<target depends="clean,init,compile,test" name="clean-build" />
+
+	<target depends="clean-build,package-only" name="package" />
+
+
+	<target name="init">
+		<tstamp>
+			<format property="timestamp" pattern="yyyy-MM-dd HH:mm:ss" />
+		</tstamp>
+		<mkdir dir="target/classes/main" />
+		<!-- 
+		<copy includeemptydirs="false" todir="target/classes/main">
+			<fileset dir="${source.main.path}">
+				<exclude name="**/*.launch" />
+				<exclude name="**/*.groovy" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		-->
+		<mkdir dir="target/classes/test" />
+		<!-- <copy includeemptydirs="false" todir="target/classes/main">
+			<fileset refid="source.test.path">
+				<exclude name="**/*.launch" />
+				<exclude name="**/*.groovy" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		-->
+	</target>
+
+	<target name="clean">
+		<delete includeemptydirs="true" failonerror="false">
+			<fileset dir="target" includes="**/*" />
+		</delete>
+	</target>
+
+	<target name="compile">
+		<groovyc destdir="target/classes/main" classpathref="compile.classpath" verbose="false">
+			<src refid="source.main.path" />
+			<classpath>
+				<path refid="compile.classpath" />
+			</classpath>
+			<javac debug="true" debuglevel="${debuglevel}" source="${source}" target="${target}" />
+		</groovyc>
+		<groovyc destdir="target/classes/test" verbose="false">
+			<src refid="source.test.path" />
+			<classpath>
+				<path refid="compile.classpath" />
+				<path refid="build.classpath" />
+				<pathelement location="target/classes/main" />
+			</classpath>
+			<javac debug="true" debuglevel="${debuglevel}" source="${source}" target="${target}" />
+		</groovyc>
+	</target>
+
+	<target name="test">
+		<mkdir dir="target/junit" />
+		<junit errorproperty="junit-errfail" failureproperty="junit-errfail" printsummary="withOutAndErr">
+			<formatter type="xml" />
+			<classpath>
+				<path refid="compile.classpath" />
+				<pathelement location="target/classes/main" />
+				<pathelement location="target/classes/test" />
+			</classpath>
+			<batchtest todir="target/junit">
+				<fileset dir="target/classes/test" includes="**/*Test.class" />
+			</batchtest>
+		</junit>
+		<junitreport todir="target/junit">
+			<fileset dir="target/junit">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="target/junit" />
+		</junitreport>
+		<fail if="junit-errfail" message="JUnit Tests failed" />
+	</target>
+
+	<target name="package-only">
+		<unjar dest="target/classes/exploded">
+			<fileset file="${commons-collections.location}" />
+		</unjar>
+		<jar destfile="target/gwlst.jar">
+			<fileset dir="target/classes/main" />
+			<fileset dir="target/classes/exploded" />
+			<manifest>
+				<attribute name="Class-Path" value="groovy-all.jar wlfullclient.jar" />
+				<attribute name="Built-By" value="Middlewareman" />
+				<attribute name="Build-Timestamp" value="${timestamp}" />
+				<attribute name="Implementation-Title" value="Groovy WebLogic Scripting Tool" />
+				<attribute name="Extension-Name" value="gwlst" />
+				<!-- Specification-Version, Implementation-Version -->
+				<attribute name="Extension-List" value="Groovy" />
+				<attribute name="Groovy-Extension-Name" value="groovy" />
+				<attribute name="Groovy-Implementation-Version" value="1.6" />
+			</manifest>
+		</jar>
+		<jar destfile="target/gwlst-console.jar">
+			<manifest>
+				<attribute name="Class-Path" value="gwlst.jar" />
+				<attribute name="Main-Class" value="com.middlewareman.mbean.weblogic.shell.GWLSTConsole" />
+				<attribute name="Built-By" value="Middlewareman" />
+				<attribute name="Build-Timestamp" value="${timestamp}" />
+				<attribute name="Implementation-Title" value="GWLST Console executable" />
+			</manifest>
+		</jar>
+		<jar destfile="target/gwlst-shell.jar">
+			<manifest>
+				<attribute name="Class-Path" value="gwlst.jar" />
+				<attribute name="Main-Class" value="com.middlewareman.mbean.weblogic.shell.GWLSTShell" />
+				<attribute name="Built-By" value="Middlewareman" />
+				<attribute name="Build-Timestamp" value="${timestamp}" />
+				<attribute name="Implementation-Title" value="GWLST Shell executable" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="gwlstdoc">
+		<groovydoc destdir="target/gapi" packagenames="**.*" use="true" windowtitle="GWLST API" doctitle="Groovy WebLogic Scripting Tool API">
+			<fileset refid="source.main.path" />
+			<link packages="java.,javax.,org.xml." href="http://java.sun.com/javase/6/docs/api/" />
+			<link packages="groovy.,org.codehaus.groovy." href="http://groovy.codehaus.org/gapi/" />
+			<link packages="com.bea.,weblogic.,weblogicx." href="http://download.oracle.com/docs/cd/E12839_01/apirefs.1111/e13941/" />
+		</groovydoc>
+	</target>
+
+	<target depends="package" name="default" />
+
+</project>
