@@ -1,14 +1,16 @@
-/*
+/* $Id$ */
+/**
+ * Print runtime data for running cluster members.
  * 
+ * Cluster members maintain their dynamic view of the cluster by receiving 
+ * heartbeat messages from other cluster members. 
+ * Because these messages are broadcast (whether with multicast or unicast),
+ * the failure in receiving these messages is not detected by the sender.
+ * This monitoring tool compares these individual runtime views to that
+ * which is expected based on other runtime information.
+ * 
+ * @author Andreas Nyberg
  */
-
-def desc = """\
-Cluster members maintain their dynamic view of the cluster by receiving 
-heartbeat messages from other cluster members. 
-Because these messages are broadcast (whether with multicast or unicast),
-the failure in receiving these messages is not detected by the sender.
-This monitoring tool compares these individual runtime views to that
-which is expected based on other runtime information."""
 
 def show(collection) {
 	collection ? collection.sort().join(' ') : ''
