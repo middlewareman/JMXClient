@@ -1,5 +1,10 @@
-
-for (sr in domainRuntimeService.ServerRuntimes) {
+/* $Id$ */
+/**
+ * GWLST version of Oracle's MonitorServlets.java.
+ * 
+ * @author Andreas Nyberg
+ */
+for (sr in domainRuntimeServer.domainRuntimeService.ServerRuntimes) {
 	for (ar in sr.ApplicationRuntimes) {
 		println "Application name: $ar.Name"
 		for (cr in ar.ComponentRuntimes) {
