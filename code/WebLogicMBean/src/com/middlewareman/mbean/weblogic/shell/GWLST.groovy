@@ -40,6 +40,7 @@ gwlst [options] - args...         (read script from stdin and evaluate)
 			System.err.println "Could not connect with url=$hf.url username=$hf.username"
 			cleaner.deepClean e
 			e.printStackTrace System.err
+			System.exit 1
 		}
 		def shell = new GroovyShell(binding)
 		
