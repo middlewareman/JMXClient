@@ -6,6 +6,6 @@
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/GroovyMBean"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/WLJMXClient"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/WebLogicClient"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
