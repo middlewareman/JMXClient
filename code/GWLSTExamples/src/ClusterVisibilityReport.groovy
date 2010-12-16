@@ -17,6 +17,7 @@ def show(collection) {
 }
 
 println status()
+println new Date()
 
 def drs = domainRuntimeServer.domainRuntimeService
 
@@ -32,8 +33,6 @@ for (clusterConfig in drs.domainConfiguration.clusters) {
 		clusterMemberConfigMap[serverConfig.name] = serverConfig
 	Set clusterMemberConfigNames = clusterMemberConfigMap.keySet()
 	Set clusterMemberRuntimeNames = allServerRuntimeNames.intersect(clusterMemberConfigNames)
-	//print "  Configured members: \t"
-	//println show(clusterMemberConfigNames)
 	print "  Running members:    \t"
 	println show(clusterMemberRuntimeNames)
 	print "  Not running members:\t"

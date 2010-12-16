@@ -16,6 +16,7 @@
  */
 
 println status()
+println new Date()
 
 def drs = domainRuntimeServer.domainRuntimeService
 
@@ -32,7 +33,7 @@ for (cluster in drs.domainConfiguration.clusters) {
 				for (server in cluster.servers) {
 					def channel = server.lookupNetworkAccessPoint(channelName)
 					if (!channel) {
-						println "    Channel definition MISSING on Server $server.name!"
+						println "    Channel definition MISSING on Server $server.name"
 					} else {
 						println "\n    Channel definition on Server $server.name"
 						println "      ClusterAddress\t$channel.clusterAddress"

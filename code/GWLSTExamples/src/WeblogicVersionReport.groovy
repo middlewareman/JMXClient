@@ -8,6 +8,7 @@
  */
 
 println status()
+println new Date()
 
 def drs = domainRuntimeServer.domainRuntimeService
 
