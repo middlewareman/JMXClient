@@ -18,7 +18,7 @@ class GWLSTBindings {
 				def serverName = runtimeService.ServerName
 				def serverType = serverRuntime.AdminServer ? 'admin' : 'managed'
 				def serverState = serverRuntime.State
-				def address = serverRuntime.@home.url
+				def address = serverRuntime.@home.serverId
 				return "Connected to $serverName ($serverType) $serverState on $address"
 			} catch (Exception e) {
 				return e.message
