@@ -39,4 +39,48 @@ class RemoteMBeanHomeTest extends GroovyTestCase {
 		assert !rs
 		println "$name home reopened ${rs.@home}"
 	}
+	
+	void testConnectedSerial() {
+		def hf = WebLogicMBeanHomeFactory.default
+		hf.reconnect = false
+		def rs = new RuntimeServer(hf).runtimeService
+		def home1 = rs.@home
+		assert home1
+		assert home1 instanceof MBeanHome
+		def con1 = home1.getMBeanServerConnection()
+		def baos = new ByteArrayOutputStream()
+		try {
+			baos.withObjectOutputStream { it.writeObject home1 }
+		} catch(Exception e) {
+			return
+		}
+		assert false
+	}
+	
+	void testConnectingSerial() {
+		def hf = WebLogicMBeanHomeFactory.default
+		hf.reconnect = true
+		def rs = new RuntimeServer(hf).runtimeService
+		def home1 = rs.@home
+		assert home1
+		assert home1 instanceof MBeanHome
+		def con1 = home1.getMBeanServerConnection()
+		println "$name writing $home1"
+		def baos = new ByteArrayOutputStream()
+		baos.withObjectOutputStream { it.writeObject home1 }
+		def data1 = baos.toByteArray()
+		println "$name serialized size $data1.length"
+		baos.reset()
+		rs.domainConfiguration.servers.name // Just do something that triggers caching
+		baos.withObjectOutputStream { it.writeObject rs.@home }
+		def data2 = baos.toByteArray()
+		println "$name serialized size $data2.length"
+		assert data1 == data2
+		def home2 = new ByteArrayInputStream(data1).withObjectInputStream { it.readObject() }
+		assert home2 instanceof MBeanHome
+		assert home2 == home1
+		def con2 = home2.getMBeanServerConnection()
+		assert ! (con1.is(con2))
+		println "$name read $home2"
+	}
 }
