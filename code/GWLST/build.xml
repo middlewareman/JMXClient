@@ -142,7 +142,8 @@
 			<fileset dir="target/classes/main" />
 			<fileset dir="target/classes/exploded" />
 			<manifest>
-				<attribute name="Class-Path" value="groovy-all.jar wlfullclient.jar" />
+				<attribute name="Class-Path" value="groovy-all-1.7.5.jar groovy-all.jar wlfullclient.jar" />
+				<attribute name="Main-Class" value="com.middlewareman.mbean.weblogic.shell.GWLST" />
 				<attribute name="Built-By" value="Middlewareman" />
 				<attribute name="Build-Timestamp" value="${timestamp}" />
 				<attribute name="Implementation-Title" value="Groovy WebLogic Scripting Tool" />
@@ -160,15 +161,6 @@
 				<attribute name="Built-By" value="Middlewareman" />
 				<attribute name="Build-Timestamp" value="${timestamp}" />
 				<attribute name="Implementation-Title" value="GWLST Console executable" />
-			</manifest>
-		</jar>
-		<jar destfile="target/gwlst-shell.jar">
-			<manifest>
-				<attribute name="Class-Path" value="gwlst.jar" />
-				<attribute name="Main-Class" value="com.middlewareman.mbean.weblogic.shell.GWLSTShell" />
-				<attribute name="Built-By" value="Middlewareman" />
-				<attribute name="Build-Timestamp" value="${timestamp}" />
-				<attribute name="Implementation-Title" value="GWLST Shell executable" />
 			</manifest>
 		</jar>
 	</target>
