@@ -39,9 +39,9 @@ new ExceptionHandler(binding).wrap {
 		def adminServerName = service.DomainConfiguration.AdminServerName
 		def serverNames = service.ServerRuntimes.Name 
 		html.html {
-			head { title 'GWLST RuntimeMBeanServer Browser' }
+			head { title 'GWLST DomainRuntimeMBeanServer Browser' }
 			body {
-				h1 'GWLST RuntimeMBeanServer Browser'
+				h1 'GWLST DomainRuntimeMBeanServer Browser'
 				h2 'MBeanHome'
 				pre domainRuntimeServer.home
 				h2 'WebLogic Services'
