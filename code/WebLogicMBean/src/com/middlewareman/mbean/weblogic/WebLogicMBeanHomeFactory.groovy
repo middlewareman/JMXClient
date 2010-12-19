@@ -12,6 +12,12 @@ import javax.management.remote.JMXConnectorFactory
 import javax.management.remote.JMXServiceURL 
 import javax.naming.Context 
 
+/**
+ * Factory of RemoteMBeanHome to a WebLogic Server with support for picking up parameters from environment, 
+ * system properties and command line parameters.
+ * 
+ * @author Andreas Nyberg
+ */
 public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 	
 	static WebLogicMBeanHomeFactory getDefault() {
@@ -69,7 +75,11 @@ public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 					break
 				case '-password':
 					assert iter, "Missing argument for $arg"
-					password = iter.next
+					password = iter.next()
+					break
+				case '-timeout':
+					assert iter, "Missing argument for $arg"
+					timeout = iter.next() as Long
 					break
 				default:
 					escape.add arg
