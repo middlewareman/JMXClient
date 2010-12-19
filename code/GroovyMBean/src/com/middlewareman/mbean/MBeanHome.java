@@ -11,14 +11,9 @@ import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import javax.management.*;
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.TabularData;
+import javax.management.openmbean.*;
 
-import com.middlewareman.mbean.type.AttributeFilter;
-import com.middlewareman.mbean.type.CompositeDataWrapper;
-import com.middlewareman.mbean.type.OpenTypeWrapper;
-import com.middlewareman.mbean.type.SimpleAttributeFilter;
+import com.middlewareman.mbean.type.*;
 
 /**
  * {@link MBean} factory that manages an {@link MBeanServerConnection} and
@@ -47,15 +42,21 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	 */
 	public boolean assertRegistered = false;
 
+	/**
+	 * Return lists instead of arrays. This is helpful when collection behaviour
+	 * is desired, such as comparing property maps of MBeans; two arrays
+	 * containing the same elements are not equal, but lists are.
+	 */
+	public boolean listProperties = false;
+
 	/** Defaults to <code>this</code>. */
 	public MBeanFactory mbeanFactory;
 
 	/** Defaults to <code>this</code>. */
 	public MBeanInfoFactory mbeanInfoFactory;
 
-	/** Filter to use for {@link #GetPropertiesAttributeFilter}. */
-	public final AttributeFilter getPropertiesFilter = SimpleAttributeFilter
-			.getSafe();
+	/** Filter to use for {@link #getProperties(ObjectName)}. */
+	private SimpleAttributeFilter defaultPropertiesFilter;
 
 	public MBeanHome() {
 		this.mbeanFactory = this;
@@ -95,6 +96,17 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 
 	public void disableMBeanInfoCache() {
 		mbeanInfoFactory = this;
+	}
+
+	public SimpleAttributeFilter getDefaultPropertiesFilter() {
+		if (defaultPropertiesFilter == null)
+			setDefaultPropertiesFilter(SimpleAttributeFilter.getNative());
+		return defaultPropertiesFilter;
+	}
+
+	public synchronized void setDefaultPropertiesFilter(
+			SimpleAttributeFilter filter) {
+		defaultPropertiesFilter = filter;
 	}
 
 	/**
@@ -282,30 +294,31 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 			IOException {
 		if (unwrapped == null)
 			return null;
-		assert !(unwrapped instanceof Collection); // TODO Can this happen?
 		if (unwrapped instanceof ObjectName[]) {
 			ObjectName[] objectNames = (ObjectName[]) unwrapped;
 			MBean[] wrapped = new MBean[objectNames.length];
 			for (int i = 0; i < objectNames.length; i++)
 				if (objectNames[i] != null)
 					wrapped[i] = getMBean(objectNames[i]);
-			return wrapped;
+			return listProperties ? Arrays.asList(wrapped) : wrapped;
 		} else if (unwrapped instanceof Object[]) {
 			Object[] objects = (Object[]) unwrapped;
 			for (int i = 0; i < objects.length; i++)
 				objects[i] = wrap(objects[i]);
-			return objects;
+			return listProperties ? Arrays.asList(objects) : objects;
 		} else if (unwrapped instanceof ObjectName)
 			return getMBean((ObjectName) unwrapped);
 		else
-			return OpenTypeWrapper.wrap(unwrapped);
+			return OpenTypeWrapper.wrap(unwrapped); // TODO listProperties
 	}
 
 	/** Returns an unwrapped object. */
 	private Object unwrap(Object wrapped) {
 		if (wrapped == null)
 			return null;
-		assert !(wrapped instanceof Collection); // TODO Can this happen?
+		if (listProperties && wrapped instanceof List)
+			wrapped = ((List<?>) wrapped).toArray();
+		// TODO will miss MBean[] match, but does it matter?
 		if (wrapped instanceof MBean[]) {
 			MBean[] mbeans = (MBean[]) wrapped;
 			ObjectName[] objectNames = new ObjectName[mbeans.length];
@@ -322,7 +335,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 		} else if (wrapped instanceof MBean)
 			return ((MBean) wrapped).objectName;
 		else
-			return OpenTypeWrapper.unwrap(wrapped);
+			return OpenTypeWrapper.unwrap(wrapped); // TODO List ?
 	}
 
 	/**
@@ -331,58 +344,117 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	 */
 	public Map<String, ?> getProperties(ObjectName objectName)
 			throws InstanceNotFoundException, IntrospectionException,
-			ReflectionException, IOException {
-		return getProperties(objectName, getPropertiesFilter);
+			AttributeNotFoundException, ReflectionException, MBeanException,
+			IOException {
+		return getProperties(objectName, getDefaultPropertiesFilter());
 	}
 
-	/**
-	 * Return selected attributes of an MBean as a map.
-	 * 
-	 * @param attributeFilter
-	 *            Specifies which attributes to include and how to handle
-	 *            decapitalisation and exceptions.
-	 * @return Map of key-value and key-exception pairs.
-	 * @throws IOException
-	 * @throws ReflectionException
-	 * @throws IntrospectionException
-	 * @throws InstanceNotFoundException
-	 */
 	public Map<String, ?> getProperties(ObjectName objectName,
-			AttributeFilter attributeFilter) throws InstanceNotFoundException,
-			IntrospectionException, ReflectionException, IOException {
+			SimpleAttributeFilter attributeFilter)
+			throws InstanceNotFoundException, IntrospectionException,
+			ReflectionException, IOException, AttributeNotFoundException,
+			MBeanException {
+		if (attributeFilter.isBulk())
+			return getPropertiesBulk(objectName, attributeFilter);
+		else
+			return getPropertiesSingle(objectName, attributeFilter);
+	}
+
+	public Map<String, ?> getPropertiesSingle(ObjectName objectName,
+			SimpleAttributeFilter attributeFilter)
+			throws InstanceNotFoundException, IntrospectionException,
+			ReflectionException, IOException, AttributeNotFoundException,
+			MBeanException {
+		MBeanAttributeInfo[] ais = getInfo(objectName).getAttributes();
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
-		// TODO getAttributes (in bulk)?
-		for (MBeanAttributeInfo attribute : getInfo(objectName).getAttributes()) {
-			if (attributeFilter.acceptAttribute(attribute)) {
-				String name = attribute.getName();
-				String newName = attributeFilter.isDecapitalise() ? decapitalise(name)
-						: name;
-				// TODO any other criteria for exceptions to pass through?
-				try {
+
+		if (attributeFilter.getOnException().equals(OnException.THROW)) {
+			for (MBeanAttributeInfo attribute : ais) {
+				if (attributeFilter.acceptAttribute(attribute)) {
+					String name = attribute.getName();
+					String newName = attributeFilter.isDecapitalise() ? decapitalise(name)
+							: name;
+					// TODO any other criteria for exceptions to pass through?
 					Object value = getAttribute(objectName, name);
-					map.put(newName, value);
-				} catch (IOException e) {
-					throw e;
-				} catch (InstanceNotFoundException e) {
-					throw e;
-					// TODO AttributeNotFoundException?
-				} catch (Exception e) {
-					switch (attributeFilter.getOnException()) {
-					case RETURN:
-						map.put(newName, e);
-						// TODO logging?
-						break;
-					case THROW:
-						throw new InstanceException(getServerId(), objectName,
-								e);
-						// TODO AttributeException?
-					case OMIT:
-						// TODO logging?
+					if (attributeFilter.acceptAttribute(attribute, value))
+						map.put(newName, value);
+				}
+			}
+		} else {
+			for (MBeanAttributeInfo attribute : ais) {
+				if (attributeFilter.acceptAttribute(attribute)) {
+					String name = attribute.getName();
+					String newName = attributeFilter.isDecapitalise() ? decapitalise(name)
+							: name;
+					// TODO any other criteria for exceptions to pass through?
+					try {
+						Object value = getAttribute(objectName, name);
+						if (attributeFilter.acceptAttribute(attribute, value))
+							map.put(newName, value);
+					} catch (IOException e) {
+						throw e;
+					} catch (InstanceNotFoundException e) {
+						throw e;
+						// TODO AttributeNotFoundException?
+					} catch (Exception e) {
+						switch (attributeFilter.getOnException()) {
+						case OMIT:
+							// TODO logging!
+							break;
+						case NULL:
+							map.put(newName, null);
+							// TODO logging!
+							break;
+						case RETURN:
+							map.put(newName, e);
+							// TODO logging?
+							break;
+						default:
+							assert false : attributeFilter.getOnException();
+						}
 					}
 				}
 			}
 		}
 		return map;
+	}
+
+	public Map<String, ?> getPropertiesBulk(ObjectName objectName,
+			SimpleAttributeFilter attributeFilter)
+			throws InstanceNotFoundException, IntrospectionException,
+			ReflectionException, IOException, AttributeNotFoundException,
+			MBeanException {
+		MBeanAttributeInfo[] ais = getInfo(objectName).getAttributes();
+		Map<String, MBeanAttributeInfo> name2ai = new LinkedHashMap<String, MBeanAttributeInfo>(
+				ais.length);
+		for (MBeanAttributeInfo ai : ais) {
+			if (attributeFilter.acceptAttribute(ai))
+				name2ai.put(ai.getName(), ai);
+		}
+		String[] names = name2ai.keySet().toArray(new String[name2ai.size()]);
+		try {
+			Object[] values = getAttributes(objectName, names);
+			assert names.length == values.length;
+			Map<String, Object> map = new LinkedHashMap<String, Object>();
+			for (int i = 0; i < names.length; i++) {
+				if (attributeFilter.acceptAttribute(name2ai.get(names[i]),
+						values[i])) {
+					String name = attributeFilter.isDecapitalise() ? decapitalise(names[i])
+							: names[i];
+					map.put(name, values[i]);
+				}
+			}
+			return map;
+		} catch (IOException e) {
+			throw e;
+		} catch (InstanceNotFoundException e) {
+			throw e;
+		} catch (Exception e) {
+			System.err.println(getClass().getName()
+					+ " getProperties bulk failed names="
+					+ Arrays.toString(names) + ": " + e.getMessage());
+			return getPropertiesSingle(objectName, attributeFilter);
+		}
 	}
 
 	private static final Object[] NOARGS = new Object[0];
