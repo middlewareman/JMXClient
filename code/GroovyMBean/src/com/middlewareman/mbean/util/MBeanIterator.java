@@ -10,7 +10,6 @@ import java.util.*;
 import javax.management.*;
 
 import com.middlewareman.mbean.MBean;
-import com.middlewareman.mbean.type.AttributeFilter.OnException;
 import com.middlewareman.mbean.type.SimpleAttributeFilter;
 
 /**
@@ -29,7 +28,8 @@ public class MBeanIterator implements Iterator<MBean> {
 		filter.setNoDeprecated(true);
 		filter.setOnlyReadable(true);
 		filter.setOnlyMBeans(true);
-		filter.setOnException(OnException.RETURN);
+		filter.setNoNullValue(true);
+		filter.setBulk(true);
 		load(mbean);
 	}
 
@@ -40,8 +40,9 @@ public class MBeanIterator implements Iterator<MBean> {
 	}
 
 	private void load(MBean parent) throws InstanceNotFoundException,
-			IntrospectionException, ReflectionException, IOException {
-		if (visited.add(parent.objectName)) {
+			IntrospectionException, AttributeNotFoundException,
+			ReflectionException, MBeanException, IOException {
+		if (visited.add(parent.objectName) && parent.asBoolean()) {
 			Map<String, ?> map = parent.home.getProperties(parent.objectName,
 					filter);
 			for (String name : map.keySet()) {
@@ -51,12 +52,16 @@ public class MBeanIterator implements Iterator<MBean> {
 					if (value instanceof MBean) {
 						add((MBean) value);
 					} else if (value instanceof MBean[]) {
-						for (MBean mbean : (MBean[]) value) {
+						for (MBean mbean : (MBean[]) value)
 							add(mbean);
-						}
-					} else {
-						System.err.println("UNEXPECTED " + value);
+					} else if (value instanceof List) {
+						for (Object item : (List) value)
+							if (item instanceof MBean)
+								add((MBean) item);
 					}
+				} else {
+					System.err.println("MBeanIterator UNEXPECTED "
+							+ value.getClass().getName() + " " + value);
 				}
 			}
 		}
@@ -73,11 +78,18 @@ public class MBeanIterator implements Iterator<MBean> {
 
 	public MBean next() {
 		MBean mbean = queue.removeFirst();
-		try {
-			load(mbean);
-		} catch (Exception e) {
+		if (mbean.asBoolean()) {
+			try {
+				load(mbean);
+			} catch (Exception e) {
+				e.fillInStackTrace();
+				e.printStackTrace();
+				// TODO logging
+			}
+		} else {
 			// TODO logging
-			e.printStackTrace();
+			System.err.println(getClass().getName()
+					+ " next() returning false mbean " + mbean);
 		}
 		return mbean;
 	}
