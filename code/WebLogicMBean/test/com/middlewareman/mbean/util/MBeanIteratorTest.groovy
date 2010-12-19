@@ -4,14 +4,19 @@
  */
 package com.middlewareman.mbean.util;
 
-import com.middlewareman.mbean.type.AttributeFilter.OnException;
+import com.middlewareman.mbean.type.OnException 
+import com.middlewareman.mbean.type.SimpleAttributeFilter 
 import com.middlewareman.mbean.weblogic.DomainRuntimeServer 
-import com.middlewareman.mbean.weblogic.RuntimeServer;
+import com.middlewareman.mbean.weblogic.RuntimeServer 
 import com.middlewareman.mbean.weblogic.WebLogicMBeanHomeFactory 
 
-import groovy.util.GroovyTestCase
-
 class MBeanIteratorTest extends GroovyTestCase {
+	
+	def filterBulk = new SimpleAttributeFilter(
+	onlyReadable:true, bulk:true)
+	
+	def filterSingle = new SimpleAttributeFilter(
+	onlyReadable:true, bulk:false, onException:OnException.NULL)
 	
 	RuntimeServer getRuntimeServer() { 
 		new RuntimeServer(WebLogicMBeanHomeFactory.default)
@@ -25,13 +30,12 @@ class MBeanIteratorTest extends GroovyTestCase {
 		def rs = runtimeServer.runtimeService
 		int counter = 0;
 		for (mbean in new MBeanIterator(rs)) {
-			//println mbean
 			++counter
 		} 
 		println counter
 	}
 	
-	void clock(mbean) {
+	void clock(mbean, attributeFilter = SimpleAttributeFilter.brief) {
 		assert mbean
 		println name
 		long start = System.currentTimeMillis()
@@ -55,6 +59,16 @@ class MBeanIteratorTest extends GroovyTestCase {
 	void testDomainRuntimeDefault() {
 		def drs = domainRuntimeServer.domainRuntimeService
 		clock drs
+	}
+	
+	void testDomainRuntimeBulk() {
+		def drs = domainRuntimeServer.domainRuntimeService
+		clock drs, filterBulk
+	}
+	
+	void testDomainRuntimeSingle() {
+		def drs = domainRuntimeServer.domainRuntimeService
+		clock drs, filterSingle
 	}
 	
 	void testCacheMBeansOnly() {
