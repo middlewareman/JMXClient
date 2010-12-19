@@ -71,7 +71,7 @@ public abstract class MBean {
 	 * connect to its MBeanServer and an MBean with the same ObjectName is
 	 * registered there.
 	 */
-	boolean asBoolean() {
+	public boolean asBoolean() {
 		try {
 			boolean isreg = home.getMBeanServerConnection().isRegistered(
 					objectName);
