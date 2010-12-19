@@ -12,7 +12,6 @@ import javax.management.RuntimeMBeanException
 
 import com.middlewareman.mbean.*
 import com.middlewareman.mbean.type.* 
-import com.middlewareman.mbean.type.AttributeFilter.OnException 
 
 class PlatformMXBeansTest extends GroovyTestCase {
 	
@@ -31,11 +30,10 @@ class PlatformMXBeansTest extends GroovyTestCase {
 	
 	void compareRemoteLocal(MBean remote, Object local) {
 		println name
-		def attributeFilter = new SimpleAttributeFilter(noDeprecated:true,decapitalise:true,onException:OnException.OMIT)
-		Map remoteProps = remote.@home.getProperties(remote.@objectName,attributeFilter)
-		println "remote keys: ${remoteProps.keySet().sort()}"
+		Map remoteProps = remote.properties
+		//println "remote keys: ${remoteProps.keySet().sort()}"
 		Map localProps = local.properties
-		println "local keys:  ${localProps.keySet().sort()}"
+		//println "local keys:  ${localProps.keySet().sort()}"
 		println "remote-local: ${remoteProps.keySet() - localProps.keySet()}"
 		println "local-remote: ${localProps.keySet() - remoteProps.keySet()}"
 		assert localProps.keySet().containsAll(remoteProps.keySet())
@@ -245,10 +243,12 @@ class PlatformMXBeansTest extends GroovyTestCase {
 	void testMemoryManager() {
 		for (mms in localMemoryManagers) {
 			def key = mms.name
-			try {
-				compareRemoteLocal getRemoteMemoryManager(key), getLocalMemoryManager(key)
-			} catch (InstanceNotFoundException e) {
-				println "$name $key: $e.message"
+			def remote = getRemoteMemoryManager(key)
+			def local = getLocalMemoryManager(key)
+			if (!local || !remote) {
+				println "$name $key ONE DOES NOT EXIST\n  local  $local\n  remote $remote"
+			} else {
+				compareRemoteLocal remote, local
 			}
 		}
 	}
