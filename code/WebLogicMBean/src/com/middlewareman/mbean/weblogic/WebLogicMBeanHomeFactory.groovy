@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import com.middlewareman.mbean.MBeanHome;
 import com.middlewareman.mbean.MBeanHomeFactory 
+import com.middlewareman.mbean.type.SimpleAttributeFilter 
 import javax.management.remote.JMXConnectorFactory 
 import javax.management.remote.JMXServiceURL 
 import javax.naming.Context 
@@ -96,6 +97,7 @@ public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 		MBeanHome home = super.createMBeanHome(urlPart)
 		home.enableMBeanCache()
 		home.enableMBeanInfoCache null
+		home.defaultPropertiesFilter = new SimpleAttributeFilter(noDeprecated:true,onlyReadable:true,bulk:true)
 		return home
 	}
 	
