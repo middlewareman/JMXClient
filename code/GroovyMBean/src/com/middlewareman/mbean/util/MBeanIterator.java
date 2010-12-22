@@ -4,26 +4,38 @@
  */
 package com.middlewareman.mbean.util;
 
-import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.management.*;
+import javax.management.InstanceNotFoundException;
+import javax.management.ObjectName;
 
+import com.middlewareman.groovy.StackTraceCleaner;
 import com.middlewareman.mbean.MBean;
 import com.middlewareman.mbean.type.SimpleAttributeFilter;
 
 /**
- * Iterates breadth-first over all children reachable from a parent MBean.
+ * Iterates breadth-first over all children reachable from a parent MBean. Note
+ * that the ObjectNames returned from the server are not checked, so it is
+ * possible that {@link #next()} returns an {@link MBean} that is not registered
+ * in the server.
  * 
  * @author Andreas Nyberg
  */
 public class MBeanIterator implements Iterator<MBean> {
 
-	public final SimpleAttributeFilter filter;
+	private static final Logger logger = Logger.getLogger(MBeanIterator.class
+			.getName());
+
+	private final SimpleAttributeFilter filter;
 	private Set<ObjectName> visited = new LinkedHashSet<ObjectName>();
 	private LinkedList<MBean> queue = new LinkedList<MBean>();
 
-	public MBeanIterator(MBean mbean) throws Exception {
+	/**
+	 * Creates an iterator with default filter (no deprecated references).
+	 */
+	public MBeanIterator(MBean mbean) {
 		filter = new SimpleAttributeFilter();
 		filter.setNoDeprecated(true);
 		filter.setOnlyReadable(true);
@@ -33,20 +45,28 @@ public class MBeanIterator implements Iterator<MBean> {
 		load(mbean);
 	}
 
-	public MBeanIterator(MBean mbean, SimpleAttributeFilter filter)
-			throws Exception {
+	/**
+	 * Creates an iterator with custom filter.
+	 */
+	public MBeanIterator(MBean mbean, SimpleAttributeFilter filter) {
 		this.filter = filter;
 		load(mbean);
 	}
 
-	private void load(MBean parent) throws InstanceNotFoundException,
-			IntrospectionException, AttributeNotFoundException,
-			ReflectionException, MBeanException, IOException {
-		if (visited.add(parent.objectName) && parent.asBoolean()) {
-			Map<String, ?> map = parent.home.getProperties(parent.objectName,
-					filter);
+	private void load(MBean parent) {
+		if (visited.add(parent.objectName)) {
+			Map<String, ?> map;
+			try {
+				map = parent.home.getProperties(parent.objectName, filter);
+			} catch (InstanceNotFoundException e) {
+				logger.log(Level.FINE, "Could not find " + parent);
+				return;
+			} catch (Exception e) {
+				StackTraceCleaner.getDefaultInstance().deepClean(e);
+				logger.log(Level.WARNING, "Could not load " + parent, e);
+				return;
+			}
 			for (String name : map.keySet()) {
-				// TODO logging
 				Object value = map.get(name);
 				if (value != null) {
 					if (value instanceof MBean) {
@@ -55,45 +75,48 @@ public class MBeanIterator implements Iterator<MBean> {
 						for (MBean mbean : (MBean[]) value)
 							add(mbean);
 					} else if (value instanceof List) {
-						for (Object item : (List) value)
+						for (Object item : (List<?>) value)
 							if (item instanceof MBean)
 								add((MBean) item);
+					} else {
+						if (logger.isLoggable(Level.FINE)) {
+							logger.log(Level.FINE,
+									"ignoring unexpected attribute type: "
+											+ value.getClass().getName()
+											+ " value:" + value);
+						}
 					}
-				} else {
-					System.err.println("MBeanIterator UNEXPECTED "
-							+ value.getClass().getName() + " " + value);
 				}
 			}
 		}
 	}
 
-	void add(MBean mbean) {
+	private void add(MBean mbean) {
 		if (!visited.contains(mbean.objectName))
 			queue.addLast(mbean);
 	}
 
+	/**
+	 * @see Iterator#hasNext()
+	 */
 	public boolean hasNext() {
 		return !queue.isEmpty();
 	}
 
+	/**
+	 * @see Iterator#next()
+	 */
 	public MBean next() {
 		MBean mbean = queue.removeFirst();
-		if (mbean.asBoolean()) {
-			try {
-				load(mbean);
-			} catch (Exception e) {
-				e.fillInStackTrace();
-				e.printStackTrace();
-				// TODO logging
-			}
-		} else {
-			// TODO logging
-			System.err.println(getClass().getName()
-					+ " next() returning false mbean " + mbean);
-		}
+		load(mbean);
 		return mbean;
 	}
 
+	/**
+	 * Not supported.
+	 * 
+	 * @see Iterator#remove()
+	 */
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}
