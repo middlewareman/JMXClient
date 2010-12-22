@@ -34,7 +34,7 @@ public class LocalMBeanHome extends MBeanHome {
 		return mbeanServer;
 	}
 
-	public MBeanServerConnection getMBeanServerConnection() {
+	public MBeanServerConnection getConnection() {
 		return mbeanServer;
 	}
 

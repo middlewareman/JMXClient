@@ -4,7 +4,6 @@
  */
 package com.middlewareman.mbean 
 
-import com.middlewareman.mbean.MBean 
 import com.middlewareman.mbean.weblogic.RuntimeServer 
 import com.middlewareman.mbean.weblogic.WebLogicMBeanHomeFactory 
 
@@ -47,7 +46,7 @@ class RemoteMBeanHomeTest extends GroovyTestCase {
 		def home1 = rs.@home
 		assert home1
 		assert home1 instanceof MBeanHome
-		def con1 = home1.getMBeanServerConnection()
+		def con1 = home1.connection
 		def baos = new ByteArrayOutputStream()
 		try {
 			baos.withObjectOutputStream { it.writeObject home1 }
@@ -64,7 +63,7 @@ class RemoteMBeanHomeTest extends GroovyTestCase {
 		def home1 = rs.@home
 		assert home1
 		assert home1 instanceof MBeanHome
-		def con1 = home1.getMBeanServerConnection()
+		def con1 = home1.connection
 		println "$name writing $home1"
 		def baos = new ByteArrayOutputStream()
 		baos.withObjectOutputStream { it.writeObject home1 }
@@ -79,7 +78,7 @@ class RemoteMBeanHomeTest extends GroovyTestCase {
 		def home2 = new ByteArrayInputStream(data1).withObjectInputStream { it.readObject() }
 		assert home2 instanceof MBeanHome
 		assert home2 == home1
-		def con2 = home2.getMBeanServerConnection()
+		def con2 = home2.connection
 		assert ! (con1.is(con2))
 		println "$name read $home2"
 	}

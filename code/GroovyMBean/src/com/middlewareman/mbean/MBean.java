@@ -73,8 +73,7 @@ public abstract class MBean {
 	 */
 	public boolean asBoolean() {
 		try {
-			boolean isreg = home.getMBeanServerConnection().isRegistered(
-					objectName);
+			boolean isreg = home.getConnection().isRegistered(objectName);
 			if (logger.isLoggable(Level.FINER))
 				logger.log(Level.FINER, "isRegistered " + this + " -> " + isreg);
 			return isreg;

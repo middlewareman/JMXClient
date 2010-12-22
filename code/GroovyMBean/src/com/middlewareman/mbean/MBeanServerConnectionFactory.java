@@ -18,6 +18,6 @@ public interface MBeanServerConnectionFactory extends Closeable {
 
 	Object getServerId();
 
-	MBeanServerConnection getMBeanServerConnection() throws IOException;
+	MBeanServerConnection getConnection() throws IOException;
 
 }

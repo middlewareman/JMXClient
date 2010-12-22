@@ -8,12 +8,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 
-import javax.management.MBeanServerConnection;
-import javax.management.Notification;
-import javax.management.NotificationListener;
-import javax.management.remote.JMXConnectionNotification;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXServiceURL;
+import javax.management.*;
+import javax.management.remote.*;
 import javax.security.auth.Subject;
 
 /**
@@ -59,7 +55,7 @@ public class ConnectedMBeanHome extends RemoteMBeanHome implements
 		return connector;
 	}
 
-	public MBeanServerConnection getMBeanServerConnection() {
+	public MBeanServerConnection getConnection() {
 		return connection;
 	}
 

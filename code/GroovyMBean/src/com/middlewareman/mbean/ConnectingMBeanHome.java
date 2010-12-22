@@ -9,12 +9,8 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.logging.Level;
 
-import javax.management.MBeanServerConnection;
-import javax.management.Notification;
-import javax.management.NotificationListener;
-import javax.management.remote.JMXConnectionNotification;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXServiceURL;
+import javax.management.*;
+import javax.management.remote.*;
 import javax.security.auth.Subject;
 
 /**
@@ -55,7 +51,10 @@ public class ConnectingMBeanHome extends RemoteMBeanHome implements
 		return connector;
 	}
 
-	/** Returns a connector that is either existing and verified or newly created. */
+	/**
+	 * Returns a connector that is either existing and verified or newly
+	 * created.
+	 */
 	protected JMXConnector createConnector() throws IOException {
 		String id = "(connector not available)";
 		if (connector != null) {
@@ -78,7 +77,7 @@ public class ConnectingMBeanHome extends RemoteMBeanHome implements
 		return connector;
 	}
 
-	public synchronized MBeanServerConnection getMBeanServerConnection()
+	public synchronized MBeanServerConnection getConnection()
 			throws IOException {
 		if (connection != null) {
 			logger.log(Level.FINER, "connection already open");

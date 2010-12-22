@@ -4,11 +4,12 @@
  */
 package com.middlewareman.mbean.platform
 
-import com.middlewareman.mbean.MBeanServerConnectionFactory 
-
 import java.lang.management.*
-import javax.management.MBeanServerConnection 
+
+import javax.management.MBeanServerConnection
 import javax.management.ObjectName 
+
+import com.middlewareman.mbean.MBeanServerConnectionFactory
 
 /**
  * Java Platform MXBeans factory returning type-safe MBean proxies.
@@ -26,7 +27,7 @@ class ProxyPlatformHome implements IProxyPlatformHome {
 	}
 	
 	private MBeanServerConnection getConnection() {
-		scf.getMBeanServerConnection();
+		scf.getConnection()
 	}
 	
 	ClassLoadingMXBean getClassLoading() {

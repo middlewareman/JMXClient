@@ -119,7 +119,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	public MBean createMBean(ObjectName objectName)
 			throws InstanceNotFoundException, IOException {
 		if (assertRegistered) {
-			if (getMBeanServerConnection().isRegistered(objectName))
+			if (getConnection().isRegistered(objectName))
 				throw new InstanceNotFoundException(objectName.toString());
 		}
 		return new BlindMBean(this, objectName);
@@ -134,7 +134,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	public MBeanInfo createMBeanInfo(ObjectName objectName)
 			throws InstanceNotFoundException, IntrospectionException,
 			ReflectionException, IOException {
-		return getMBeanServerConnection().getMBeanInfo(objectName);
+		return getConnection().getMBeanInfo(objectName);
 	}
 
 	/**
@@ -177,7 +177,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	 *             if MBeanServer is not available.
 	 */
 	public void ping() throws IOException {
-		assert getMBeanServerConnection().getDefaultDomain() != null;
+		assert getConnection().getDefaultDomain() != null;
 	}
 
 	/**
@@ -192,8 +192,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	 */
 	public Set<MBean> getMBeans(ObjectName name, QueryExp query)
 			throws IOException, InstanceNotFoundException {
-		Set<ObjectName> names = getMBeanServerConnection().queryNames(name,
-				query);
+		Set<ObjectName> names = getConnection().queryNames(name, query);
 		Set<MBean> mbeans = new LinkedHashSet<MBean>(names.size());
 		for (ObjectName objectName : names)
 			mbeans.add(getMBean(objectName));
@@ -235,8 +234,8 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 			throws InstanceNotFoundException, MBeanException,
 			ReflectionException, IOException {
 		// TODO already unwrapped?
-		Object result = getMBeanServerConnection().invoke(objectName,
-				operationName, params, signature);
+		Object result = getConnection().invoke(objectName, operationName,
+				params, signature);
 		return wrap(result);
 	}
 
@@ -246,8 +245,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	public Object getAttribute(ObjectName objectName, String attributeName)
 			throws AttributeNotFoundException, InstanceNotFoundException,
 			MBeanException, ReflectionException, IOException {
-		Object result = getMBeanServerConnection().getAttribute(objectName,
-				attributeName);
+		Object result = getConnection().getAttribute(objectName, attributeName);
 		return wrap(result);
 	}
 
@@ -256,8 +254,8 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	 */
 	public Object[] getAttributes(ObjectName objectName, String[] attributeNames)
 			throws InstanceNotFoundException, ReflectionException, IOException {
-		List<Attribute> attributes = getMBeanServerConnection().getAttributes(
-				objectName, attributeNames).asList();
+		List<Attribute> attributes = getConnection().getAttributes(objectName,
+				attributeNames).asList();
 		Object[] result = new Object[attributes.size()];
 		for (int i = 0; i < result.length; i++)
 			result[i] = wrap(attributes.get(i).getValue());
@@ -270,7 +268,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 			AttributeNotFoundException, InvalidAttributeValueException,
 			MBeanException, ReflectionException, IOException {
 		Attribute attribute = new Attribute(attributeName, unwrap(value));
-		getMBeanServerConnection().setAttribute(objectName, attribute);
+		getConnection().setAttribute(objectName, attribute);
 	}
 
 	/** Sets attributes of remote MBean with unwrapped values in bulk. */
@@ -281,7 +279,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 			attributeList.add(new Attribute(entry.getKey(), unwrap(entry
 					.getValue())));
 		}
-		getMBeanServerConnection().setAttributes(objectName, attributeList);
+		getConnection().setAttributes(objectName, attributeList);
 	}
 
 	/**
