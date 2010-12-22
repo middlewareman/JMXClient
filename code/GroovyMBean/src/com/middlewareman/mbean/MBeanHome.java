@@ -8,11 +8,13 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.management.*;
 import javax.management.openmbean.*;
 
+import com.middlewareman.groovy.StackTraceCleaner;
 import com.middlewareman.mbean.type.*;
 
 /**
@@ -250,15 +252,18 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	}
 
 	/**
-	 * Returns wrapped attribute values of remote MBean in bulk.
+	 * Returns wrapped attribute name-values pairs retrieved from a remote MBean
+	 * in bulk. Note that the returned key set might not contain all names.
 	 */
-	public Object[] getAttributes(ObjectName objectName, String[] attributeNames)
-			throws InstanceNotFoundException, ReflectionException, IOException {
+	public Map<String, Object> getAttributes(ObjectName objectName,
+			String[] attributeNames) throws InstanceNotFoundException,
+			ReflectionException, IOException {
 		List<Attribute> attributes = getConnection().getAttributes(objectName,
 				attributeNames).asList();
-		Object[] result = new Object[attributes.size()];
-		for (int i = 0; i < result.length; i++)
-			result[i] = wrap(attributes.get(i).getValue());
+		Map<String, Object> result = new LinkedHashMap<String, Object>(
+				attributes.size());
+		for (Attribute attribute : attributes)
+			result.put(attribute.getName(), wrap(attribute.getValue()));
 		return result;
 	}
 
@@ -397,15 +402,30 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 					} catch (Exception e) {
 						switch (attributeFilter.getOnException()) {
 						case OMIT:
-							// TODO logging!
+							if (logger.isLoggable(Level.FINER)) {
+								StackTraceCleaner.getDefaultInstance()
+										.deepClean(e);
+								logger.log(Level.FINER, "omitting "
+										+ objectName + ": " + name, e);
+							}
 							break;
 						case NULL:
 							map.put(newName, null);
-							// TODO logging!
+							if (logger.isLoggable(Level.FINER)) {
+								StackTraceCleaner.getDefaultInstance()
+										.deepClean(e);
+								logger.log(Level.FINER, "returning null for "
+										+ objectName + ": " + name, e);
+							}
 							break;
 						case RETURN:
+							StackTraceCleaner.getDefaultInstance().deepClean(e);
 							map.put(newName, e);
-							// TODO logging?
+							if (logger.isLoggable(Level.FINER)) {
+								logger.log(Level.FINER,
+										"returning exception for " + objectName
+												+ ": " + name, e);
+							}
 							break;
 						default:
 							assert false : attributeFilter.getOnException();
@@ -429,30 +449,57 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 			if (attributeFilter.acceptAttribute(ai))
 				name2ai.put(ai.getName(), ai);
 		}
+
 		String[] names = name2ai.keySet().toArray(new String[name2ai.size()]);
+		Map<String, Object> values;
 		try {
-			Object[] values = getAttributes(objectName, names);
-			assert names.length == values.length;
-			Map<String, Object> map = new LinkedHashMap<String, Object>();
-			for (int i = 0; i < names.length; i++) {
-				if (attributeFilter.acceptAttribute(name2ai.get(names[i]),
-						values[i])) {
-					String name = attributeFilter.isDecapitalise() ? decapitalise(names[i])
-							: names[i];
-					map.put(name, values[i]);
-				}
-			}
-			return map;
+			values = getAttributes(objectName, names);
 		} catch (IOException e) {
 			throw e;
 		} catch (InstanceNotFoundException e) {
 			throw e;
 		} catch (Exception e) {
-			System.err.println(getClass().getName()
-					+ " getProperties bulk failed names="
-					+ Arrays.toString(names) + ": " + e.getMessage());
+			if (logger.isLoggable(Level.FINE)) {
+				StackTraceCleaner.getDefaultInstance().deepClean(e);
+				logger.log(Level.FINE,
+						"reverting to single after bulk failed: " + objectName
+								+ ": " + Arrays.toString(names), e);
+			}
 			return getPropertiesSingle(objectName, attributeFilter);
 		}
+
+		if (names.length != values.size()) {
+			if (!attributeFilter.getOnException().equals(OnException.OMIT)) {
+				if (logger.isLoggable(Level.FINER)) {
+					Set<String> omitted = new LinkedHashSet<String>(
+							Arrays.asList(names));
+					omitted.removeAll(values.keySet());
+					logger.log(Level.FINER, "reverting to single as keys " + omitted
+							+ " would have been omitted from " + objectName);
+				}
+				return getPropertiesSingle(objectName, attributeFilter);
+			}
+			if (logger.isLoggable(Level.FINE)) {
+				Set<String> omitted = new LinkedHashSet<String>(
+						Arrays.asList(names));
+				omitted.removeAll(values.keySet());
+				logger.log(Level.FINE, "keys " + omitted + " omitted from "
+						+ objectName);
+			}
+		}
+
+		Map<String, Object> map = new LinkedHashMap<String, Object>(
+				values.size());
+		for (Map.Entry<String, Object> pair : values.entrySet()) {
+			String name = pair.getKey();
+			Object value = pair.getValue();
+			if (attributeFilter.acceptAttribute(name2ai.get(name), value)) {
+				if (attributeFilter.isDecapitalise())
+					name = decapitalise(name);
+				map.put(name, value);
+			}
+		}
+		return map;
 	}
 
 	private static final Object[] NOARGS = new Object[0];

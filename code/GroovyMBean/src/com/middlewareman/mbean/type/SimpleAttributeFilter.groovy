@@ -42,7 +42,7 @@ class SimpleAttributeFilter implements AttributeFilter {
 	 * getProperties()}.
 	 */
 	static SimpleAttributeFilter getNative() {
-		new SimpleAttributeFilter(decapitalise:true,bulk:false,onException:OnException.OMIT)
+		new SimpleAttributeFilter(decapitalise:true,bulk:true,onException:OnException.OMIT)
 	}
 	
 	/** Instance to include all attributes, and include any exception as a value. */
@@ -100,7 +100,7 @@ class SimpleAttributeFilter implements AttributeFilter {
 	 * Load several attributes in one call when possible. 
 	 * Bulk loading reduces network traffic but will always return
 	 * null when an individual load would have received an exception. 
-	 * Bulk loading implies {@link OnException} <code>NULL</code>.
+	 * Bulk loading implies {@link OnException} <code>OMIT</code>.
 	 */
 	boolean bulk
 	
