@@ -20,7 +20,7 @@ gwlst [options] - args...         (read script from stdin and evaluate)
   groovy-all.jar and wlfullclient.jar in same directory as gwlst.jar or on classpath.
   http://www.middlewareman.com/gwlst"""
 	
-	static final StackTraceCleaner cleaner = new StackTraceCleaner()
+	static final StackTraceCleaner cleaner = StackTraceCleaner.defaultInstance
 	
 	static void main(String[] args) {
 		if (args && args[0] ==~ /-h.*|-\?/) {

@@ -13,19 +13,36 @@ import java.util.regex.Pattern
  */
 class StackTraceCleaner {
 	
-	static final String groovyExcludes = /groovy\..*|org\.codehaus\.groovy\..*|java\..*|javax\..*|sun\..*|gjdk\.groovy\..*/
-	static final String weblogicExcludes = /weblogic.*\.internal\..*/
+	static final StackTraceCleaner defaultInstance = new StackTraceCleaner()
+	
+	static final String defaultGroovyExcludes = /groovy\..*|org\.codehaus\.groovy\..*|java\..*|javax\..*|sun\..*|gjdk\.groovy\..*/
+	static final String defaultWeblogicExcludes = /weblogic.*\.internal\..*/
 	
 	/** Always include elements with matching className. */
-	Pattern classNameInclude = ~''
+	private final Pattern include
 	
 	/** Exclude elements with matching className unless explicitly included. */
-	Pattern classNameExclude = ~"$groovyExcludes|$weblogicExcludes"
+	private final Pattern exclude
 	
+	private StackTraceCleaner() {
+		this.include = ~''
+		this.exclude = ~"$defaultGroovyExcludes|$defaultWeblogicExcludes"
+	}
+	
+	StackTraceCleaner(String include, String exclude) {
+		this.include = ~include
+		this.exclude = ~exclude
+	}
+	
+	/**
+	 * Cleans a throwable (but not its causes).
+	 * @param throwable
+	 * @return the number of stack trace elements removed
+	 */
 	int shallowClean(Throwable throwable) {
 		StackTraceElement[] before = throwable.getStackTrace()
 		StackTraceElement[] after = before.findAll { StackTraceElement ste ->
-			ste.className ==~classNameInclude || !(ste.className ==~ classNameExclude)
+			ste.className ==~include || !(ste.className ==~ exclude)
 		}
 		int removed = before.length - after.length
 		if (removed) throwable.setStackTrace after

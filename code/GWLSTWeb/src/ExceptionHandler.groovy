@@ -47,7 +47,7 @@ class ExceptionHandler {
 		assert response
 		if (response.isCommitted()) {
 			def message = "${getClass().getName()} response already committed bufferSize=$response.bufferSize"
-			new StackTraceCleaner().deepClean t
+			StackTraceCleaner.defaultInstance.deepClean t
 			ServletContext context = binding.context
 			if (context) {
 				context.log message, t
