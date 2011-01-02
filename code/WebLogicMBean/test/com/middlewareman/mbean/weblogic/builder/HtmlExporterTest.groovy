@@ -53,8 +53,7 @@ class HtmlExporterTest extends GroovyTestCase {
 	}
 	
 	void recurse(MBean mbean, HtmlExporter he, Set<ObjectName> visited) {
-		def on = mbean.@objectName
-		if (on in visited) {
+		if (mbean == null || mbean.@objectName in visited) {
 			return
 		}
 		visited.add mbean.@objectName
@@ -63,7 +62,7 @@ class HtmlExporterTest extends GroovyTestCase {
 		for (ai in ais) {
 			if (ai.type.contains('javax.management.ObjectName')) {
 				try {
-					def child = mbean.getProperty(ai.name)
+					def child = mbean."$ai.name"
 					if (child != null) {
 						if (child instanceof MBean) {
 							recurse child, he, visited
@@ -76,6 +75,7 @@ class HtmlExporterTest extends GroovyTestCase {
 					}
 				} catch(Exception e) {
 					System.err.println "$name $ai.name $ai.type failed on $mbean"
+					e.printStackTrace()
 				}
 			}
 		}
