@@ -26,13 +26,13 @@ class MBeanIteratorTest extends GroovyTestCase {
 		new DomainRuntimeServer(WebLogicMBeanHomeFactory.default)
 	}
 	
-	void testDefaultVerbose() {
+	void testDefault() {
 		def rs = runtimeServer.runtimeService
 		int counter = 0;
 		for (mbean in new MBeanIterator(rs)) {
 			++counter
 		} 
-		println counter
+		println "$name count $counter"
 	}
 	
 	void clock(mbean, attributeFilter = SimpleAttributeFilter.brief) {
@@ -61,38 +61,38 @@ class MBeanIteratorTest extends GroovyTestCase {
 		clock drs
 	}
 	
-	void testDomainRuntimeBulk() {
+	void donttestDomainRuntimeBulk() {
 		def drs = domainRuntimeServer.domainRuntimeService
 		clock drs, filterBulk
 	}
 	
-	void testDomainRuntimeSingle() {
+	void donttestDomainRuntimeSingle() {
 		def drs = domainRuntimeServer.domainRuntimeService
 		clock drs, filterSingle
 	}
 	
-	void testCacheMBeansOnly() {
+	void donttestCacheMBeansOnly() {
 		def rs = runtimeServer.runtimeService
 		rs.@home.enableMBeanCache()
 		rs.@home.disableMBeanInfoCache()
 		clock rs
 	}
 	
-	void testCacheMBeanInfosForeverOnly() {
+	void donttestCacheMBeanInfosForeverOnly() {
 		def rs = runtimeServer.runtimeService
 		rs.@home.disableMBeanCache()
 		rs.@home.enableMBeanInfoCache null
 		clock rs
 	}
 	
-	void testCacheMBeanInfosNeverOnly() {
+	void donttestCacheMBeanInfosNeverOnly() {
 		def rs = runtimeServer.runtimeService
 		rs.@home.disableMBeanCache()
 		rs.@home.enableMBeanInfoCache 0
 		clock rs
 	}
 	
-	void testCacheAll() {
+	void donttestCacheAll() {
 		def rs = runtimeServer.runtimeService
 		rs.@home.enableMBeanCache()
 		rs.@home.enableMBeanInfoCache null
