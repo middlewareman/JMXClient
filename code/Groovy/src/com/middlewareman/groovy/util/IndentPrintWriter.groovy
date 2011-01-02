@@ -4,12 +4,15 @@
  */
 package com.middlewareman.groovy.util
 
+import java.util.regex.Pattern
+
 /**
  * PrintWriter with indentation using closures. 
- * Indentation is automatically added at the beginning of a new line.
- * A future feature could be to scan the string for the newline character to 
- * call {@link #println()} for each of these rather than just writing it, 
- * as this will break indentation.
+ * The appropriate number of {@link #tab} is automatically added at the 
+ * beginning of each new line.
+ * End of line sequences {@link #endOfLine} are recognised when printing strings
+ * and will result in a sequence of {@link PrintWriter#println(String)} being called to
+ * preserve indentation.
  * 
  * @author Andreas Nyberg
  */
@@ -17,6 +20,9 @@ class IndentPrintWriter extends PrintWriter {
 
 	/** The object to print as a single indentation; defaults to a string of four spaces. */
 	def tab = '    '
+
+	/** Pattern in String to recognise as end of line; defaults to <code>\n</code>. */
+	Pattern endOfLine = ~'\n'
 
 	private int level = 0
 	private boolean newline = true
@@ -95,6 +101,19 @@ class IndentPrintWriter extends PrintWriter {
 	void println() {
 		super.println()
 		newline = true
+	}
+
+	void print(String s) {
+		if (s != null && endOfLine != null) {
+			String[] lines = endOfLine.split(s, -1)
+			int i = 0;
+			while (i < lines.length - 1) {
+				println lines[i++]
+			}
+			super.print lines[i]
+		} else {
+			super.print(s)
+		}
 	}
 
 	void indent(Closure closure) {

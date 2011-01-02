@@ -15,4 +15,11 @@ class IndentPrintWriterTest extends GroovyTestCase {
 			ipw.indent { ipw.println "next level" }
 		}
 	}
+	
+	void testIndentNewline() {
+		def ipw = new IndentPrintWriter()
+		ipw.indent('HeadNewLineBegin') {
+			ipw.println 'Next\nLevel'
+		}
+	}
 }
