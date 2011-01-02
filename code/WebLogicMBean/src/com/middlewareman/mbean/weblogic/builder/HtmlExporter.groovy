@@ -131,7 +131,8 @@ class HtmlExporter {
 	}
 	
 	void attributes(MBean mbean, MBeanInfo info, delegate) {
-		def ais = info.attributes.findAll { attributeFilter.acceptAttribute it }.sort { it.name }
+		def props = mbean.@home.getProperties(mbean.@objectName,attributeFilter)
+		def names = props.keySet().sort()
 		delegate.table(border:'1') {
 			tr {
 				th 'Name'
@@ -140,17 +141,9 @@ class HtmlExporter {
 				th 'ActualType'
 				th 'Value'
 			}
-			for (ai in ais) {
-				def val
-				try {
-					val = mbean.getProperty(ai.name)
-					if (!attributeFilter.acceptAttribute(ai,val)) {
-						println "skipping attribute $ai.name"
-						continue
-					}
-				} catch(Exception e) {
-					val = e
-				}
+			for (key in names) {
+				def ai = info.attributes.find { it.name = key }
+				def val = props[key]
 				tr {
 					td { name ai, delegate }
 					td { descriptor ai, delegate }
