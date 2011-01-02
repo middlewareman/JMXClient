@@ -18,6 +18,7 @@ import com.middlewareman.mbean.type.SimpleAttributeFilter
 import com.middlewareman.mbean.type.SimpleDescriptorFilter 
 import com.middlewareman.mbean.type.TabularDataWrapper 
 import com.middlewareman.mbean.type.TypeFacade 
+import com.middlewareman.mbean.util.MBeanProperties;
 
 /**
  * Generates an HTML report from an MBean or MBeanInfo.
@@ -131,7 +132,7 @@ class HtmlExporter {
 	}
 	
 	void attributes(MBean mbean, MBeanInfo info, delegate) {
-		def props = mbean.@home.getProperties(mbean.@objectName,attributeFilter)
+		def props = MBeanProperties.get(mbean.@home, mbean.@objectName, attributeFilter)
 		def names = props.keySet().sort()
 		delegate.table(border:'1') {
 			tr {

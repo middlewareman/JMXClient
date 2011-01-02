@@ -16,6 +16,7 @@ import javax.management.openmbean.OpenType;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
 import com.middlewareman.mbean.type.AttributeFilter;
+import com.middlewareman.mbean.util.MBeanProperties;
 
 /**
  * MBean implementation that blindly proxies a pretend method to an MBean
@@ -156,9 +157,10 @@ public class BlindMBean extends MBean implements GroovyObject {
 	public Map<String, ?> getProperties() throws InstanceNotFoundException,
 			IntrospectionException, AttributeNotFoundException,
 			ReflectionException, MBeanException, IOException {
-		return home.getProperties(objectName);
+		return MBeanProperties.get(home, objectName,
+				home.getDefaultPropertiesFilter());
 	}
-	
+
 	private static String capitalise(String string) {
 		char first = string.charAt(0);
 		if (!Character.isUpperCase(first)) {

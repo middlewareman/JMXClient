@@ -57,7 +57,8 @@ public class MBeanIterator implements Iterator<MBean> {
 		if (visited.add(parent.objectName)) {
 			Map<String, ?> map;
 			try {
-				map = parent.home.getProperties(parent.objectName, filter);
+				map = MBeanProperties.get(parent.home,
+						parent.objectName, filter);
 			} catch (InstanceNotFoundException e) {
 				logger.log(Level.FINE, "Could not find " + parent);
 				return;
