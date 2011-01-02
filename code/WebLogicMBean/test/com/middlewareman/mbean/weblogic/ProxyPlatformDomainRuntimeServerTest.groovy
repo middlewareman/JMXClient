@@ -12,6 +12,7 @@ class ProxyPlatformDomainRuntimeServerTest extends PlatformHomeTestAbstract {
 	
 	ProxyPlatformDomainRuntimeServerTest() {
 		def drs = new DomainRuntimeServer(WebLogicMBeanHomeFactory.default)
-		ph = drs.getProxyPlatformHome('AdminServer')
+		def names = drs.domainRuntimeService.ServerRuntimes.Name
+		ph = drs.getProxyPlatformHome(names[0])
 	}
 }
