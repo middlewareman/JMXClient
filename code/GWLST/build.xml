@@ -37,6 +37,7 @@
 	</path>
 
 	<path id="source.main.path">
+		<pathelement location="${top.dir}/Groovy/src" />
 		<pathelement location="${top.dir}/GroovyMBean/src" />
 		<pathelement location="${top.dir}/WebLogicMBean/src" />
 	</path>
