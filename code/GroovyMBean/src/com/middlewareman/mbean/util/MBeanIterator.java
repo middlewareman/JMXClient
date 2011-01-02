@@ -92,7 +92,7 @@ public class MBeanIterator implements Iterator<MBean> {
 	}
 
 	private void add(MBean mbean) {
-		if (!visited.contains(mbean.objectName))
+		if (mbean != null && !visited.contains(mbean.objectName))
 			queue.addLast(mbean);
 	}
 
