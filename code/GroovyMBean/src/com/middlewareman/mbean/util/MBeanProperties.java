@@ -16,22 +16,33 @@ import com.middlewareman.mbean.MBeanHome;
 import com.middlewareman.mbean.type.OnException;
 import com.middlewareman.mbean.type.SimpleAttributeFilter;
 
+/**
+ * Handle <code>getProperties()</code> for an MBean.
+ * 
+ * @author Andreas Nyberg
+ */
 public class MBeanProperties {
 
 	private static final Logger logger = Logger.getLogger(MBeanProperties.class
 			.getName());
 
+	/**
+	 * Uses {@link #getBulk} if possible, otherwise {@link #getSingles}.
+	 */
 	public static Map<String, ?> get(MBeanHome home, ObjectName objectName,
 			SimpleAttributeFilter attributeFilter)
 			throws InstanceNotFoundException, IntrospectionException,
 			ReflectionException, IOException, AttributeNotFoundException,
 			MBeanException {
-		if (attributeFilter.isBulk())
+		if (attributeFilter.getOnException().equals(OnException.OMIT))
 			return getBulk(home, objectName, attributeFilter);
 		else
 			return getSingles(home, objectName, attributeFilter);
 	}
 
+	/**
+	 * Retrieve attributes one by one.
+	 */
 	public static Map<String, ?> getSingles(MBeanHome home,
 			ObjectName objectName, SimpleAttributeFilter attributeFilter)
 			throws InstanceNotFoundException, IntrospectionException,
@@ -78,15 +89,6 @@ public class MBeanProperties {
 										+ objectName + ": " + name, e);
 							}
 							break;
-						case NULL:
-							map.put(newName, null);
-							if (logger.isLoggable(Level.FINER)) {
-								StackTraceCleaner.getDefaultInstance()
-										.deepClean(e);
-								logger.log(Level.FINER, "returning null for "
-										+ objectName + ": " + name, e);
-							}
-							break;
 						case RETURN:
 							StackTraceCleaner.getDefaultInstance().deepClean(e);
 							map.put(newName, e);
@@ -106,6 +108,11 @@ public class MBeanProperties {
 		return map;
 	}
 
+	/**
+	 * Retrieve attributes in bulk. Reverts to single if fewer than expected
+	 * values were retrieved and attributes throwing an exception are not to be
+	 * omitted.
+	 */
 	public static Map<String, ?> getBulk(MBeanHome home, ObjectName objectName,
 			SimpleAttributeFilter attributeFilter)
 			throws InstanceNotFoundException, IntrospectionException,

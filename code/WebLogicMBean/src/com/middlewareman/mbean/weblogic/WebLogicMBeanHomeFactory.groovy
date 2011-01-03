@@ -97,7 +97,7 @@ public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 		MBeanHome home = super.createMBeanHome(urlPart)
 		home.enableMBeanCache()
 		home.enableMBeanInfoCache null
-		home.defaultPropertiesFilter = new SimpleAttributeFilter(noDeprecated:true,onlyReadable:true,bulk:true)
+		home.defaultPropertiesFilter = new SimpleAttributeFilter(noDeprecated:true,onlyReadable:true)
 		return home
 	}
 	

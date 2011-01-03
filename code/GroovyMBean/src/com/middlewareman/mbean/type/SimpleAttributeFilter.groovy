@@ -5,8 +5,8 @@
 package com.middlewareman.mbean.type
 
 import javax.management.MBeanAttributeInfo
-import javax.management.ObjectName 
-import javax.management.openmbean.OpenMBeanAttributeInfo 
+import javax.management.ObjectName
+import javax.management.openmbean.OpenMBeanAttributeInfo
 
 /**
  * Filter(?) to determine which MBean attributes to include and how to handle
@@ -35,59 +35,60 @@ import javax.management.openmbean.OpenMBeanAttributeInfo
  * @author Andreas Nyberg
  */
 class SimpleAttributeFilter implements AttributeFilter {
-	
+
 	/** 
 	 * Instance to emulate behaviour of the default GDK
 	 * {@link org.codehaus.groovy.runtime.DefaultGroovyMethods#getProperties(Object) 
 	 * getProperties()}.
 	 */
 	static SimpleAttributeFilter getNative() {
-		new SimpleAttributeFilter(decapitalise:true,bulk:true,onException:OnException.OMIT)
+		new SimpleAttributeFilter(decapitalise:true)
 	}
-	
+
 	/** Instance to include all attributes, and include any exception as a value. */
 	static SimpleAttributeFilter getVerbose() {
-		new SimpleAttributeFilter(bulk:false,onException:OnException.RETURN)
+		new SimpleAttributeFilter(onException:OnException.RETURN)
 	}
-	
+
 	/** 
 	 * Instance to include only non-deprecated attributes that are readable, 
 	 * not null, not defaulted and do not throw an exception. 
 	 */
 	static SimpleAttributeFilter getBrief() {
 		new SimpleAttributeFilter(noDeprecated:true, onlyReadable:true,
-				noNullValue:true, noDefaultValue:true, bulk:true)
+				noNullValue:true, noDefaultValue:true)
 	}
-	
+
 	/** 
-	 * Instance to include only non-deprecated attributes that are readable, 
-	 * and return null for any exception. 
+	 * Instance to include only non-deprecated attributes that are readable and
+	 * do not throw an exception. Acts as {@link #getNative()} but possibly 
+	 * faster as it does not even try to read non-readable attributes.
 	 */
 	static SimpleAttributeFilter getSafe() {
-		new SimpleAttributeFilter(noDeprecated:true, onlyReadable:true, bulk:true)
+		new SimpleAttributeFilter(noDeprecated:true, onlyReadable:true)
 	}
-	
+
 	/** Don't include deprecated attributes. */
 	boolean noDeprecated
-	
+
 	/** Only include readable attributes. */
 	boolean onlyReadable
-	
+
 	/** Only include writable attributes. */
 	boolean onlyWritable
-	
+
 	/** Don't include any attributes that refer to other MBeans. */
 	boolean noMBeans
-	
+
 	/** Only include attributes that refer to other MBeans. */
 	boolean onlyMBeans
-	
+
 	/** Don't include any attribute with null value. */
 	boolean noNullValue
-	
+
 	/** Don't include any attributes that declare a default value that is equal to the current value. */
 	boolean noDefaultValue
-	
+
 	/**
 	 * Returns true if attribute names should be decapitalised before returning
 	 * to the client.
@@ -95,39 +96,31 @@ class SimpleAttributeFilter implements AttributeFilter {
 	 * @see java.beans.Introspector#decapitalize(String)
 	 */
 	boolean decapitalise
-	
-	/**
-	 * Load several attributes in one call when possible. 
-	 * Bulk loading reduces network traffic but will always return
-	 * null when an individual load would have received an exception. 
-	 * Bulk loading implies {@link OnException} <code>OMIT</code>.
-	 */
-	boolean bulk
-	
+
 	/** 
-	 * Defines behaviour when getting an exception on get in non-bulk mode,
-	 * and bulk mode implicitly behaves as <code>null</code>. 
+	 * Defines behaviour when getting an exception.
+	 * 
 	 * @see AttributeFilter#getOnException() 
 	 */
-	OnException onException = OnException.NULL
-	
+	OnException onException = OnException.OMIT
+
 	boolean acceptAttribute(MBeanAttributeInfo ai) {
 		if (noDeprecated && ai.descriptor.getFieldValue('deprecated')) return false
 		if (onlyReadable && !ai.isReadable()) return false
 		if (onlyWritable && !ai.isWritable()) return false
 		if (noMBeans) {
 			assert !onlyMBeans
-			if (ai.attributeType.contains(ObjectName.getClass().getName())) 
+			if (ai.attributeType.contains(ObjectName.getClass().getName()))
 				return false
-		} else if (onlyMBeans && !ai.type.contains(ObjectName.class.getName())) 
+		} else if (onlyMBeans && !ai.type.contains(ObjectName.class.getName()))
 			return false;
 		return true;
 	}
-	
+
 	boolean acceptAttribute(MBeanAttributeInfo ai, Object value) {
 		if (noNullValue && value == null) return false
-		if (noDefaultValue && ai instanceof OpenMBeanAttributeInfo 
-		&& ai.hasDefaultValue() && ai.getDefaultValue() != value) 
+		if (noDefaultValue && ai instanceof OpenMBeanAttributeInfo
+		&& ai.hasDefaultValue() && ai.getDefaultValue() != value)
 			return false
 		return true
 	}

@@ -41,7 +41,6 @@ public class MBeanIterator implements Iterator<MBean> {
 		filter.setOnlyReadable(true);
 		filter.setOnlyMBeans(true);
 		filter.setNoNullValue(true);
-		filter.setBulk(true);
 		load(mbean);
 	}
 
