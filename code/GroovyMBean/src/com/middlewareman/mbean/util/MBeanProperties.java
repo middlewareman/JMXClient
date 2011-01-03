@@ -1,6 +1,6 @@
 /*
  * $Id$
- * Copyright © 2011 Middlewareman Limited. All rights reserved.
+ * Copyright (c) 2011 Middlewareman Limited. All rights reserved.
  */
 package com.middlewareman.mbean.util;
 
