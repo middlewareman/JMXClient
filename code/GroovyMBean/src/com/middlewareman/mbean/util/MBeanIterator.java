@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 import javax.management.InstanceNotFoundException;
 import javax.management.ObjectName;
 
-import com.middlewareman.groovy.StackTraceCleaner;
+import com.middlewareman.groovy.util.StackTraceCleaner;
 import com.middlewareman.mbean.MBean;
 import com.middlewareman.mbean.type.SimpleAttributeFilter;
 
@@ -57,8 +57,8 @@ public class MBeanIterator implements Iterator<MBean> {
 		if (visited.add(parent.objectName)) {
 			Map<String, ?> map;
 			try {
-				map = MBeanProperties.get(parent.home,
-						parent.objectName, filter);
+				map = MBeanProperties.get(parent.home, parent.objectName,
+						filter);
 			} catch (InstanceNotFoundException e) {
 				logger.log(Level.FINE, "Could not find " + parent);
 				return;

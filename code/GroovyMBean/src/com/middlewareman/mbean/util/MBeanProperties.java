@@ -11,17 +11,18 @@ import java.util.logging.Logger;
 
 import javax.management.*;
 
-import com.middlewareman.groovy.StackTraceCleaner;
+import com.middlewareman.groovy.util.StackTraceCleaner;
 import com.middlewareman.mbean.MBeanHome;
-import com.middlewareman.mbean.type.*;
+import com.middlewareman.mbean.type.OnException;
+import com.middlewareman.mbean.type.SimpleAttributeFilter;
 
 public class MBeanProperties {
 
 	private static final Logger logger = Logger.getLogger(MBeanProperties.class
 			.getName());
 
-	public static Map<String, ?> get(MBeanHome home,
-			ObjectName objectName, SimpleAttributeFilter attributeFilter)
+	public static Map<String, ?> get(MBeanHome home, ObjectName objectName,
+			SimpleAttributeFilter attributeFilter)
 			throws InstanceNotFoundException, IntrospectionException,
 			ReflectionException, IOException, AttributeNotFoundException,
 			MBeanException {
@@ -105,8 +106,8 @@ public class MBeanProperties {
 		return map;
 	}
 
-	public static Map<String, ?> getBulk(MBeanHome home,
-			ObjectName objectName, SimpleAttributeFilter attributeFilter)
+	public static Map<String, ?> getBulk(MBeanHome home, ObjectName objectName,
+			SimpleAttributeFilter attributeFilter)
 			throws InstanceNotFoundException, IntrospectionException,
 			ReflectionException, IOException, AttributeNotFoundException,
 			MBeanException {

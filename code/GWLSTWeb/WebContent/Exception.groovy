@@ -8,7 +8,7 @@
  * @author Andreas Nyberg
  */
 
-import com.middlewareman.groovy.StackTraceCleaner 
+import com.middlewareman.groovy.util.StackTraceCleaner 
 
 String toString(Throwable t) {
 	def sw = new StringWriter()

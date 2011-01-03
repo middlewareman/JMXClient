@@ -2,9 +2,9 @@
  * $Id$
  * Copyright © 2010 Middlewareman Limited. All rights reserved.
  */
-package com.middlewareman.groovy
+package com.middlewareman.groovy.util
 
-import java.util.regex.Pattern 
+import java.util.regex.Pattern
 
 /**
  * Removes superfluous {@link StackTraceElement}s from an exception.
@@ -12,28 +12,28 @@ import java.util.regex.Pattern
  * @author Andreas Nyberg
  */
 class StackTraceCleaner {
-	
+
 	static final StackTraceCleaner defaultInstance = new StackTraceCleaner()
-	
+
 	static final String defaultGroovyExcludes = /groovy\..*|org\.codehaus\.groovy\..*|java\..*|javax\..*|sun\..*|gjdk\.groovy\..*/
 	static final String defaultWeblogicExcludes = /weblogic.*\.internal\..*/
-	
+
 	/** Always include elements with matching className. */
 	private final Pattern include
-	
+
 	/** Exclude elements with matching className unless explicitly included. */
 	private final Pattern exclude
-	
+
 	private StackTraceCleaner() {
 		this.include = ~''
 		this.exclude = ~"$defaultGroovyExcludes|$defaultWeblogicExcludes"
 	}
-	
+
 	StackTraceCleaner(String include, String exclude) {
 		this.include = ~include
 		this.exclude = ~exclude
 	}
-	
+
 	/**
 	 * Cleans a throwable (but not its causes).
 	 * @param throwable
@@ -48,7 +48,7 @@ class StackTraceCleaner {
 		if (removed) throwable.setStackTrace after
 		return removed
 	}
-	
+
 	/** 
 	 * Cleans throwable and all its causes.
 	 * @param top 

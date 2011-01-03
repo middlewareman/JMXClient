@@ -4,7 +4,7 @@
  */
 package com.middlewareman.mbean.weblogic.shell
 
-import com.middlewareman.groovy.StackTraceCleaner 
+import com.middlewareman.groovy.util.StackTraceCleaner
 import com.middlewareman.mbean.weblogic.WebLogicMBeanHomeFactory 
 
 class GWLST {

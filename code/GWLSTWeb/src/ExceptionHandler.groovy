@@ -2,12 +2,14 @@
  * $Id$
  * Copyright © 2010 Middlewareman Limited. All rights reserved.
  */
+
+import com.middlewareman.groovy.util.StackTraceCleaner
+
 import javax.servlet.RequestDispatcher 
 import javax.servlet.ServletContext 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
-import com.middlewareman.groovy.StackTraceCleaner;
 
 /**
  * Handles forwarding to error page for groovlets that are not happy with GroovyServlet behaviour.
