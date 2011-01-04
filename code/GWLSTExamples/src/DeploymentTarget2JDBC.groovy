@@ -4,14 +4,13 @@
  * same targets as each deployment.
  */
 
-import com.middlewareman.groovy.util.IndentPrintWriter
-
-def ipw = new IndentPrintWriter()
+def ipw = new com.middlewareman.groovy.util.IndentPrintWriter()
+ipw.println status()
+ipw.println new Date()
+ipw.println()
 
 drs = domainRuntimeServer.domainRuntimeService
 domain = drs.DomainConfiguration
-ipw.println "Domain $domain.Name \non ${domain.@home.serverId} \nat ${new Date()}\n"
-
 for (appDeployment in domain.AppDeployments) {
 	ipw.indent("AppDeployment $appDeployment.Name") {
 		for (appTarget in appDeployment.Targets) {
