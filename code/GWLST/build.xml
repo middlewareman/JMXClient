@@ -137,6 +137,12 @@
 	</target>
 
 	<target name="package-only">
+		<tstamp>
+			<format property="timestamp" pattern="yyyy-MM-dd HH:mm:ss z" locale="en_GB" />
+		</tstamp>
+		<tstamp>
+			<format property="versionstamp" pattern="yyyy.MM.dd.HH.mm.ss" locale="en_GB" />
+		</tstamp>
 		<unjar dest="target/classes/exploded">
 			<fileset file="${commons-collections.location}" />
 		</unjar>
@@ -147,10 +153,10 @@
 			<manifest>
 				<attribute name="Class-Path" value="groovy-all-1.7.5.jar groovy-all.jar wlfullclient.jar" />
 				<attribute name="Main-Class" value="com.middlewareman.mbean.weblogic.shell.GWLST" />
-				<attribute name="Built-By" value="Middlewareman" />
+				<attribute name="Built-By" value="Andreas Nyberg" />
 				<attribute name="Build-Timestamp" value="${timestamp}" />
 				<attribute name="Implementation-Title" value="Groovy WebLogic Scripting Tool" />
-				<attribute name="Implementation-Version" value="internal ${timestamp}" />
+				<attribute name="Implementation-Version" value="0.5.${versionstamp}" />
 				<attribute name="Implementation-Vendor" value="Middlewareman Limited" />
 				<attribute name="Implementation-Vendor-Id" value="com.middlewareman" />
 				<attribute name="Implementation-URL" value="http://www.middlewareman.com/gwlst" />
@@ -160,15 +166,6 @@
 				<attribute name="Groovy-Implementation-Version" value="1.7" />
 			</manifest>
 		</jar>
-		<jar destfile="target/gwlst-console.jar">
-			<manifest>
-				<attribute name="Class-Path" value="gwlst.jar" />
-				<attribute name="Main-Class" value="com.middlewareman.mbean.weblogic.shell.GWLSTConsole" />
-				<attribute name="Built-By" value="Middlewareman" />
-				<attribute name="Build-Timestamp" value="${timestamp}" />
-				<attribute name="Implementation-Title" value="GWLST Console executable" />
-			</manifest>
-		</jar>
 	</target>
 
 	<target name="gwlstdoc">
@@ -176,7 +173,7 @@
 			<fileset refid="source.main.path" />
 			<link packages="java.,javax.,org.xml." href="http://java.sun.com/javase/6/docs/api/" />
 			<link packages="groovy.,org.codehaus.groovy." href="http://groovy.codehaus.org/gapi/" />
-			<link packages="com.bea.,weblogic.,weblogicx." href="http://download.oracle.com/docs/cd/E12839_01/apirefs.1111/e13941/" />
+			<link packages="com.bea.,weblogic.,weblogicx." href="http://download.oracle.com/docs/cd/E14571_01/apirefs.1111/e13941" />
 		</groovydoc>
 	</target>
 
