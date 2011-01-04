@@ -1,4 +1,4 @@
-$Id
+/* $Id$ */
 
 END-USER EVALUATION LICENSE AGREEMENT FOR 
 Groovy WebLogic Scripting Tool (GWLST).

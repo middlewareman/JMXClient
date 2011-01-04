@@ -1,4 +1,4 @@
-$Id$
+/* $Id$ */
 
 Groovy WebLogic Scripting Tool (GWLST)
 Copyright 2010-2011 Middlewareman Limited
