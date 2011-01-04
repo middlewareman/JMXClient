@@ -2,9 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/Groovy"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/GroovyMBean"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/GroovyMBean"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/WebLogicClient"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
