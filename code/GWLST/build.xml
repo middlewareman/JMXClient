@@ -141,6 +141,7 @@
 			<fileset file="${commons-collections.location}" />
 		</unjar>
 		<jar destfile="target/gwlst.jar">
+			<dirset dir="META-INF" />
 			<fileset dir="target/classes/main" />
 			<fileset dir="target/classes/exploded" />
 			<manifest>
@@ -149,11 +150,14 @@
 				<attribute name="Built-By" value="Middlewareman" />
 				<attribute name="Build-Timestamp" value="${timestamp}" />
 				<attribute name="Implementation-Title" value="Groovy WebLogic Scripting Tool" />
+				<attribute name="Implementation-Version" value="internal ${timestamp}" />
+				<attribute name="Implementation-Vendor" value="Middlewareman Limited" />
+				<attribute name="Implementation-Vendor-Id" value="com.middlewareman" />
+				<attribute name="Implementation-URL" value="http://www.middlewareman.com/gwlst" />
 				<attribute name="Extension-Name" value="gwlst" />
-				<!-- Specification-Version, Implementation-Version -->
 				<attribute name="Extension-List" value="Groovy" />
 				<attribute name="Groovy-Extension-Name" value="groovy" />
-				<attribute name="Groovy-Implementation-Version" value="1.6" />
+				<attribute name="Groovy-Implementation-Version" value="1.7" />
 			</manifest>
 		</jar>
 		<jar destfile="target/gwlst-console.jar">
