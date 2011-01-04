@@ -146,7 +146,7 @@ class HtmlExporter {
 				th 'Value'
 			}
 			for (key in names) {
-				def ai = info.attributes.find { it.name = key }
+				def ai = info.attributes.find { it.name == key }
 				def val = props[key]
 				tr {
 					td { name ai, delegate }
