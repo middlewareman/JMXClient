@@ -4,11 +4,14 @@
  */
 package com.middlewareman.mbean.weblogic.access
 
+import java.util.logging.Level
+import java.util.logging.Logger
+
+import javax.servlet.http.HttpServletRequest
+
 import com.middlewareman.mbean.MBeanHomeFactory
 import com.middlewareman.mbean.weblogic.*
 
-import java.util.logging.Logger;
-import javax.servlet.http.HttpServletRequest
 
 /**
  * Accesses references to MBean Servers in an HttpSession and handles connecting and disconnecting.
@@ -16,28 +19,28 @@ import javax.servlet.http.HttpServletRequest
  * @author Andreas Nyberg
  */
 class HttpServletRequestAdapter {
-	
+
 	static final Logger logger = Logger.getLogger(HttpServletRequestAdapter.class.name)
-	
+
 	static final String runtimeServerName = 'runtimeServer'
 	static final String domainRuntimeServerName = 'domainRuntimeServer'
 	static final String editServerName = 'editServer'
-	
+
 	private HttpServletRequest request
 	Boolean reconnect = true
 	Long timeout = 10000
-	
+
 	HttpServletRequestAdapter(HttpServletRequest request) {
 		assert request
 		this.request = request
 	}
-	
+
 	private MBeanHomeFactory getHomeFactory() {
 		String value = request.getParameter('url')
 		if (!value) return null
 		def hf = new WebLogicMBeanHomeFactory()
 		hf.url = value
-		if ((value = request.getParameter('username'))) 
+		if ((value = request.getParameter('username')))
 			hf.username = value
 		if ((value = request.getParameter('password')))
 			hf.password = value
@@ -45,19 +48,19 @@ class HttpServletRequestAdapter {
 		hf.timeout = timeout
 		return hf
 	}
-	
+
 	private getattr(String name) {
 		request.getSession(false)?.getAttribute name
 	}
-	
+
 	private void setattr(String name, value) {
 		request.getSession(true).setAttribute name, value
 	}
-	
+
 	private void removeattr(String name) {
 		request.getSession(false)?.removeAttribute name
 	}
-	
+
 	RuntimeServer getRemoteRuntimeServer() {
 		try {
 			def rs = getattr(runtimeServerName)
@@ -72,7 +75,7 @@ class HttpServletRequestAdapter {
 		}
 		return null
 	}
-	
+
 	RuntimeServer getRuntimeServer() {
 		def rs = remoteRuntimeServer
 		if (rs) return rs
@@ -80,12 +83,12 @@ class HttpServletRequestAdapter {
 		assert rs
 		return rs
 	}
-	
+
 	void logoutRuntimeServer() {
 		if (request.getParameter('logout'))
 			removeattr runtimeServerName
 	}
-	
+
 	RuntimeServer loginRuntimeServer() {
 		def hf = homeFactory
 		if (hf) {
@@ -97,7 +100,7 @@ class HttpServletRequestAdapter {
 		}
 		return null
 	}
-	
+
 	DomainRuntimeServer getRemoteDomainRuntimeServer() {
 		try {
 			def drs = getattr(domainRuntimeServerName)
@@ -112,7 +115,7 @@ class HttpServletRequestAdapter {
 		}
 		return null
 	}
-	
+
 	DomainRuntimeServer getDomainRuntimeServer() {
 		def drs = remoteDomainRuntimeServer
 		if (drs) return drs
@@ -126,12 +129,12 @@ class HttpServletRequestAdapter {
 		setattr domainRuntimeServerName, drs
 		return drs
 	}
-	
+
 	void logoutDomainRuntimeServer() {
 		if (request.getParameter('logout'))
 			removeattr domainRuntimeServerName
 	}
-	
+
 	DomainRuntimeServer loginDomainRuntimeServer() {
 		def hf = homeFactory
 		if (hf) {
@@ -143,7 +146,7 @@ class HttpServletRequestAdapter {
 		}
 		return null
 	}
-	
+
 	EditServer getRemoteEditServer() {
 		EditServer es
 		try {
@@ -159,7 +162,7 @@ class HttpServletRequestAdapter {
 		}
 		return null
 	}
-	
+
 	EditServer getEditServer() {
 		def es = remoteEditServer
 		if (es) return es
@@ -171,12 +174,12 @@ class HttpServletRequestAdapter {
 		setattr editServerName, es
 		return es
 	}
-	
+
 	void logoutEditServer() {
 		if (request.getParameter('logout'))
 			removeattr editServerName
 	}
-	
+
 	EditServer loginEditServer() {
 		def hf = homeFactory
 		if (hf) {
@@ -188,13 +191,13 @@ class HttpServletRequestAdapter {
 		}
 		return null
 	}
-	
+
 	void logoutAll() {
 		logoutRuntimeServer()
 		logoutDomainRuntimeServer()
 		logoutEditServer()
 	}
-	
+
 	void loginAll() {
 		loginRuntimeServer()
 		loginDomainRuntimeServer()
