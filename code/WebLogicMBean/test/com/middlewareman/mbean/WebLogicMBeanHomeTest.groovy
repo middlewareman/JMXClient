@@ -78,42 +78,28 @@ class WebLogicMBeanHomeTest extends GroovyTestCase {
 	}
 
 	void testDomainRuntimeBulkCompareNobulk() {
-		def drs1 = domainRuntimeServer.domainRuntimeService
-		MBeanIterator it1 = new MBeanIterator(drs1)
-		def drs2 = domainRuntimeServer.domainRuntimeService
-		MBeanIterator it2 = new MBeanIterator(drs2)
-
-		assert drs1 == drs2
-
+		def drs = domainRuntimeServer.domainRuntimeService
+		MBeanIterator iter = new MBeanIterator(drs)
 		def filter = new SimpleAttributeFilter(noNullValue:true)	// TODO should not need noNullValue!
 
-		while (it1.hasNext() && it2.hasNext()) {
-			def mbean1 = it1.next()
-			def mbean2 = it2.next()
-			equals mbean1, mbean2
-			if (mbean1 && mbean2) {
-				assert mbean1 == mbean2
-				Map props1 = MBeanProperties.getSingles(mbean1.@home, mbean1.@objectName, filter)
-				//equals props1, props1
-				Map props2 = MBeanProperties.getBulk(mbean2.@home, mbean2.@objectName, filter)
-				//equals props2, props2
-				//equals props1, props2
-				Set keys1 = props1.keySet()
-				Set keys2 = props2.keySet()
-				Set left = keys1 - keys2
-				if (left) {
-					println "$name LEFT singles has more $mbean1"
-					for (key in left) println "$key\t${props1[key]}"
-				}
-				Set right = keys2 - keys1
-				if (right) {
-					println "$name RIGHT bulk has more $mbean1"
-					for (key in right) println "$key\t${props2[key]}"
-				}
-				// assert !left && !right  TODO Oracle bug for EmbeddedLDAP ?
+		while (iter.hasNext()) {
+			def mbean = iter.next()
+			Map singles = MBeanProperties.getSingles(mbean.@home, mbean.@objectName, filter)
+			Map bulk = MBeanProperties.getBulk(mbean.@home, mbean.@objectName, filter)
+			Set keysS = singles.keySet()
+			Set keysB = bulk.keySet()
+			Set moreS = keysS - keysB
+			if (moreS) {
+				println "$name singles has more $mbean"
+				for (key in moreS) println "$key\t${singles[key]}"
 			}
+			Set moreB = keysB - keysS
+			if (moreB) {
+				println "$name bulk has more $mbean"
+				for (key in moreB) println "$key\t${bulk[key]}"
+			}
+			// assert !left && !right  TODO Oracle bug for EmbeddedLDAP ?
 		}
-		assert !it1.hasNext() && !it2.hasNext()
 	}
 
 	private void equals(Object obj1, Object obj2) {
