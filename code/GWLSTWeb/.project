@@ -5,6 +5,7 @@
 	<projects>
 		<project>WebLogicMBean</project>
 		<project>GroovyMBean</project>
+		<project>Groovy</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

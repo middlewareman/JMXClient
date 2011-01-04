@@ -3,6 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/Groovy"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/GroovyMBean"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/WebLogicMBean"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT">
