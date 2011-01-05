@@ -116,7 +116,8 @@
 
 	<target name="test">
 		<mkdir dir="target/junit" />
-		<junit errorproperty="junit-errfail" failureproperty="junit-errfail" printsummary="withOutAndErr">
+		<mkdir dir="target/temp" />
+		<junit fork="yes" dir="target/temp" errorproperty="junit-errfail" failureproperty="junit-errfail" printsummary="withOutAndErr">
 			<formatter type="xml" />
 			<classpath>
 				<path refid="compile.classpath" />
