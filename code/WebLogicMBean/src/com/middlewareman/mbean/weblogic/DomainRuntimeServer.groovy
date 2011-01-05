@@ -4,17 +4,13 @@
  */
 package com.middlewareman.mbean.weblogic
 
-import com.middlewareman.mbean.LocalMBeanHome;
-import com.middlewareman.mbean.MBean 
-import com.middlewareman.mbean.MBeanHome 
-import com.middlewareman.mbean.MBeanHomeFactory 
-import com.middlewareman.mbean.platform.MBeanPlatformHome;
-import com.middlewareman.mbean.platform.ProxyPlatformHome;
+import javax.naming.InitialContext
 
-import java.lang.management.ManagementFactory 
-import javax.naming.InitialContext 
+import com.middlewareman.mbean.*
+import com.middlewareman.mbean.platform.MBeanPlatformHome
+import com.middlewareman.mbean.platform.ProxyPlatformHome
 
-class DomainRuntimeServer {
+class DomainRuntimeServer extends WebLogicMBeanServer {
 	
 	private static final localJndiName = 'java:comp/env/jmx/domainRuntime'
 	private static final remoteJndiName = 'weblogic.management.mbeanservers.domainruntime'
@@ -32,14 +28,12 @@ class DomainRuntimeServer {
 		new DomainRuntimeServer(getLocalMBeanHome())
 	}
 	
-	final MBeanHome home
-	
-	DomainRuntimeServer(MBeanHome home) {
-		this.home = home
+	private DomainRuntimeServer(MBeanHome home) {
+		super(home)
 	}
 	
 	DomainRuntimeServer(MBeanHomeFactory homeFactory) {
-		this.home = homeFactory.createMBeanHome(remoteJndiName)
+		super(homeFactory.createMBeanHome(remoteJndiName))
 	}
 	
 	MBean getDomainRuntimeService() {
