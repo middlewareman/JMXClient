@@ -26,6 +26,8 @@ public class MBeanProperties {
 	private static final Logger logger = Logger.getLogger(MBeanProperties.class
 			.getName());
 
+	public static boolean neverBulk;	// emergency bulk bypass
+	
 	/**
 	 * Uses {@link #getBulk} if possible, otherwise {@link #getSingles}.
 	 */
@@ -34,7 +36,7 @@ public class MBeanProperties {
 			throws InstanceNotFoundException, IntrospectionException,
 			ReflectionException, IOException, AttributeNotFoundException,
 			MBeanException {
-		if (attributeFilter.getOnException().equals(OnException.OMIT))
+		if (!neverBulk && attributeFilter.getOnException().equals(OnException.OMIT))
 			return getBulk(home, objectName, attributeFilter);
 		else
 			return getSingles(home, objectName, attributeFilter);
