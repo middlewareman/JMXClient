@@ -117,6 +117,7 @@ public abstract class RemoteMBeanHome extends MBeanHome {
 				logger.log(Level.FINER, "connector null -> false");
 				return false;
 			}
+			ping();
 			String id = connector.getConnectionId();
 			logger.log(Level.FINER, "connector {0} -> true", id);
 			return true;
