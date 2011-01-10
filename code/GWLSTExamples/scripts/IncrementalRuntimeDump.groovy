@@ -15,8 +15,9 @@ if (!args) {
 def tab = '\t'
 
 String mbeanType = args[0]
-List objectNameKeys = args.size() > 1 ? args[1..-1] : []
-if (!objectNameKeys) objectNameKeys = ['Location']
+List objectNameKeys = (args.size() > 1) ? args[1..-1] : []
+
+if (!objectNameKeys) println "WARNING: no objectName keys may produce confusing output"
 
 Matcher matcher = domainRuntimeServer.home.serverId =~ /.*:\/\/(.+):(\d+).*/
 def host = matcher[0][1]
@@ -29,6 +30,7 @@ List propsKeys
 
 def out
 if (file.exists()) {
+	/* If file exists, read first line to determine keys to include. */
 	file.withReader {
 		def line = it.readLine()
 		List keys = line.tokenize(tab)
