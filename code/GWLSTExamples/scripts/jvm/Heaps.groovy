@@ -13,9 +13,15 @@ def describe(jvm) {
 	"${jvm.HeapFreeCurrent>>20} MB\t${jvm.HeapFreePercent}%\t${jvm.HeapSizeCurrent>>20} MB\t${jvm.HeapSizeMax>>20} MB"
 }
 
+println status()
+println new Date()
+println()
+
 def drs = domainRuntimeServer.domainRuntimeService
+
 print "Server     \t"
 println header()
+
 for (jvm in drs.ServerRuntimes.JVMRuntime) {
 	println jvm.Name
 	print "  beforeGC \t"
