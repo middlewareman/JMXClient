@@ -4,13 +4,10 @@
  */
 package com.middlewareman.mbean.weblogic.shell
 
-import com.middlewareman.mbean.weblogic.DomainRuntimeServer 
-import com.middlewareman.mbean.weblogic.EditServer 
-import com.middlewareman.mbean.weblogic.RuntimeServer 
-import com.middlewareman.mbean.weblogic.WebLogicMBeanHomeFactory;
+import com.middlewareman.mbean.weblogic.*
 
 class GWLSTBindings {
-	
+
 	static status(def runtimeService) {
 		if (runtimeService) {
 			try {
@@ -27,8 +24,8 @@ class GWLSTBindings {
 			return 'Not connected'
 		}
 	}
-	
-	static bind(WebLogicMBeanHomeFactory hf, def target) {
+
+	static bind(WebLogicMBeanHomeFactory hf, target) {
 		def newRuntimeServer = new RuntimeServer(hf)
 		newRuntimeServer.home.ping()
 		def newRuntimeService = newRuntimeServer.runtimeService
@@ -60,6 +57,7 @@ class GWLSTBindings {
 		}
 		// TODO convenience closures
 		target.status = { status(target.runtimeService) }
+		return target
 	}
 }
 
