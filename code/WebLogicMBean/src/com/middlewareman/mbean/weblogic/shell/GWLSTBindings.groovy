@@ -6,9 +6,37 @@ package com.middlewareman.mbean.weblogic.shell
 
 import com.middlewareman.mbean.weblogic.*
 
+/**
+ * Create standard bindings for GWLST script.
+ * <p>Beans:
+ * <ul>
+ * <li><code>runtimeServer</code></li>
+ * <li><code>runtimeService</code> (short for 
+ * <code>runtimeServer.runtimeService</code>)</li>
+ * <li><code>domainRuntimeServer</code></li>
+ * <li><code>domainRuntimeService</code> (short for 
+ * <code>domainRuntimeServer.domainRuntimeService</code>)</li>
+ * <li><code>editServer</code></li>
+ * <li><code>editService</code> (short for 
+ * <code>editServer.editService</code>)</li>
+ * </ul>
+ * </p>
+ * <p>Closures:
+ * <ul>
+ * <li><code>String status()</code></li>
+ * <li><code>edit(Closure script)</code> that passes the pending domain MBean 
+ * as the parameter to the script</li>
+ * </ul>
+ * </p>
+ * 
+ * @author Andreas Nyberg
+ */
 class GWLSTBindings {
 
-	static status(def runtimeService) {
+	/**
+	 * Returns a string describing the runtimeService.
+	 */
+	static String status(def runtimeService) {
 		if (runtimeService) {
 			try {
 				def serverRuntime = runtimeService.ServerRuntime
@@ -25,6 +53,14 @@ class GWLSTBindings {
 		}
 	}
 
+	/**
+	 * Create standard bindings for GWLST script. 
+	 * 
+	 * @param hf
+	 * @param target anything that accepts having properties assigned to it
+	 * such as a {@link Bindings} or a {@link Map}.
+	 * @return the same target.
+	 */
 	static bind(WebLogicMBeanHomeFactory hf, target) {
 		def newRuntimeServer = new RuntimeServer(hf)
 		newRuntimeServer.home.ping()
@@ -55,8 +91,8 @@ class GWLSTBindings {
 				// TODO Warning?
 			}
 		}
-		// TODO convenience closures
 		target.status = { status(target.runtimeService) }
+		target.edit = { script -> Editor.saveOnly.editDomain(target.editService, script) }
 		return target
 	}
 }

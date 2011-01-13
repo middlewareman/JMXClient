@@ -32,6 +32,17 @@ class EditorTest extends GroovyTestCase {
 		assert pending.Notes == pendingnotes + '!'
 	}
 
+	void testEdit() {
+		def config = gwlst.domainRuntimeService.DomainConfiguration
+		def pending = gwlst.domainRuntimeService.DomainPending
+		def confignotes = config.Notes
+		def pendingnotes = pending.Notes
+		println "$name $confignotes $pendingnotes"
+		gwlst.edit { it.Notes += '!' }
+		assert config.Notes == confignotes
+		assert pending.Notes == pendingnotes + '!'
+	}
+
 	void testActivate() {
 		def config = gwlst.domainRuntimeService.DomainConfiguration
 		def pending = gwlst.domainRuntimeService.DomainPending
