@@ -4,31 +4,24 @@
  */
 package com.middlewareman.mbean.type;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.TabularData;
-import javax.management.openmbean.TabularType;
+import javax.management.openmbean.*;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 
 /**
  * Wrapper for {@link TabularData} that unwraps {@link OpenType} values and
  * provides map-like access in Groovy and a readable String representation.
  * <p>
- * Columns are identified by names, of which at least one is part of the index
- * (primary key of a row), and the rest are not. TabularData allows this index
- * to consist of an arbitrary set of columns and hence addresses a row by an
- * object array. TabularDataWrapper extends this behaviour by allowing indexing
- * by a single value in the common case that the index consists of a single
- * name. In addition, when there is only one non-index column, it too will be
- * treated as a single value rather than an array or a map. Thus, in the common
- * case that TabularData is used to represent a simple key-value map,
+ * Columns are identified by names of which at least one is part of the index
+ * (primary key of a row). TabularData allows this index to consist of an
+ * arbitrary set of columns and hence addresses a row by an object array.
+ * TabularDataWrapper extends this behaviour by allowing indexing by a single
+ * value in the common case that the index consists of a single name. In
+ * addition, when there is only one non-index column, it too will be treated as
+ * a single value rather than an array or a map. Thus, in the common case that
+ * TabularData is used to represent a simple key-simple value map,
  * TabularDataWrapper will behave as such.
  * </p>
  * <p>
@@ -38,9 +31,10 @@ import javax.management.openmbean.TabularType;
  * 
  * @author Andreas Nyberg
  */
-class TabularDataWrapper {
+class TabularDataWrapper implements TableModel {
 
 	final TabularData delegate;
+	final List<String> columnNames;
 	final String[] indexNames;
 	final String[] nonIndexNames;
 	final OpenType<?>[] nonIndexTypes;
@@ -50,11 +44,15 @@ class TabularDataWrapper {
 		TabularType tt = delegate.getTabularType();
 		CompositeType rowType = tt.getRowType();
 		List<String> indexNamesList = tt.getIndexNames();
-		Set<String> nonIndexNamesSet = new TreeSet<String>(rowType.keySet());
+		Set<String> nonIndexNamesSet = new LinkedHashSet<String>(
+				rowType.keySet());
 		nonIndexNamesSet.removeAll(indexNamesList);
 		indexNames = indexNamesList.toArray(new String[indexNamesList.size()]);
 		nonIndexNames = nonIndexNamesSet.toArray(new String[nonIndexNamesSet
 				.size()]);
+		columnNames = new ArrayList<String>();
+		columnNames.addAll(indexNamesList);
+		columnNames.addAll(nonIndexNamesSet);
 		nonIndexTypes = new OpenType[nonIndexNames.length];
 		for (int i = 0; i < nonIndexNames.length; i++)
 			nonIndexTypes[i] = rowType.getType(nonIndexNames[i]);
@@ -125,7 +123,7 @@ class TabularDataWrapper {
 		}
 	}
 
-	public Object[] calculateIndex(Map<String, ?> value) {
+	private Object[] calculateIndex(Map<String, ?> value) {
 		Object[] index = new Object[indexNames.length];
 		for (int i = 0; i < indexNames.length; i++) {
 			if (value.containsKey(indexNames[i]))
@@ -136,25 +134,21 @@ class TabularDataWrapper {
 		return index;
 	}
 
-	public int size() {
-		return delegate.size();
-	}
-
 	public boolean isEmpty() {
 		return delegate.isEmpty();
 	}
 
-	public boolean containsKey(Object[] key) {
+	private boolean containsKey(Object[] key) {
 		assert indexNames.length == key.length;
 		return delegate.containsKey(key);
 	}
 
-	public boolean containsKey(Object key) {
+	private boolean containsKey(Object key) {
 		assert indexNames.length == 1;
 		return containsKey(new Object[] { key });
 	}
 
-	public boolean containsKey(Map<String, ?> key) {
+	private boolean containsKey(Map<String, ?> key) {
 		return containsKey(calculateIndex(key));
 	}
 
@@ -215,13 +209,58 @@ class TabularDataWrapper {
 		return value;
 	}
 
-	// @Override public boolean containsValue(CompositeData value) {
-	// @Override public void put(CompositeData value) {
-	// @Override public CompositeData remove(Object[] key) {
-	// @Override public void putAll(CompositeData[] values) {
-	// @Override public void clear() {
-	// @Override public Set<?> keySet() {
-	// @Override public Collection<?> values() {
+	@Override
+	public int getRowCount() {
+		return delegate.size();
+	}
+
+	@Override
+	public int getColumnCount() {
+		return columnNames.size();
+	}
+
+	@Override
+	public String getColumnName(int columnIndex) {
+		return columnNames.get(columnIndex);
+	}
+
+	@Override
+	public Class<?> getColumnClass(int columnIndex) {
+		return delegate.getTabularType().getRowType()
+				.getType(columnNames.get(columnIndex)).getClass();
+	}
+
+	@Override
+	public boolean isCellEditable(int rowIndex, int columnIndex) {
+		return false;
+	}
+
+	@Override
+	public Object getValueAt(int rowIndex, int columnIndex) {
+		Collection<CompositeData> cds = (Collection<CompositeData>) delegate.values();
+		assert rowIndex < cds.size();
+		Iterator<CompositeData> cdi = cds.iterator();
+		CompositeData cd = null;
+		for (int i = 0; i <= rowIndex; i++)
+			cd = cdi.next();
+		String key = columnNames.get(columnIndex);
+		return cd.get(key);
+	}
+
+	@Override
+	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void addTableModelListener(TableModelListener l) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void removeTableModelListener(TableModelListener l) {
+		// TODO Auto-generated method stub
+	}
 
 	public boolean equals(Object other) {
 		if (other == null)
