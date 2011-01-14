@@ -84,7 +84,7 @@ abstract class PlatformHomeTestAbstract extends GroovyTestCase {
 		assert cp instanceof String
 		assert cp == ph.runtime.systemProperties.'java.class.path'
 		def args = ph.runtime.inputArguments
-		assert args instanceof List<String> || args instanceof String[], args.dump()
+		assert args instanceof List<String> || args instanceof Object[], args.dump()
 		describe xx
 	}
 	
@@ -106,7 +106,7 @@ abstract class PlatformHomeTestAbstract extends GroovyTestCase {
 		assert x instanceof Long
 		def y = gc.memoryPoolNames
 		assert y
-		assert y instanceof String[], gc.dump()
+		assert y instanceof Object[], gc.dump()
 		describe gc
 	}
 	
