@@ -291,26 +291,27 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	 * @throws IOException
 	 * @throws InstanceNotFoundException
 	 */
-	private Object wrap(Object unwrapped) throws InstanceNotFoundException,
+	private Object wrap(Object notwrapped) throws InstanceNotFoundException,
 			IOException {
-		if (unwrapped == null)
+		if (notwrapped == null)
 			return null;
-		if (unwrapped instanceof ObjectName[]) {
-			ObjectName[] objectNames = (ObjectName[]) unwrapped;
+		if (notwrapped instanceof ObjectName[]) {
+			ObjectName[] objectNames = (ObjectName[]) notwrapped;
 			MBean[] wrapped = new MBean[objectNames.length];
 			for (int i = 0; i < objectNames.length; i++)
 				if (objectNames[i] != null)
 					wrapped[i] = getMBean(objectNames[i]);
 			return listProperties ? Arrays.asList(wrapped) : wrapped;
-		} else if (unwrapped instanceof Object[]) {
-			Object[] objects = (Object[]) unwrapped;
+		} else if (notwrapped instanceof Object[]) {
+			Object[] notwrappedArray = (Object[]) notwrapped;
+			Object[] objects = new Object[notwrappedArray.length];
 			for (int i = 0; i < objects.length; i++)
-				objects[i] = wrap(objects[i]);
+				objects[i] = wrap(notwrappedArray[i]);
 			return listProperties ? Arrays.asList(objects) : objects;
-		} else if (unwrapped instanceof ObjectName)
-			return getMBean((ObjectName) unwrapped);
+		} else if (notwrapped instanceof ObjectName)
+			return getMBean((ObjectName) notwrapped);
 		else
-			return OpenTypeWrapper.wrap(unwrapped); // TODO listProperties
+			return OpenTypeWrapper.wrap(notwrapped); // TODO listProperties
 	}
 
 	/** Returns an unwrapped object. */
@@ -339,7 +340,6 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 			return OpenTypeWrapper.unwrap(wrapped); // TODO List ?
 	}
 
-
 	private static final Object[] NOARGS = new Object[0];
 
 	private static Object[] argsArray(Object obj) {
@@ -350,6 +350,5 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 		else
 			return new Object[] { obj };
 	}
-
 
 }
