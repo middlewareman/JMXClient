@@ -4,16 +4,43 @@
  */
 package com.middlewareman.mbean.weblogic
 
+import java.util.logging.Level
+import java.util.logging.Logger
+
+import com.middlewareman.groovy.util.StackTraceCleaner
+
+/**
+ * Facade for ConfigurationManager to edit domain configuration with a closure.
+ * Editor provides all the boilerplate functionality for starting and closing
+ * the edit session.
+ *  
+ * @author Andreas Nyberg
+ */
 class Editor {
 
+	private static final Logger logger = Logger.getLogger(Editor.class.name)
+	private static final className = Editor.class.name
+
+	/** 
+	 * New instance that only validates and then undoes all changes without saving,
+	 * useful for testing scripts without saving any changes.
+	 */
 	static Editor getValidateOnly() {
 		new Editor(action:Action.ValidateOnly)
 	}
 
+	/**
+	 * New instance that only validates and saves any changes, but does not 
+	 * activate them. This allows reviewing the changes through the admin
+	 * console before activating them from there.
+	 */
 	static Editor getSaveOnly() {
 		new Editor(action:Action.SaveOnly)
 	}
 
+	/**
+	 * New instance that validates, saves and activates any changes.
+	 */
 	static Editor getActivate() {
 		new Editor(action:Action.Activate)
 	}
@@ -29,6 +56,9 @@ class Editor {
 
 	/** Start a new edit session if your user already has one. */
 	boolean alwaysStart = true
+
+	/** Undo any existing unsaved changes. */
+	boolean undoExistingChanges = true
 
 	/** 
 	 * Prevents other uses from starting an edit session until waitTimeInMillis 
@@ -78,46 +108,75 @@ class Editor {
 	boolean alwaysStop = true
 
 	def editDomain(def editService, Closure script) {
+		final methodName = 'editDomain'
 		assert editService.Name == 'EditService'
-		def configManager = editService.ConfigurationManager
-		// TODO cancelEdit if somebody else's
-		// TODO undoUnactivatedChanges
-		def domain = (configManager.Editor && !alwaysStart) ?
-				editService.DomainConfiguration :
-				configManager.startEdit(editWaitTime,editTimeout,editExclusive)
-		assert domain
-		assert domain.Type == 'Domain'
-		try {
-			// LOG
-			script domain
-			// LOG
 
+		def configManager = editService.ConfigurationManager
+
+		// TODO cancelEdit if somebody else's session
+		// TODO undoUnactivatedChanges
+
+		try {
+			def domain
+			if (configManager.Editor && !alwaysStart) {
+				logger.logp Level.FINE, className, methodName, 'Reusing your old edit session'
+				domain = editService.DomainConfiguration
+			} else {
+				logger.logp Level.FINE, className, methodName, 'Starting a new edit session'
+				domain = configManager.startEdit(editWaitTime,editTimeout,editExclusive)
+			}
+			assert domain
+			assert domain.Type == 'Domain'
+
+			def changes = configManager.Changes
+			if (changes && undoExistingChanges) {
+				logger.logp Level.INFO, className, methodName, "undoing ${changes.size()} existing unsaved changes"
+				configManager.undo()
+			}
+			assert !configManager.Changes
+
+			logger.logp Level.FINE, className, methodName, "Starting configuration script on ${domain.@home}"
+			script domain
+			logger.logp Level.FINE, className, methodName, 'Finished configuration script'
 			switch (action) {
 				case Action.ValidateOnly:
+					logger.logp Level.FINE, className, methodName, 'Validating only'
+					configManager.validate()
+					logger.logp Level.FINE, className, methodName, 'Undoing'
 					configManager.undo()
 					break
 				case Action.SaveOnly:
+					logger.logp Level.FINE, className, methodName, 'Saving only'
 					configManager.save()
 					break
 				case Action.Activate:
+					logger.logp Level.FINE, className, methodName, 'Saving before activate'
 					configManager.save()
+					logger.logp Level.FINE, className, methodName, 'Activating'
 					return configManager.activate(activateTimeout)
 				default:
+					assert false, action
 					break
 			}
+			logger.logp Level.FINE, className, methodName, 'Done.'
 		} catch(Exception e) {
-			// TODO Log
+			new StackTraceCleaner().deepClean e
+			logger.logp Level.WARNING, className, methodName, "Unable to complete edit on ${domain.@home}", e
 			throw e
 		} finally {
 			if (alwaysStop && configManager.Editor) {
-				// TODO Log
+				def newchanges = configManager.Changes.size()
+				if (newchanges)
+					logger.logp Level.INFO, className, methodName, "Stopping edit session: discarding $newchanges unsaved changes."
+				else
+					logger.logp Level.FINE, className, methodName, 'Stopping edit session without any changes'
 				try {
 					configManager.stopEdit()
 				} catch(Exception e) {
-					// TODO log
+					new StackTraceCleaner().deepClean e
+					logger.logp Level.ERROR, className, methodName, 'Unable to stop edit session', e
 				}
 			}
-			// TODO Log done
 		}
 	}
 }
