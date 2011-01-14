@@ -46,7 +46,7 @@ public abstract class MBean {
 	}
 
 	public String toString() {
-		return getClass().getSimpleName() + "(" + objectName + ")";
+		return objectName.toString();
 	}
 
 	public int hashCode() {
