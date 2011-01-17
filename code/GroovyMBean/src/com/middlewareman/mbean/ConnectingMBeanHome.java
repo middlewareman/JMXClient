@@ -83,11 +83,20 @@ public class ConnectingMBeanHome extends RemoteMBeanHome implements
 			logger.log(Level.FINER, "connection already open");
 			return connection;
 		}
-		createConnector();
-		String id = connector.getConnectionId();
-		connection = createConnection(connector, subject);
-		logger.log(Level.FINE, "opened connection on {0}", id);
-		return connection;
+		try {
+			createConnector();
+			String id = connector.getConnectionId();
+			connection = createConnection(connector, subject);
+			logger.log(Level.FINE, "opened connection on {0}", id);
+			return connection;
+		} catch (IOException e) {
+			reset();
+			createConnector();
+			String id = connector.getConnectionId();
+			connection = createConnection(connector, subject);
+			logger.log(Level.FINE, "reopened connection on {0}", id);
+			return connection;
+		}
 	}
 
 	public synchronized void handleNotification(Notification notification,
