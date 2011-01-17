@@ -186,7 +186,7 @@ class HtmlExporter {
 			}
 			for (op in info.operations) {
 				tr {
-					td { type op.returnType, delegate }		// TODO
+					td { type op, delegate }		// TODO
 					td { name op, delegate }
 					td { descriptor op, delegate }
 					td { signature op.signature, delegate }
@@ -215,6 +215,11 @@ class HtmlExporter {
 	void signature(MBeanParameterInfo[] pis, delegate) {
 		if (pis) {
 			delegate.table('class':'properties') {
+				tr {
+					th 'Type'
+					th 'Descriptor'
+					th 'Name'
+				}
 				for (pi in pis) {
 					tr {
 						td { type pi, delegate }
