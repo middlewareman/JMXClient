@@ -2,7 +2,7 @@ final version = '$Id$'
 
 def ipw = new com.middlewareman.groovy.util.IndentPrintWriter()
 
-ipw.println "$version"
+ipw.println version
 ipw.println new Date()
 ipw.println domainRuntimeServer.home
 ipw.println()
