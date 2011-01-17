@@ -2,12 +2,13 @@
  * $Id$
  * Copyright (c) 2010 Middlewareman Limited. All rights reserved.
  */
-package com.middlewareman.mbean.type
+package com.middlewareman.mbean.info
 
-import javax.management.MBeanFeatureInfo 
+import javax.management.MBeanFeatureInfo
 
-public class SimpleDescriptorFilter implements DescriptorFilter {
-	
+
+class SimpleDescriptorFilter implements DescriptorFilter {
+
 	boolean accept(MBeanFeatureInfo fi, String fieldName) {
 		use(MBeanInfoCategory) {
 			// TODO precompile regex?

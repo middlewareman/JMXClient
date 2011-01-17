@@ -4,21 +4,16 @@
  */
 package com.middlewareman.mbean.weblogic.builder
 
-import groovy.xml.MarkupBuilder;
+import groovy.xml.MarkupBuilder
 
-import javax.management.*;
+import javax.management.*
 
-import com.middlewareman.mbean.MBean;
-import com.middlewareman.mbean.type.AttributeFilter;
-import com.middlewareman.mbean.type.CompositeDataWrapper
-import com.middlewareman.mbean.type.DescriptorFilter
-import com.middlewareman.mbean.type.InterfaceTypeFacade
-import com.middlewareman.mbean.type.MBeanInfoCategory
-import com.middlewareman.mbean.type.SimpleAttributeFilter
-import com.middlewareman.mbean.type.SimpleDescriptorFilter
-import com.middlewareman.mbean.type.TabularDataWrapper
-import com.middlewareman.mbean.type.TypeFacade
-import com.middlewareman.mbean.util.MBeanProperties;
+import com.middlewareman.mbean.MBean
+import com.middlewareman.mbean.info.DescriptorFilter
+import com.middlewareman.mbean.info.SimpleDescriptorFilter
+import com.middlewareman.mbean.type.*
+import com.middlewareman.mbean.util.MBeanProperties
+import com.middlewareman.mbean.weblogic.info.WebLogicMBeanInfoCategory
 
 /**
  * Generates an HTML report from an MBean or MBeanInfo.
@@ -264,7 +259,7 @@ class HtmlExporter {
 	}
 
 	void descriptor(MBeanFeatureInfo info, delegate) {
-		use(MBeanInfoCategory) {
+		use(WebLogicMBeanInfoCategory) {
 			// TODO Global solution?
 			for (fieldName in info.descriptor.fieldNames) {
 				if (!descriptorFilter || descriptorFilter.accept(info,fieldName))
@@ -304,7 +299,7 @@ class HtmlExporter {
 		}
 	}
 
-	private wordBreaks = ~/(\W+)/ // ~/(;|:|,)/ // C:\\.*;| 
+	private wordBreaks = ~/(\W+)/ // ~/(;|:|,)/ // C:\\.*;|
 
 	void array(Object[] array, delegate) {
 		if (array) {

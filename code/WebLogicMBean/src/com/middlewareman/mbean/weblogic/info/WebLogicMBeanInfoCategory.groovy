@@ -7,7 +7,9 @@ package com.middlewareman.mbean.weblogic.info
 import javax.management.MBeanAttributeInfo
 import javax.management.MBeanFeatureInfo
 
-class MBeanInfoCategory {
+import com.middlewareman.mbean.info.MBeanInfoCategory
+
+class WebLogicMBeanInfoCategory extends MBeanInfoCategory {
 
 	static boolean isKey(MBeanAttributeInfo ai) {
 		'com.bea.key' in ai.descriptor.fieldNames

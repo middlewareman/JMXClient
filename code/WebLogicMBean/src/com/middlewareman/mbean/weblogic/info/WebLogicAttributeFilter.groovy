@@ -17,7 +17,7 @@ class WebLogicAttributeFilter extends SimpleAttributeFilter {
 
 	boolean acceptAttribute(MBeanAttributeInfo ai) {
 		if (!super.acceptAttribute(ai)) return false
-		use(MBeanInfoCategory) {
+		use(WebLogicMBeanInfoCategory) {
 			if (key == true && !ai.isKey()) return false
 			if (key == false && ai.isKey()) return false
 			if (reference == true && !ai.isReference()) return false
