@@ -4,9 +4,11 @@
  */
 package com.middlewareman.mbean.type
 
-import javax.management.MBeanAttributeInfo
-import javax.management.ObjectName
-import javax.management.openmbean.OpenMBeanAttributeInfo
+import java.util.regex.Pattern
+
+import javax.management.*
+
+import com.middlewareman.mbean.info.MBeanInfoCategory
 
 /**
  * Filter(?) to determine which MBean attributes to include and how to handle
@@ -55,8 +57,8 @@ class SimpleAttributeFilter implements AttributeFilter {
 	 * not null, not defaulted and do not throw an exception. 
 	 */
 	static SimpleAttributeFilter getBrief() {
-		new SimpleAttributeFilter(noDeprecated:true, onlyReadable:true,
-				noNullValue:true, noDefaultValue:true)
+		new SimpleAttributeFilter(deprecated:false, readable:true,
+				nullValue:false, defaultValue:false)
 	}
 
 	/** 
@@ -65,29 +67,17 @@ class SimpleAttributeFilter implements AttributeFilter {
 	 * faster as it does not even try to read non-readable attributes.
 	 */
 	static SimpleAttributeFilter getSafe() {
-		new SimpleAttributeFilter(noDeprecated:true, onlyReadable:true)
+		new SimpleAttributeFilter(deprecated:false, readable:true)
 	}
 
-	/** Don't include deprecated attributes. */
-	boolean noDeprecated
+	Boolean deprecated
+	Boolean readable
+	Boolean writable
+	Boolean mbeans
+	Boolean nullValue
+	Boolean defaultValue
 
-	/** Only include readable attributes. */
-	boolean onlyReadable
-
-	/** Only include writable attributes. */
-	boolean onlyWritable
-
-	/** Don't include any attributes that refer to other MBeans. */
-	boolean noMBeans
-
-	/** Only include attributes that refer to other MBeans. */
-	boolean onlyMBeans
-
-	/** Don't include any attribute with null value. */
-	boolean noNullValue
-
-	/** Don't include any attributes that declare a default value that is equal to the current value. */
-	boolean noDefaultValue
+	Pattern typeInclude
 
 	/**
 	 * Returns true if attribute names should be decapitalised before returning
@@ -105,23 +95,27 @@ class SimpleAttributeFilter implements AttributeFilter {
 	OnException onException = OnException.OMIT
 
 	boolean acceptAttribute(MBeanAttributeInfo ai) {
-		if (noDeprecated && ai.descriptor.getFieldValue('deprecated')) return false
-		if (onlyReadable && !ai.isReadable()) return false
-		if (onlyWritable && !ai.isWritable()) return false
-		if (noMBeans) {
-			assert !onlyMBeans
-			if (ai.attributeType.contains(ObjectName.getClass().getName()))
-				return false
-		} else if (onlyMBeans && !ai.type.contains(ObjectName.class.getName()))
-			return false;
-		return true;
+		use(MBeanInfoCategory) {
+			if (deprecated == false && ai.isDeprecated()) return false
+			if (deprecated == true && !ai.isDeprecated()) return false
+			if (readable == false && ai.isReadable()) return false
+			if (readable == true && ai.isReadable()) return false
+			if (writable == false && ai.isWritable()) return false
+			if (writable == true && !ai.isWritable()) return false
+			if (mbeans == false && ai.isMBean()) return false
+			if (mbeans == true && !ai.isMBean()) return false
+			if (typeInclude && !(ai.type ==~ typeInclude)) return false
+		}
+		return true
 	}
 
 	boolean acceptAttribute(MBeanAttributeInfo ai, Object value) {
-		if (noNullValue && value == null) return false
-		if (noDefaultValue && ai instanceof OpenMBeanAttributeInfo
-		&& ai.hasDefaultValue() && ai.getDefaultValue() != value)
-			return false
+		if (nullValue == false && value == null) return false
+		if (nullValue == true && value != null) return false
+		use(MBeanInfoCategory) {
+			if (defaultValue == false && ai.hasDefaultValue() && ai.getDefaultValue() == value) return false
+			if (defaultValue == true && ai.hasDefaultValue() && ai.getDefaultValue() != value) return false
+		}
 		return true
 	}
 }

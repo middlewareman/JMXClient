@@ -37,10 +37,10 @@ public class MBeanIterator implements Iterator<MBean> {
 	 */
 	public MBeanIterator(MBean mbean) {
 		filter = new SimpleAttributeFilter();
-		filter.setNoDeprecated(true);
-		filter.setOnlyReadable(true);
-		filter.setOnlyMBeans(true);
-		filter.setNoNullValue(true);
+		filter.setDeprecated(false);
+		filter.setReadable(true); 
+		filter.setMbeans(true);
+		filter.setNullValue(false);
 		load(mbean);
 	}
 

@@ -7,11 +7,11 @@ package com.middlewareman.mbean.weblogic
 import java.io.IOException;
 
 import com.middlewareman.mbean.MBeanHome;
-import com.middlewareman.mbean.MBeanHomeFactory 
-import com.middlewareman.mbean.type.SimpleAttributeFilter 
-import javax.management.remote.JMXConnectorFactory 
-import javax.management.remote.JMXServiceURL 
-import javax.naming.Context 
+import com.middlewareman.mbean.MBeanHomeFactory
+import com.middlewareman.mbean.type.SimpleAttributeFilter
+import javax.management.remote.JMXConnectorFactory
+import javax.management.remote.JMXServiceURL
+import javax.naming.Context
 
 /**
  * Factory of RemoteMBeanHome to a WebLogic Server with support for picking up parameters from environment, 
@@ -20,7 +20,7 @@ import javax.naming.Context
  * @author Andreas Nyberg
  */
 public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
-	
+
 	static WebLogicMBeanHomeFactory getDefault() {
 		def hf = new WebLogicMBeanHomeFactory(
 				url:'t3://localhost:7001',username:'weblogic',password:'welcome1')
@@ -28,12 +28,19 @@ public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 		hf.loadSystemProperties()
 		return hf
 	}
-	
+
+	static WebLogicMBeanHomeFactory getLoaded() {
+		def hf = new WebLogicMBeanHomeFactory()
+		hf.loadEnvironmentProperties()
+		hf.loadSystemProperties()
+		return hf
+	}
+
 	String username
 	String password
 	String protocolProviderPackages = 'weblogic.management.remote'
 	Long timeout
-	
+
 	void loadEnvironmentProperties() {
 		String value
 		value = System.getenv('GWLST_URL')
@@ -46,7 +53,7 @@ public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 		if (value) timeout = value as Long
 		// TODO GWLST_ENV_*
 	}
-	
+
 	void loadSystemProperties() {
 		String value
 		value = System.getProperty('gwlst.url')
@@ -59,7 +66,7 @@ public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 		if (value) timeout = value as Long
 		// TODO gwlst.env.*
 	}
-	
+
 	String[] loadArguments(String[] args) {
 		def escape = new ArrayList<String>(args.length)
 		def iter = args.iterator()
@@ -88,25 +95,25 @@ public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 		}
 		return escape as String[]
 	}
-	
+
 	JMXServiceURL surl(String path) throws MalformedURLException {
 		new JMXServiceURL("service:jmx:${url}/jndi/${path}");
 	}
-	
+
 	MBeanHome createMBeanHome(String urlPart) throws IOException {
 		MBeanHome home = super.createMBeanHome(urlPart)
 		home.enableMBeanCache()
 		home.enableMBeanInfoCache null
-		home.defaultPropertiesFilter = new SimpleAttributeFilter(noDeprecated:true,onlyReadable:true)
+		home.defaultPropertiesFilter = new SimpleAttributeFilter(deprecated:false,readable:true)
 		return home
 	}
-	
+
 	Map<String,?> env() {
 		def map = super.env()
 		map.put Context.SECURITY_PRINCIPAL, username
 		map.put Context.SECURITY_CREDENTIALS, password
 		map.put 'jmx.remote.x.request.waiting.timeout', timeout
-		map.put JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES, protocolProviderPackages 
+		map.put JMXConnectorFactory.PROTOCOL_PROVIDER_PACKAGES, protocolProviderPackages
 		return map
 	}
 }

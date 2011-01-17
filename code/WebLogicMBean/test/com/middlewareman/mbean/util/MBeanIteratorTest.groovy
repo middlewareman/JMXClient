@@ -12,9 +12,9 @@ import com.middlewareman.mbean.weblogic.WebLogicMBeanHomeFactory
 
 class MBeanIteratorTest extends GroovyTestCase {
 	
-	def filterBulk = new SimpleAttributeFilter(onlyReadable:true)
+	def filterBulk = new SimpleAttributeFilter(readable:true)
 	
-	def filterSingle = new SimpleAttributeFilter(onlyReadable:true, onException:OnException.RETURN)
+	def filterSingle = new SimpleAttributeFilter(readable:true, onException:OnException.RETURN)
 	
 	RuntimeServer getRuntimeServer() { 
 		new RuntimeServer(WebLogicMBeanHomeFactory.default)

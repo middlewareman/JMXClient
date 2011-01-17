@@ -80,7 +80,7 @@ class WebLogicMBeanHomeTest extends GroovyTestCase {
 	void testDomainRuntimeBulkCompareNobulk() {
 		def drs = domainRuntimeServer.domainRuntimeService
 		MBeanIterator iter = new MBeanIterator(drs)
-		def filter = new SimpleAttributeFilter(noNullValue:true)	// TODO should not need noNullValue!
+		def filter = new SimpleAttributeFilter(nullValue:false)	// TODO should not need noNullValue!
 
 		while (iter.hasNext()) {
 			def mbean = iter.next()
