@@ -6,6 +6,7 @@ package com.middlewareman.mbean.weblogic.info
 
 import javax.management.MBeanAttributeInfo
 
+import com.middlewareman.mbean.MBean
 import com.middlewareman.mbean.info.SimpleAttributeFilter
 
 class WebLogicAttributeFilter extends SimpleAttributeFilter {
@@ -14,6 +15,7 @@ class WebLogicAttributeFilter extends SimpleAttributeFilter {
 	Boolean reference
 	Boolean child
 	Boolean unharvestable
+	Boolean isSet
 
 	boolean acceptAttribute(MBeanAttributeInfo ai) {
 		if (!super.acceptAttribute(ai)) return false
@@ -34,4 +36,11 @@ class WebLogicAttributeFilter extends SimpleAttributeFilter {
 		if (!super.acceptAttribute(ai, value)) return false
 		return true
 	}
+
+	boolean acceptAttribute(MBeanAttributeInfo ai, MBean parent) {
+		if (isSet == true && !parent.isSet(ai.name)) return false
+		if (isSet == false && parent.isSet(ai.name)) return false
+		return true
+	}	
+	
 }
