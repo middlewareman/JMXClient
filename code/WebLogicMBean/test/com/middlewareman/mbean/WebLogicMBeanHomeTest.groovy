@@ -4,7 +4,7 @@
  */
 package com.middlewareman.mbean
 
-import com.middlewareman.mbean.type.SimpleAttributeFilter
+import com.middlewareman.mbean.info.SimpleAttributeFilter
 import com.middlewareman.mbean.util.MBeanIterator
 import com.middlewareman.mbean.util.MBeanProperties
 import com.middlewareman.mbean.weblogic.*

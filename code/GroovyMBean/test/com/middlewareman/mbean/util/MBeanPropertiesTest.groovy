@@ -5,8 +5,8 @@
 package com.middlewareman.mbean.util
 
 import com.middlewareman.mbean.LocalPlatformMBeanHome
+import com.middlewareman.mbean.info.SimpleAttributeFilter
 import com.middlewareman.mbean.platform.MBeanPlatformHome
-import com.middlewareman.mbean.type.SimpleAttributeFilter
 
 class MBeanPropertiesTest extends GroovyTestCase {
 

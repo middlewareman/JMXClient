@@ -6,7 +6,7 @@ package com.middlewareman.mbean.weblogic.info
 
 import javax.management.MBeanAttributeInfo
 
-import com.middlewareman.mbean.type.SimpleAttributeFilter
+import com.middlewareman.mbean.info.SimpleAttributeFilter
 
 class WebLogicAttributeFilter extends SimpleAttributeFilter {
 

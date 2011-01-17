@@ -13,7 +13,7 @@ import javax.management.ObjectName;
 
 import com.middlewareman.groovy.util.StackTraceCleaner;
 import com.middlewareman.mbean.MBean;
-import com.middlewareman.mbean.type.SimpleAttributeFilter;
+import com.middlewareman.mbean.info.SimpleAttributeFilter;
 
 /**
  * Iterates breadth-first over all children reachable from a parent MBean. Note
@@ -38,7 +38,7 @@ public class MBeanIterator implements Iterator<MBean> {
 	public MBeanIterator(MBean mbean) {
 		filter = new SimpleAttributeFilter();
 		filter.setDeprecated(false);
-		filter.setReadable(true); 
+		filter.setReadable(true);
 		filter.setMbeans(true);
 		filter.setNullValue(false);
 		load(mbean);

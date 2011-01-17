@@ -13,7 +13,9 @@ import java.util.logging.Logger;
 import javax.management.*;
 import javax.management.openmbean.*;
 
-import com.middlewareman.mbean.type.*;
+import com.middlewareman.mbean.info.SimpleAttributeFilter;
+import com.middlewareman.mbean.type.CompositeDataWrapper;
+import com.middlewareman.mbean.type.OpenTypeWrapper;
 
 /**
  * {@link MBean} factory that manages an {@link MBeanServerConnection} and

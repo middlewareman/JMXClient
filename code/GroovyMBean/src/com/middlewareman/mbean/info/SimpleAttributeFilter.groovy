@@ -2,13 +2,12 @@
  * $Id$
  * Copyright (c) 2010 Middlewareman Limited. All rights reserved.
  */
-package com.middlewareman.mbean.type
+package com.middlewareman.mbean.info
 
 import java.util.regex.Pattern
 
 import javax.management.*
 
-import com.middlewareman.mbean.info.MBeanInfoCategory
 
 /**
  * Filter(?) to determine which MBean attributes to include and how to handle

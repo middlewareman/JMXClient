@@ -4,14 +4,15 @@
  */
 package com.middlewareman.mbean.weblogic
 
-import java.io.IOException;
+import java.io.IOException
 
-import com.middlewareman.mbean.MBeanHome;
-import com.middlewareman.mbean.MBeanHomeFactory
-import com.middlewareman.mbean.type.SimpleAttributeFilter
 import javax.management.remote.JMXConnectorFactory
 import javax.management.remote.JMXServiceURL
 import javax.naming.Context
+
+import com.middlewareman.mbean.MBeanHome
+import com.middlewareman.mbean.MBeanHomeFactory
+import com.middlewareman.mbean.info.SimpleAttributeFilter
 
 /**
  * Factory of RemoteMBeanHome to a WebLogic Server with support for picking up parameters from environment, 

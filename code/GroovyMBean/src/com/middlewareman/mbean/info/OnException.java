@@ -1,4 +1,4 @@
-package com.middlewareman.mbean.type;
+package com.middlewareman.mbean.info;
 
 /**
  * Indicates how to treat exceptions when retrieving an attribute.

@@ -13,8 +13,8 @@ import javax.management.*;
 
 import com.middlewareman.groovy.util.StackTraceCleaner;
 import com.middlewareman.mbean.MBeanHome;
-import com.middlewareman.mbean.type.OnException;
-import com.middlewareman.mbean.type.SimpleAttributeFilter;
+import com.middlewareman.mbean.info.OnException;
+import com.middlewareman.mbean.info.SimpleAttributeFilter;
 
 /**
  * Handle <code>getProperties()</code> for an MBean.
@@ -26,8 +26,8 @@ public class MBeanProperties {
 	private static final Logger logger = Logger.getLogger(MBeanProperties.class
 			.getName());
 
-	public static boolean neverBulk;	// emergency bulk bypass
-	
+	public static boolean neverBulk; // emergency bulk bypass
+
 	/**
 	 * Uses {@link #getBulk} if possible, otherwise {@link #getSingles}.
 	 */
@@ -36,7 +36,8 @@ public class MBeanProperties {
 			throws InstanceNotFoundException, IntrospectionException,
 			ReflectionException, IOException, AttributeNotFoundException,
 			MBeanException {
-		if (!neverBulk && attributeFilter.getOnException().equals(OnException.OMIT))
+		if (!neverBulk
+				&& attributeFilter.getOnException().equals(OnException.OMIT))
 			return getBulk(home, objectName, attributeFilter);
 		else
 			return getSingles(home, objectName, attributeFilter);

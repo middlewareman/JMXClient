@@ -9,8 +9,7 @@ import groovy.xml.MarkupBuilder
 import javax.management.*
 
 import com.middlewareman.mbean.MBean
-import com.middlewareman.mbean.info.DescriptorFilter
-import com.middlewareman.mbean.info.SimpleDescriptorFilter
+import com.middlewareman.mbean.info.*
 import com.middlewareman.mbean.type.*
 import com.middlewareman.mbean.util.MBeanProperties
 import com.middlewareman.mbean.weblogic.info.WebLogicMBeanInfoCategory

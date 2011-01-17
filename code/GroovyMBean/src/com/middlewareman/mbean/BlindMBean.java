@@ -15,7 +15,7 @@ import javax.management.openmbean.OpenType;
 
 import org.codehaus.groovy.runtime.InvokerHelper;
 
-import com.middlewareman.mbean.type.AttributeFilter;
+import com.middlewareman.mbean.info.AttributeFilter;
 import com.middlewareman.mbean.util.MBeanProperties;
 
 /**
