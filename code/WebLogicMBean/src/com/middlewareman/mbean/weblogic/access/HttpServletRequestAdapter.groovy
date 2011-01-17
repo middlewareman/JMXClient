@@ -157,7 +157,7 @@ class HttpServletRequestAdapter {
 		} catch(Exception e) {
 			//new StackTraceCleaner().deepClean e
 			def session = request.getSession(false)?.id
-			logger.logp(Level.WARNING, this.getClass().getName(), 'getRemoteEditServer', "Could not from $session", e);
+			logger.logp(Level.WARNING, this.getClass().getName(), 'getRemoteEditServer', "Could not get from $session", e);
 			removeattr runtimeServerName
 		}
 		return null
