@@ -4,36 +4,24 @@
  */
 package com.middlewareman.gwlst.jdbc
 
-class MultiDataSourceConfig {
+class MultiDataSourceConfig extends DataSourceConfig {
 
-	String name
-	List<String> targetServerNames = []
-	String algorithmType
+	void setAlgorithmType(String value) {
+		dataSourceParams.AlgorithmType = value
+	}
 
 	List<DataSourceConfig> memberConfigs
 
-	def configure(domain) {
+	void editResource(domain, resource) {
 		assert domain.Type == 'Domain'
 
 		println "Creating members $memberConfigs"
-		def members = memberConfigs.collect { it.configure(domain) }
+		def members = memberConfigs.collect { it.configDomain(domain) }
 		println "Created members $members"
 		assert members.every()
 
-		def systemResource = domain.createJDBCSystemResource(name)
-		def resource = systemResource.JDBCResource
-		resource.Name = name
+		dataSourceParams.DataSourceList = members.Name.join(',')
 
-		def jdbcDataSourceParams = resource.JDBCDataSourceParams
-		if (algorithmType) jdbcDataSourceParams.AlgorithmType = algorithmType
-		jdbcDataSourceParams.DataSourceList = members.Name.join(',')
-
-		def targets = targetServerNames.collect { domain.lookupServer it }
-		println "Targeting $members to $targets"
-		members.each { member ->
-			targets.each { target ->  member.addTarget target }
-		}
-		
-		return systemResource
+		super.editResource(domain, resource)
 	}
 }

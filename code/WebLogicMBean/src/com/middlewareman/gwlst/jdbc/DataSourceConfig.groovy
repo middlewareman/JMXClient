@@ -1,82 +1,56 @@
 /*
-* $Id$
-* Copyright (c) 2011 Middlewareman Limited. All rights reserved.
-*/
+ * $Id$
+ * Copyright (c) 2011 Middlewareman Limited. All rights reserved.
+ */
 package com.middlewareman.gwlst.jdbc
+
+import java.util.List
 
 class DataSourceConfig {
 
-	void setOracle() {
-		connectionPoolParams.TestTableName = 'SQL SELECT 1 FROM DUAL'
-	}
-
-	void setOracleNonXA() {
-		setOracle()
-		driverName = 'oracle.jdbc.OracleDriver'
-	}
-
-	void setOracleEmulated() {
-		setOracleNonXA()
-		globalTransactionsProtocol = 'EmulateTwoPhaseCommit'
-	}
-
-
-	void setUrl(String value) {
-		driverParams.Url = value
-	}
-
-	void setDriverName(String value) {
-		driverParams.DriverName = value
-	}
-
-	void setGlobalTransactionsProtocol(String value) {
-		dataSourceParams.GlobalTransactionsProtocol = value
-	}
-
-	void setRowPrefetch(boolean value) {
-		dataSourceParams.RowPrefetch = value
-	}
-
-	void setMaxCapacity(int value) {
-		connectionPoolParams.MaxCapacity = value
-	}
-
-	void setTestConnectionsOnReserve(boolean value) {
-		connectionPoolParams.TestConnectionsOnReserve = value
-	}
-
 	String name
+	List<String> jndiNames
 
-	String user
-	String password
+	List<String> targetServerNames
+	List<String> targetClusterNames
 
-	Map connectionPoolParams = [:]
 	Map dataSourceParams = [:]
-	Map driverParams = [:]
 
-	def configure(domain) {
+	def configDomain(domain) {
 		assert domain.Type == 'Domain'
 
 		def systemResource = domain.createJDBCSystemResource(name)
 		def resource = systemResource.JDBCResource
 		resource.Name = name
 
-		def jdbcDriverParams = resource.JDBCDriverParams
-		for (param in driverParams)
-			jdbcDriverParams."$param.key" = param.value
-		jdbcDriverParams.Properties.createProperty('user').Value = user
-		jdbcDriverParams.Password = password
+		editResource domain, resource
 
-		def jdbcConnectionPoolParams = resource.JDBCConnectionPoolParams
-		for (param in connectionPoolParams)
-			jdbcConnectionPoolParams."$param.key" = param.value
+		for (serverName in targetServerNames) {
+			def target = domain.lookupServer(serverName)
+			assert target
+			systemResource.addTarget target
+		}
+		for (clusterName in targetClusterNames) {
+			def target = domain.lookupCluster(clusterName)
+			assert target
+			systemResource.addTarget target
+		}
 
-
-		def jdbcDataSourceParams = resource.JDBCDataSourceParams
-		for (param in dataSourceParams)
-			jdbcDataSourceParams."$param.key" = param.value
-		
 		return systemResource
+	}
+
+	protected void copyProperties(Map map, GroovyObject bean) {
+		for (Map.Entry param in map)
+			bean.setProperty(param.key, param.value)
+	}
+
+	void editResource(domain, resource) {
+		editDataSource resource.JDBCDataSourceParams
+	}
+
+	private void editDataSource(dataSourceParamsBean) {
+		copyProperties dataSourceParams, dataSourceParamsBean
+		jndiNames.each { dataSourceParamsBean.addTarget it }
 	}
 }
 
