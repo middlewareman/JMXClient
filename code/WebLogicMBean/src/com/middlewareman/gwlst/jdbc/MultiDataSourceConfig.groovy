@@ -15,7 +15,6 @@ class MultiDataSourceConfig extends DataSourceConfig {
 	void editResource(domain, resource) {
 		assert domain.Type == 'Domain'
 
-		println "Creating members $memberConfigs"
 		def members = memberConfigs.collect { it.configDomain(domain) }
 		println "Created members $members"
 		assert members.every()

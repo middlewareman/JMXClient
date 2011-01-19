@@ -33,12 +33,17 @@ class SimpleDataSourceConfig extends DataSourceConfig {
 		setOracle()
 		driverName = 'oracle.jdbc.OracleDriver'
 	}
+	
+	void setOracle2PC() {
+		setOracle()
+		driverName = 'oracle.jdbc.xa.client.OracleXADataSource'
+		globalTransactionsProtocol = 'TwoPhaseCommit'
+	}
 
 	void setOracleEmulated() {
 		setOracleNonXA()
 		globalTransactionsProtocol = 'EmulateTwoPhaseCommit'
 	}
-
 
 	void setUrl(String value) {
 		driverParams.Url = value
