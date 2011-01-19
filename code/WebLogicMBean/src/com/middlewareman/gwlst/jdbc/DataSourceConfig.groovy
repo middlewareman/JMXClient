@@ -50,7 +50,7 @@ class DataSourceConfig {
 
 	private void editDataSource(dataSourceParamsBean) {
 		copyProperties dataSourceParams, dataSourceParamsBean
-		jndiNames.each { dataSourceParamsBean.addTarget it }
+		jndiNames.each { dataSourceParamsBean.addJNDIName it }
 	}
 }
 
