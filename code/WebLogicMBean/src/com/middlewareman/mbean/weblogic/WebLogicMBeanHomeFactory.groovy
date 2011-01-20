@@ -1,6 +1,6 @@
 /*
  * $Id$
- * Copyright (c) 2010 Middlewareman Limited. All rights reserved.
+ * Copyright (c) 2011 Middlewareman Limited. All rights reserved.
  */
 package com.middlewareman.mbean.weblogic
 
@@ -22,12 +22,17 @@ import com.middlewareman.mbean.info.SimpleAttributeFilter
  */
 public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 
-	static WebLogicMBeanHomeFactory getDefault() {
+	static WebLogicMBeanHomeFactory getDefaults() {
 		def hf = new WebLogicMBeanHomeFactory(
 				url:'t3://localhost:7001',username:'weblogic',password:'welcome1')
 		hf.loadEnvironmentProperties()
 		hf.loadSystemProperties()
 		return hf
+	}
+
+	@Deprecated
+	static WebLogicMBeanHomeFactory getDefault() {
+		getDefaults()
 	}
 
 	static WebLogicMBeanHomeFactory getLoaded() {
@@ -48,11 +53,8 @@ public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 		if (value) url = value
 		value = System.getenv('GWLST_USERNAME')
 		if (value) username = value
-		value = System.getenv('GWLST_PASSWORD')
-		if (value) password = value
 		value = System.getenv('GWLST_TIMEOUT')
 		if (value) timeout = value as Long
-		// TODO GWLST_ENV_*
 	}
 
 	void loadSystemProperties() {
@@ -95,6 +97,26 @@ public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 			}
 		}
 		return escape as String[]
+	}
+
+	void promptConsole() {
+		Console console = System.console()
+		if (!console) {
+			// LOG
+			return
+		}
+		final urlPattern = ~/\w+:\/\/\w+(\.\w+)*:\d+/
+		while (!url || !(url ==~ urlPattern)) {
+			if (url) console.printf "Invalid URL format: $url\n"
+			url = console.readLine('GWLST URL:      ')
+		}
+		while (!username) username = console.readLine('GWLST username: ')
+		while (!password) password = new String(console.readPassword('GWLST password: '))
+	}
+
+	void promptPopup() {
+		//System.err.println "${this.class.name} promptPopup() not yet implemented"
+		promptConsole()
 	}
 
 	JMXServiceURL surl(String path) throws MalformedURLException {
