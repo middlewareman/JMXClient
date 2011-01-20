@@ -70,13 +70,13 @@ class EditorTest extends GroovyTestCase {
 		assert pending.Notes == pendingnotes
 	}
 
-	void testEdit() {
+	void testEditSave() {
 		def config = gwlst.domainRuntimeService.DomainConfiguration
 		def pending = gwlst.domainRuntimeService.DomainPending
 		def confignotes = config.Notes
 		def pendingnotes = pending.Notes
 		println "$name $confignotes $pendingnotes"
-		gwlst.edit goodScript
+		gwlst.editSave goodScript
 		assert pending.Notes == pendingnotes + '!'
 	}
 
@@ -96,24 +96,24 @@ class EditorTest extends GroovyTestCase {
 		assert pending.Notes == pendingnotes
 	}
 
-	void testActivate() {
+	void testActivateWait() {
 		def config = gwlst.domainRuntimeService.DomainConfiguration
 		def pending = gwlst.domainRuntimeService.DomainPending
 		def confignotes = config.Notes
 		def pendingnotes = pending.Notes
 		println "$name $confignotes $pendingnotes"
-		Editor.activate.editDomain(gwlst.editService, goodScript)
+		Editor.activateWait.editDomain(gwlst.editService, goodScript)
 		assert config.Notes == pendingnotes + '!'
 	}
 
-	void testActivateBad() {
+	void testActivateWaitBadScript() {
 		def config = gwlst.domainRuntimeService.DomainConfiguration
 		def pending = gwlst.domainRuntimeService.DomainPending
 		def confignotes = config.Notes
 		def pendingnotes = pending.Notes
 		println "$name $confignotes $pendingnotes"
 		try {
-			Editor.activate.editDomain(gwlst.editService, badScript)
+			Editor.activateWait.editDomain(gwlst.editService, badScript)
 			fail()
 		}
 		catch(Exception) {
@@ -121,4 +121,6 @@ class EditorTest extends GroovyTestCase {
 		assert config.Notes == confignotes
 		assert pending.Notes == pendingnotes
 	}
+
+	// TODO testActivateBadActivation
 }

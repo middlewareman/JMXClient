@@ -92,7 +92,19 @@ class GWLSTBindings {
 			}
 		}
 		target.status = { status(target.runtimeService) }
-		target.edit = { script -> Editor.saveOnly.editDomain(target.editService, script) }
+		target.editValidate = { script ->
+			Editor.validateOnly.editDomain(target.editService, script)
+		}
+		target.editSave = { script ->
+			Editor.saveOnly.editDomain(target.editService, script)
+		}
+		target.editActivateWait = { script ->
+			Editor.activateWait.editDomain(target.editService, script)
+		}
+		target.editActivateNoWait = { script ->
+			Editor.activateNoWait.editDomain(target.editService, script)
+		}
+
 		return target
 	}
 }

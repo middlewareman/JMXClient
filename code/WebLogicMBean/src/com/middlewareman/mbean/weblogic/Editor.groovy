@@ -11,7 +11,7 @@ import com.middlewareman.groovy.util.StackTraceCleaner
 
 /**
  * Facade for ConfigurationManager to edit domain configuration with a closure.
- * Editor provides all the boilerplate functionality for starting and closing
+ * Editor provides all the boilerplate functionality for starting and ending
  * the edit session.
  *  
  * @author Andreas Nyberg
@@ -41,8 +41,12 @@ class Editor {
 	/**
 	 * New instance that validates, saves and activates any changes.
 	 */
-	static Editor getActivate() {
-		new Editor(action:Action.Activate)
+	static Editor getActivateWait() {
+		new Editor(action:Action.Activate, activateTimeout:-1)
+	}
+
+	static Editor getActivateNoWait() {
+		new Editor(action:Action.Activate, activateTimeout:0)
 	}
 
 	enum Action {
@@ -116,24 +120,18 @@ class Editor {
 		// TODO cancelEdit if somebody else's session
 		// TODO undoUnactivatedChanges
 
+		logger.logp Level.FINE, className, methodName, 'Starting a new edit session'
+		def domain = configManager.startEdit(editWaitTime,editTimeout,editExclusive)
+		assert domain, "Could not start new edit session on $configManager"
+		def changes = configManager.Changes
+		if (changes && undoExistingChanges) {
+			logger.logp Level.INFO, className, methodName, "undoing ${changes.size()} existing unsaved changes"
+			configManager.undo()
+		}
+		assert !configManager.Changes, "There are already unsaved changes on $domain"
 		try {
-			def domain
-			if (configManager.Editor && !alwaysStart) {
-				logger.logp Level.FINE, className, methodName, 'Reusing your old edit session'
-				domain = editService.DomainConfiguration
-			} else {
-				logger.logp Level.FINE, className, methodName, 'Starting a new edit session'
-				domain = configManager.startEdit(editWaitTime,editTimeout,editExclusive)
-			}
 			assert domain
 			assert domain.Type == 'Domain'
-
-			def changes = configManager.Changes
-			if (changes && undoExistingChanges) {
-				logger.logp Level.INFO, className, methodName, "undoing ${changes.size()} existing unsaved changes"
-				configManager.undo()
-			}
-			assert !configManager.Changes
 
 			logger.logp Level.FINE, className, methodName, "Starting configuration script on ${domain.@home}"
 			script domain
@@ -161,7 +159,7 @@ class Editor {
 			logger.logp Level.FINE, className, methodName, 'Done.'
 		} catch(Exception e) {
 			new StackTraceCleaner().deepClean e
-			logger.logp Level.WARNING, className, methodName, "Unable to complete edit on ${domain.@home}", e
+			//logger.logp Level.WARNING, className, methodName, "Unable to complete edit on ${domain?.@home}", e
 			throw e
 		} finally {
 			if (alwaysStop && configManager.Editor) {
