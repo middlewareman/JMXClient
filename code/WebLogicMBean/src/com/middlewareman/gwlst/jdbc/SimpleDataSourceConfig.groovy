@@ -4,7 +4,14 @@
  */
 package com.middlewareman.gwlst.jdbc
 
-class SimpleDataSourceConfig extends DataSourceConfig {
+/**
+ * SimpleDataSource (as opposed to MultiDataSource) has a driver and connection
+ * pool. A subclass for each database vendor or major configuration provides
+ * settings such as drivers and test table.
+ * 
+ * @author Andreas Nyberg
+ */
+abstract class SimpleDataSourceConfig extends DataSourceConfig {
 
 	String user
 	String password
@@ -12,37 +19,16 @@ class SimpleDataSourceConfig extends DataSourceConfig {
 	Map driverParams = [:]
 	Map connectionPoolParams = [:]
 
-	private void editDriverParams(driverParamsBean) {
+	private void configureDriverParams(driverParamsBean) {
 		copyProperties driverParams, driverParamsBean
 		driverParamsBean.Properties.createProperty('user').Value = user
 		driverParamsBean.Password = password
 	}
 
-	void editResource(domain, resource) {
-		super.editResource(domain,resource)
-		editDriverParams(resource.JDBCDriverParams)
+	void configureResource(domain, resource) {
+		super.configureResource(domain,resource)
+		configureDriverParams(resource.JDBCDriverParams)
 		copyProperties connectionPoolParams, resource.JDBCConnectionPoolParams
-	}
-
-
-	void setOracle() {
-		connectionPoolParams.TestTableName = 'SQL SELECT 1 FROM DUAL'
-	}
-
-	void setOracleNonXA() {
-		setOracle()
-		driverName = 'oracle.jdbc.OracleDriver'
-	}
-	
-	void setOracle2PC() {
-		setOracle()
-		driverName = 'oracle.jdbc.xa.client.OracleXADataSource'
-		globalTransactionsProtocol = 'TwoPhaseCommit'
-	}
-
-	void setOracleEmulated() {
-		setOracleNonXA()
-		globalTransactionsProtocol = 'EmulateTwoPhaseCommit'
 	}
 
 	void setUrl(String value) {
@@ -67,5 +53,33 @@ class SimpleDataSourceConfig extends DataSourceConfig {
 
 	void setTestConnectionsOnReserve(boolean value) {
 		connectionPoolParams.TestConnectionsOnReserve = value
+	}
+
+	abstract void setNonXADriver();
+	abstract void setXADriver();
+	
+	void setTwoPhaseCommit() {
+		setXADriver()
+		globalTransactionsProtocol = 'TwoPhaseCommit'
+	}
+
+	void setLoggingLastResource() {
+		setNonXADriver()
+		globalTransactionsProtocol = 'LoggingLastResource'
+	}
+
+	void setEmulateTwoPhaseCommit() {
+		setNonXADriver()
+		globalTransactionsProtocol = 'EmulateTwoPhaseCommit'
+	}
+
+	void setOracleOnePhaseCommit() {
+		setNonXADriver()
+		globalTransactionsProtocol = 'OnePhaseCommit'
+	}
+
+	void setNone() {
+		setNonXADriver()
+		globalTransactionsProtocol = 'None'
 	}
 }

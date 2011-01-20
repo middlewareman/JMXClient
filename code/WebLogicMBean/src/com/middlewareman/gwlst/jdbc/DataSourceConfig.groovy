@@ -4,26 +4,34 @@
  */
 package com.middlewareman.gwlst.jdbc
 
-import java.util.List
-
+/**
+ * A datasource is either SimpleDataSource or MultiDataSource.
+ * It has a name, JNDI names and targets.
+ * 
+ * @author Andreas Nyberg
+ */
 class DataSourceConfig {
 
 	String name
-	List<String> jndiNames
-
-	List<String> targetServerNames
-	List<String> targetClusterNames
+	Collection<String> jndiNames = new LinkedHashSet()
+	Collection<String> targetServerNames = new LinkedHashSet()
+	Collection<String> targetClusterNames = new LinkedHashSet()
 
 	Map dataSourceParams = [:]
 
-	def configDomain(domain) {
+	/**
+	 * Create a new JDBCSystemResource in the domain.
+	 * @param domain
+	 * @return the new JDBCSystemResource
+	 */
+	def configureDomain(domain) {
 		assert domain.Type == 'Domain'
 
 		def systemResource = domain.createJDBCSystemResource(name)
 		def resource = systemResource.JDBCResource
 		resource.Name = name
 
-		editResource domain, resource
+		configureResource domain, resource
 
 		for (serverName in targetServerNames) {
 			def target = domain.lookupServer(serverName)
@@ -39,18 +47,23 @@ class DataSourceConfig {
 		return systemResource
 	}
 
+	/**
+	 * Configure an existing JDBCResource (in JDBCSystemResource). 
+	 * @param domain
+	 * @param resource JDBCSystemResource
+	 */
+	void configureResource(domain, resource) {
+		configureDataSource resource.JDBCDataSourceParams
+	}
+
+	private void configureDataSource(dataSourceParamsBean) {
+		copyProperties dataSourceParams, dataSourceParamsBean
+		jndiNames.each { dataSourceParamsBean.addJNDIName it }
+	}
+
 	protected void copyProperties(Map map, GroovyObject bean) {
 		for (Map.Entry param in map)
 			bean.setProperty(param.key, param.value)
-	}
-
-	void editResource(domain, resource) {
-		editDataSource resource.JDBCDataSourceParams
-	}
-
-	private void editDataSource(dataSourceParamsBean) {
-		copyProperties dataSourceParams, dataSourceParamsBean
-		jndiNames.each { dataSourceParamsBean.addJNDIName it }
 	}
 }
 
