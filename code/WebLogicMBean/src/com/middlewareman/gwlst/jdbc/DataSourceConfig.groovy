@@ -35,12 +35,12 @@ class DataSourceConfig {
 
 		for (serverName in targetServerNames) {
 			def target = domain.lookupServer(serverName)
-			assert target
+			assert target, "target server $serverName not found"
 			systemResource.addTarget target
 		}
 		for (clusterName in targetClusterNames) {
 			def target = domain.lookupCluster(clusterName)
-			assert target
+			assert target, "target cluster $clusterName not found"
 			systemResource.addTarget target
 		}
 
