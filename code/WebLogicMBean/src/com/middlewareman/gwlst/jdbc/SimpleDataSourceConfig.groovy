@@ -73,7 +73,7 @@ abstract class SimpleDataSourceConfig extends DataSourceConfig {
 		globalTransactionsProtocol = 'EmulateTwoPhaseCommit'
 	}
 
-	void setOracleOnePhaseCommit() {
+	void setOnePhaseCommit() {
 		setNonXADriver()
 		globalTransactionsProtocol = 'OnePhaseCommit'
 	}
