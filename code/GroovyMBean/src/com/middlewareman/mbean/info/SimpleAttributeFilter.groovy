@@ -104,8 +104,8 @@ class SimpleAttributeFilter implements AttributeFilter {
 			if (mbeans == false && ai.isMBean()) return false
 			if (mbeans == true && !ai.isMBean()) return false
 			if (typeInclude && !(ai.type ==~ typeInclude)) return false
+			return true
 		}
-		return true
 	}
 
 	boolean acceptAttribute(MBeanAttributeInfo ai, Object value) {
@@ -114,8 +114,12 @@ class SimpleAttributeFilter implements AttributeFilter {
 		use(MBeanInfoCategory) {
 			if (defaultValue == false && ai.hasDefaultValue() && ai.getDefaultValue() == value) return false
 			if (defaultValue == true && ai.hasDefaultValue() && ai.getDefaultValue() != value) return false
+			return true
 		}
-		return true
+	}
+
+	String toString() {
+		"deprecated:$deprecated,readable:$readable,writable:$writable,mbeans:$mbeans,nullValue:$nullValue,defaultValue:$defaultValue"
 	}
 }
 

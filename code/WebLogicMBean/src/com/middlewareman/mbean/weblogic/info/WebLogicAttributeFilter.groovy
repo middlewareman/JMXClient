@@ -28,8 +28,8 @@ class WebLogicAttributeFilter extends SimpleAttributeFilter {
 			if (child == false && ai.isChild()) return false
 			if (unharvestable == true && !ai.isUnharvestable()) return false
 			if (unharvestable == false && ai.isUnharvestable()) return false
+			return true
 		}
-		return true
 	}
 
 	boolean acceptAttribute(MBeanAttributeInfo ai, Object value) {
@@ -41,6 +41,5 @@ class WebLogicAttributeFilter extends SimpleAttributeFilter {
 		if (isSet == true && !parent.isSet(ai.name)) return false
 		if (isSet == false && parent.isSet(ai.name)) return false
 		return true
-	}	
-	
+	}
 }
