@@ -39,7 +39,7 @@ new ExceptionHandler(binding).wrap {
 		def info = typeService.getMBeanInfo(interfaceClassName)
 		assert info
 		def subtypes = typeService.getSubtypes(interfaceClassName)
-		
+
 		response.bufferSize = 350000
 		def htmlExporter = new HtmlExporter(response.writer)
 
@@ -47,6 +47,26 @@ new ExceptionHandler(binding).wrap {
 
 		htmlExporter.mbean typeService, interfaceClassName, info, subtypes
 
+	} else if (params.mbeanDomain) {
+
+		def mbeanDomain = params.mbeanDomain
+		html.html {
+			head { title 'GWLST RuntimeMBeanServer Browser' }
+			body {
+				h2 'MBeanHome'
+				pre runtimeServer.home
+				h2 "MBean Domain $mbeanDomain"
+				def beans = runtimeServer.home.getMBeans("$mbeanDomain:*")
+				ul {
+					for (bean in beans) {
+						def objectName = bean.@objectName
+						li {
+							a(href:"?objectName=$objectName", objectName)
+						}
+					}
+				}
+			}
+		}
 	} else {
 
 		html.html {
@@ -107,6 +127,12 @@ new ExceptionHandler(binding).wrap {
 								}
 							}
 						}
+					}
+				}
+				h2 'MBean domains'
+				ul {
+					for (mbeanDomain in runtimeServer.home.connection.domains) {
+						li { a(href:"?mbeanDomain=$mbeanDomain", mbeanDomain) }
 					}
 				}
 			}
