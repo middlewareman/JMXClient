@@ -3,36 +3,52 @@
  * Copyright (c) 2010 Middlewareman Limited. All rights reserved.
  */
 
-import com.middlewareman.mbean.MBean 
+import com.middlewareman.mbean.MBean
 import com.middlewareman.mbean.weblogic.access.HttpServletRequestAdapter
-import com.middlewareman.mbean.weblogic.builder.HtmlExporter 
+import com.middlewareman.mbean.weblogic.builder.HtmlExporter
 
 new ExceptionHandler(binding).wrap {
-	
+
 	def adapter = new HttpServletRequestAdapter(request)
 	def runtimeServer = adapter.runtimeServer
-	
+
 	if (params.objectName) {
 		def home = runtimeServer.home
 		assert home
 		def mbean = home.getMBean(params.objectName)
 		assert mbean
-		
+
 		response.bufferSize = 350000
-		def htmlExporter = new HtmlExporter(response.writer)	
-		
+		def htmlExporter = new HtmlExporter(response.writer)
+
 		// TODO any additional parameters or preferences
-		
+
 		def timestamp = new Date()
 		def extras = [
 					'URL':request.requestURL,
 					'Timestamp':timestamp,
-					'user':request.remoteUser, 
+					'user':request.remoteUser,
 					'principal':request.userPrincipal]
 		htmlExporter.mbean mbean, extras
+
+	} else if (params.interfaceClassName) {
+
+		def typeService = runtimeServer.typeService
+		assert typeService
+		def interfaceClassName = params.interfaceClassName
+		def info = typeService.getMBeanInfo(interfaceClassName)
+		assert info
+		def subtypes = typeService.getSubtypes(interfaceClassName)
 		
+		response.bufferSize = 350000
+		def htmlExporter = new HtmlExporter(response.writer)
+
+		// TODO any additional parameters or preferences
+
+		htmlExporter.mbean typeService, interfaceClassName, info, subtypes
+
 	} else {
-		
+
 		html.html {
 			head { title 'GWLST RuntimeMBeanServer Browser' }
 			body {
@@ -49,7 +65,7 @@ new ExceptionHandler(binding).wrap {
 					h3 name
 					a(href:"?objectName=$objectName") { pre objectName }
 				}
-				
+
 				h2 'Java Platform MXBeans'
 				def used = null
 				def enabled = null
@@ -64,12 +80,12 @@ new ExceptionHandler(binding).wrap {
 				if (!enabled && !used) {
 					i 'PlatformMBeanServer probably needs to be enabled in your domain configuration to see the beans below.'
 				}
-				
+
 				def map = runtimeServer.getMBeanPlatformHome().properties.findAll { key, value ->
 					value instanceof MBean || value instanceof Collection<MBean>
 				}
-				
-				map.each { name, mbeans -> 
+
+				map.each { name, mbeans ->
 					h3 name
 					if (mbeans instanceof MBean) {
 						def objectName = mbeans.@objectName

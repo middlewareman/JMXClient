@@ -104,11 +104,19 @@ class HtmlExporter {
 		}
 	}
 
-	void mbean(MBeanInfo info) {
+	void mbean(MBean typeService, String interfaceClassName, MBeanInfo info, subtypes) {
 		long time0 = System.currentTimeMillis()
 		html.html {
-			head { title 'GWLST MBeanInfo Browser' }
-			a(href:'http://www.middlewareman.com/gwlst', 'Groovy WebLogic Scripting Tool (GWLST)')
+			head {
+				title 'GWLST MBeanInfo Browser'
+				link(rel:"stylesheet", type:"text/css", title:"Style", href:"style.css")
+			}
+			notice delegate
+			h1 'GWLST MBean Type Browser'
+			h2 'TypeService'
+			pre typeService
+			h2 'InterfaceClassName'
+			pre interfaceClassName
 			body {
 				h2 'Description'
 				blockquote {
@@ -122,6 +130,14 @@ class HtmlExporter {
 				operations info, delegate
 				h2 'Notifications'
 				notifications info, delegate
+				h2 'Subtypes'
+				ul {
+					for (type in subtypes) {
+						li {
+							a(href:"?interfaceClassName=$type") { pre type }
+						}
+					}
+				}
 				h2 'Done'
 				div "Done in ${System.currentTimeMillis() - time0} ms"
 			}
@@ -165,8 +181,6 @@ class HtmlExporter {
 				th 'Type'
 			}
 			for (ai in ais) {
-				if (!attributeInfoFilter(ai))
-					continue
 				tr {
 					td { name ai, delegate }
 					td { descriptor ai, delegate }
@@ -354,7 +368,9 @@ class HtmlExporter {
 
 	void type(MBeanFeatureInfo fi, delegate) {
 		def tf = new InterfaceTypeFacade(fi)
-		delegate.pre title:tf.originalTypeName, tf.shortString
+		delegate.a(href:"?interfaceClassName=$tf.longName") {
+			pre title:tf.originalTypeName, tf.shortString
+		}
 	}
 
 	void type(Class clazz, delegate) {
