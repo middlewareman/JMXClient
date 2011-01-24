@@ -249,6 +249,7 @@ class HtmlExporter {
 		delegate.table('class':'properties') {
 			tr {
 				th 'Name'
+				th 'Descriptor'
 				th 'NotificationTypes'
 			}
 			for (ni in info.notifications) {
