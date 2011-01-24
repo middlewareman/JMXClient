@@ -8,6 +8,9 @@ import java.text.SimpleDateFormat
 
 long sleep = 500
 
+long lastReport = 0
+long reportInterval = 10000
+
 def serverNames = args
 println "Server names: $serverNames"
 
@@ -21,8 +24,8 @@ def jtaRuntimes = serverNames ?
 		domainRuntimeService.ServerRuntimes.JTARuntime
 while(true) {
 	def timestamp = df.format(new Date())
-	print 'Ping '
-	println timestamp
+	System.err.print 'Ping '
+	System.err.println timestamp
 	for (jta in jtaRuntimes) {
 		def serverName = jta.@objectName.getKeyProperty('ServerRuntime')
 		assert serverName
@@ -36,7 +39,7 @@ while(true) {
 			xid2tx = [:]
 			server2xid2tx.put serverName, xid2tx
 		}
-		
+
 		def txs = jta.JTATransactions.findAll { it.resourceNamesAndStatus }
 		for (goneid in xid2tx.keySet() - (txs*.xid as Set)) {
 			/* Transaction is gone: use report last known state and remove from map. */
@@ -44,22 +47,22 @@ while(true) {
 			def resourceNames = gone.resourceNamesAndStatus.keySet()
 			if (resourceGroups.add(resourceNames)) {
 				/* New group */
-				println "SERVER JTA\t$serverName"
-				print '  NEW    \t'
-				println resourceNames
-				println '  CURRENT'
+				System.err.println "SERVER JTA\t$serverName"
+				System.err.print '  NEW    \t'
+				System.err.println resourceNames
+				System.err.println '  CURRENT'
 				resourceGroups.sort { it.size() }.each {
-					print '\t'
-					println it
+					System.err.print '\t'
+					System.err.println it
 				}
 				def onlyOnes = resourceGroups.findAll {	one ->
 					one.size() == 1 && !resourceGroups.any { more ->
 						more.size() > 1 && more.containsAll(one)
 					}
 				}
-				print '  SINGLES\t'
-				println onlyOnes
-				println()
+				System.err.print '  SINGLES\t'
+				System.err.println onlyOnes
+				System.err.println()
 			}
 			xid2tx.remove goneid
 		}
@@ -67,6 +70,29 @@ while(true) {
 			/* Update map with current (new and known) transactions. */
 			xid2tx.put tx.xid, tx
 		}
+	}
+
+	long now = System.currentTimeMillis()
+	if (now - lastReport > reportInterval) {
+		println timestamp
+		for (server in server2resourceGroups.keySet().sort()) {
+			println "SERVER $server"
+			def groups = server2resourceGroups[server]
+			groups.each {
+				print '\tGROUP '
+				println it
+			}
+			def singles = groups.findAll {	one ->
+				one.size() == 1 && !groups.any { more ->
+					more.size() > 1 && more.containsAll(one)
+				}
+			}
+			singles.each {
+				print '\tSINGLE '
+				println it
+			}
+		}
+		lastReport = now
 	}
 	Thread.sleep sleep
 }
