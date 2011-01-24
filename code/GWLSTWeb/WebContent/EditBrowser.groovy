@@ -27,7 +27,23 @@ new ExceptionHandler(binding).wrap {
 					'user':request.remoteUser,
 					'principal':request.userPrincipal]
 		htmlExporter.mbean mbean, extras
-		
+	
+		} else if (params.interfaceClassName) {
+	
+			def typeService = editServer.typeService
+			assert typeService
+			def interfaceClassName = params.interfaceClassName
+			def info = typeService.getMBeanInfo(interfaceClassName)
+			assert info
+			def subtypes = typeService.getSubtypes(interfaceClassName)
+			
+			response.bufferSize = 350000
+			def htmlExporter = new HtmlExporter(response.writer)
+	
+			// TODO any additional parameters or preferences
+	
+			htmlExporter.mbean typeService, interfaceClassName, info, subtypes
+	
 	} else { 
 		
 		html.html {
