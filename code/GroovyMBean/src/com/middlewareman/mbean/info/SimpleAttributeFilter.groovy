@@ -98,7 +98,7 @@ class SimpleAttributeFilter implements AttributeFilter {
 			if (deprecated == false && ai.isDeprecated()) return false
 			if (deprecated == true && !ai.isDeprecated()) return false
 			if (readable == false && ai.isReadable()) return false
-			if (readable == true && ai.isReadable()) return false
+			if (readable == true && !ai.isReadable()) return false
 			if (writable == false && ai.isWritable()) return false
 			if (writable == true && !ai.isWritable()) return false
 			if (mbeans == false && ai.isMBean()) return false
