@@ -6,7 +6,7 @@
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.2.1.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Groovy"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/Groovy"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
