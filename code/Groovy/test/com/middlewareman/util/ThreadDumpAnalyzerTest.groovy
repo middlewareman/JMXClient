@@ -111,4 +111,8 @@ class ThreadDumpAnalyzerTest extends GroovyTestCase {
 	void testST2() {
 		process 'stuckthreadswa01_0102.out'
 	}
+	
+	void testMfixca6() {
+		process 'mfixca6-264-STUCK.txt'
+	}
 }
