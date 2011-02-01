@@ -4,14 +4,22 @@
  */
 package com.middlewareman.util
 
-@Immutable
-class ThreadDump implements Comparable<ThreadDump>{
-	String name
-	String extra
-	String status
-	String action
-	List<String> stack
+//@Immutable
+class ThreadDump implements Comparable<ThreadDump> {
+	final String name
+	final String extra
+	final String status
+	final String action
+	final List<String> stack
 
+	ThreadDump(String name, String extra, String status, String action, List<String> stack) {
+		this.name = name
+		this.extra = extra
+		this.status = status
+		this.action = action
+		this.stack = stack.asImmutable()
+	}
+	
 	String toString() {
 		"$status\t$name\t$action\t${stack.size()}"
 	}
