@@ -44,34 +44,37 @@ class ThreadDumpAnalyzer {
 		}
 	}
 
+	private fraction(int numerator, int denomenator) {
+		"$numerator of $denomenator = ${numerator*100/denomenator} %"
+	}
+
 	void report(out = System.out) {
 		def ipw = new IndentPrintWriter(out)
-		int totalThreads = parsed.size()
+		int total = parsed.size()
 
-		ipw.indent('BY STATUS', '\n') {
+		ipw.indent('BY STATUS','\n') {
 			topBy { it.status }.each { status, byStatus ->
-				int len = byStatus.size()
-				ipw.indent("$status\t$len of $totalThreads = ${len*100/totalThreads} %") {
-					topBy(byStatus) { it.action }.each { action, byAction ->
-						ipw.indent(action) {
-							byAction.each { ipw.println it.name }
-						}
-					}
+				ipw.indent("\n${fraction(byStatus.size(), total)}:\t$status") {
+					byStatus.sort { it.name }.each { ipw.println it.name }
+				}
+			}
+		}
+
+		ipw.indent('BY ACTION','\n') {
+			topBy { it.action }.each { action, byAction ->
+				ipw.indent("\n${fraction(byAction.size(), total)}:\t$action") {
+					byAction.sort { it.name }.each { ipw.println it.name }
 				}
 			}
 		}
 
 		ipw.indent('BY STACK','\n') {
-			def byStack = parsed.groupBy { it.stack }
-			byStack = sort(byStack)
-			byStack.each { stack, list ->
-				int len = list.size()
-				ipw.indent("$len of $totalThreads = ${len*100/totalThreads} %", '\n') {
-					for (ThreadDump td in list.sort()) {
-						ipw.println td
-						assert td.stack == stack
+			topBy { it.stack }.each { stack, byStack ->
+				ipw.indent("\n${fraction(byStack.size(),total)}") {
+					topBy(byStack) {
+						byStack.sort { it.name }.each { ipw.println it.name }
 					}
-					ipw.indent {
+					ipw.indent('STACK') {
 						stack.each { ipw.println it }
 					}
 				}
@@ -92,7 +95,11 @@ class ThreadDumpAnalyzer {
 	 */
 	static Map<?,Collection<ThreadDump>> sort(Map<?,Collection<ThreadDump>> source) {
 		def target = new LinkedHashMap(source.size())
-		source.keySet().sort { -source[it].size() }.each { target[it] = source[it] }
+		source.keySet().sort {
+			-source[it].size()
+		}.each {
+			target[it] = source[it]
+		}
 		assert source.size() == target.size()
 		return target
 	}

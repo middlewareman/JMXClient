@@ -93,4 +93,22 @@ class ThreadDumpAnalyzerTest extends GroovyTestCase {
 		assert tda.parsed.any{ it.stack }
 		new File('WLS1002CopyPastedThreadDump.analysed.txt').withPrintWriter { tda.report it }
 	}
+
+	void process(String rootname) {
+		String text = new File(rootname).text
+		assert text
+		def tda = new ThreadDumpAnalyzer()
+		tda.parse text
+		println tda.parsed.size()
+		assert tda.parsed.any{ it.stack }
+		new File(rootname+'.analysed.txt').withPrintWriter { tda.report it }
+	}
+	
+	void testST1() {
+		process 'stuckthread0102.out'
+	} 
+	
+	void testST2() {
+		process 'stuckthreadswa01_0102.out'
+	}
 }
