@@ -18,11 +18,9 @@ import com.middlewareman.groovy.util.IndentPrintWriter
  */
 class ThreadDumpAnalyzer {
 
-	String threadPattern = ~/^([ \t]*)"(\[(.+)\] )?(.*)" (.*)$((?:\s*^[ \t]+(?:(?:\S+\(.+\))|(?:at .+)|(?:- .+))$)*)/
-	// all, spaces, statePart, state, name, state, name, action, stack
+	String threadPattern = ~/^([ \t]*)"(\[(.+)\] )?(.*)" (.*(?:\w+=\w+ )+)?(runnable.*|RUNNABLE.*|waiting.*|TIMED_WAITING.*|WAITING.*|in.*)$((?:\s*^[ \t]+(?:(?:\S+\(.+\))|(?:at .+)|(?:- .+))$)*)/
 
 	String stackElementPattern = ~ /\s*^[ \t]+((?:at )?(\S+\(.+\))|(?:- waiting .*)|(?:- locked .*))$/  ///^((\S+\(.+\))|(at .+)|(- .+))\s*$/
-	// spacesAndLocation, location
 
 	final List<ThreadDump> parsed = []
 
@@ -31,34 +29,62 @@ class ThreadDumpAnalyzer {
 		def stackpat = Pattern.compile(stackElementPattern, Pattern.MULTILINE)
 		def dumps = []
 		text.eachMatch(allpat) { all ->
+			//all.eachWithIndex { item, ind -> println "all[$ind]:\t$item" }
 			String state = all[3]
 			String name = all[4]
-			String action = all[5]
-			String stack = all[6]
+			String extra = all[5]
+			String action = all[6]
+			String stack = all[7]
 			def list = []
 			stack.eachMatch(stackpat) { line ->
 				list.add line[1]
 			}
 			assert !stack || list, stack
-			parsed.add new ThreadDump(name,state,action,list)
+			parsed.add new ThreadDump(name,extra,state,action,list)
 		}
 	}
 
 	void report(out = System.out) {
-		int totalThreads = parsed.size()
-		def byStack = parsed.groupBy { it.stack }
-		byStack = sort(byStack)
 		def ipw = new IndentPrintWriter(out)
-		byStack.each { stack, Collection<ThreadDump> list ->
-			int len = list.size()
-			ipw.indent("$len of $totalThreads = ${len/totalThreads} %", '\n') {
-				for (ThreadDump td in list.sort()) {
-					ipw.println "$td.state\t$td.name\t$td.action"
-					assert td.stack == stack
+		int totalThreads = parsed.size()
+
+		ipw.indent('BY STATUS', '\n') {
+			topBy { it.status }.each { status, byStatus ->
+				int len = byStatus.size()
+				ipw.indent("$status\t$len of $totalThreads = ${len*100/totalThreads} %") {
+					topBy(byStatus) { it.action }.each { action, byAction ->
+						ipw.indent(action) {
+							byAction.each { ipw.println it.name }
+						}
+					}
 				}
-				stack.each { ipw.println it }
 			}
 		}
+
+		ipw.indent('BY STACK','\n') {
+			def byStack = parsed.groupBy { it.stack }
+			byStack = sort(byStack)
+			byStack.each { stack, list ->
+				int len = list.size()
+				ipw.indent("$len of $totalThreads = ${len*100/totalThreads} %", '\n') {
+					for (ThreadDump td in list.sort()) {
+						ipw.println td
+						assert td.stack == stack
+					}
+					ipw.indent {
+						stack.each { ipw.println it }
+					}
+				}
+			}
+		}
+	}
+
+	Map topBy(Closure cut) {
+		topBy(parsed, cut)
+	}
+
+	static Map topBy(List list, Closure cut) {
+		sort(list.groupBy(cut))
 	}
 
 	/**

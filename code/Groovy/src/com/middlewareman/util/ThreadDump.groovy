@@ -7,15 +7,16 @@ package com.middlewareman.util
 @Immutable
 class ThreadDump implements Comparable<ThreadDump>{
 	String name
-	String state
+	String extra
+	String status
 	String action
 	List<String> stack
 
-	String mytoString() {
-		"$state \t$action \t$name"
+	String toString() {
+		"$status\t$name\t$action\t${stack.size()}"
 	}
 
 	int compareTo(ThreadDump that) {
-		this.stack <=> that.stack ?: this.state <=> that.state ?: this.action <=> that.action ?: this.name <=> that.name
+		this.stack <=> that.stack ?: this.status <=> that.status ?: this.action <=> that.action ?: this.name <=> that.name
 	}
 }

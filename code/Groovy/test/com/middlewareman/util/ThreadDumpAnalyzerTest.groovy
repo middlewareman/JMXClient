@@ -2,6 +2,7 @@
 package com.middlewareman.util
 
 import java.lang.management.ManagementFactory
+import java.util.regex.Pattern
 
 class ThreadDumpAnalyzerTest extends GroovyTestCase {
 
@@ -49,7 +50,7 @@ class ThreadDumpAnalyzerTest extends GroovyTestCase {
 		def tda = new ThreadDumpAnalyzer()
 		tda.parse text
 		println tda.parsed.size()
-		assert tda.parsed
+		assert tda.parsed.size() == 113
 		println tda.parsed[0]
 		assert tda.parsed.any { it.stack }
 		new File('Java5FullThreadDump.analysed.txt').withPrintWriter { tda.report it }
@@ -86,7 +87,8 @@ class ThreadDumpAnalyzerTest extends GroovyTestCase {
 		def tda = new ThreadDumpAnalyzer()
 		tda.parse text
 		println tda.parsed.size()
-		assert tda.parsed
+		Pattern namePattern = Pattern.compile(/\s*"(?:\[(?:.+)\] )?(.*)".*$/, Pattern.MULTILINE)
+		assert tda.parsed.size() == 608
 		println tda.parsed[0]
 		assert tda.parsed.any{ it.stack }
 		new File('WLS1002CopyPastedThreadDump.analysed.txt').withPrintWriter { tda.report it }
