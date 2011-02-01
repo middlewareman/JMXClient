@@ -6,6 +6,8 @@ package com.middlewareman.util
 
 import java.util.regex.Pattern
 
+import com.middlewareman.groovy.util.IndentPrintWriter
+
 /**
  * Parser for a thread dump. 
  * The result is a list of ThreadDump elements that can be grouped by its attributes.
@@ -42,11 +44,21 @@ class ThreadDumpAnalyzer {
 		}
 	}
 
-	void report(PrintWriter out = new PrintWriter(System.out)) {
-	}
-
-	static void sort(Map<?,Collection> source, Closure putter) {
-		source.entrySet().sort { -it.value.size() }.each { key, value -> putter key, value }
+	void report(out = System.out) {
+		int totalThreads = parsed.size()
+		def byStack = parsed.groupBy { it.stack }
+		byStack = sort(byStack)
+		def ipw = new IndentPrintWriter(out)
+		byStack.each { stack, Collection<ThreadDump> list ->
+			int len = list.size()
+			ipw.indent("$len of $totalThreads = ${len/totalThreads} %", '\n') {
+				for (ThreadDump td in list.sort()) {
+					ipw.println "$td.state\t$td.name\t$td.action"
+					assert td.stack == stack
+				}
+				stack.each { ipw.println it }
+			}
+		}
 	}
 
 	/**
@@ -54,11 +66,9 @@ class ThreadDumpAnalyzer {
 	 */
 	static Map<?,Collection<ThreadDump>> sort(Map<?,Collection<ThreadDump>> source) {
 		def target = new LinkedHashMap(source.size())
-		source.entrySet().sort { -it.value.size() }.each { key, value -> target[key] = value }
+		source.keySet().sort { -source[it].size() }.each { target[it] = source[it] }
+		assert source.size() == target.size()
 		return target
-	}
-
-	static Map<?,Collection<ThreadDump>> top(Map<?,Collection<ThreadDump>> source) {
 	}
 
 	/**
@@ -66,8 +76,8 @@ class ThreadDumpAnalyzer {
 	 * @params totalFraction include only elements until the total fraction of threads are reached.
 	 * @params individualFraction include only elements with number of threads greater than this fraction.
 	 */
-	static Map findTop(Map<?,ThreadDump> map, totalFraction, individualFraction) {
-		int totalCount = map.values().inject(0) { tally, td ->
+	private static Map findTop(Map<?,Collection<ThreadDump>> map, totalFraction, individualFraction) {
+		int totalCount = map.values().inject(0) { tally, Collection<ThreadDump> td ->
 			tally + td.trace.size()
 		}
 		println "total count is $totalCount"

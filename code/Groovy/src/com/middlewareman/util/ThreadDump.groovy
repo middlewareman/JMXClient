@@ -9,13 +9,13 @@ class ThreadDump implements Comparable<ThreadDump>{
 	String name
 	String state
 	String action
-	List<String> trace
+	List<String> stack
 
 	String mytoString() {
 		"$state \t$action \t$name"
 	}
 
 	int compareTo(ThreadDump that) {
-		this.trace <=> that.trace ?: this.state <=> that.state ?: this.action <=> that.action ?: this.name <=> that.name
+		this.stack <=> that.stack ?: this.state <=> that.state ?: this.action <=> that.action ?: this.name <=> that.name
 	}
 }

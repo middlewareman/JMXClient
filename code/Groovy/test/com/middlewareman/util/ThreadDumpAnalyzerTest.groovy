@@ -17,7 +17,7 @@ class ThreadDumpAnalyzerTest extends GroovyTestCase {
 		println tda.parsed.size()
 		assert tda.parsed
 		println tda.parsed[0]
-		assert tda.parsed.any { it.trace }
+		assert tda.parsed.any { it.stack }
 	}
 
 	void testJava5Snippet() {
@@ -38,8 +38,8 @@ class ThreadDumpAnalyzerTest extends GroovyTestCase {
 		println tda.parsed.name
 		assert tda.parsed.size() == 1
 		println tda.parsed[0]
-		println tda.parsed[0].trace
-		assert tda.parsed[0].trace.size() >= 4
+		println tda.parsed[0].stack
+		assert tda.parsed[0].stack.size() >= 4
 	}
 
 	void testJava5Full() {
@@ -51,7 +51,8 @@ class ThreadDumpAnalyzerTest extends GroovyTestCase {
 		println tda.parsed.size()
 		assert tda.parsed
 		println tda.parsed[0]
-		assert tda.parsed.any { it.trace }
+		assert tda.parsed.any { it.stack }
+		new File('Java5FullThreadDump.analysed.txt').withPrintWriter { tda.report it }
 	}
 
 	void testWLS1002Snippet() {
@@ -74,8 +75,8 @@ class ThreadDumpAnalyzerTest extends GroovyTestCase {
 		println text
 		assert tda.parsed.size() == 1
 		println tda.parsed[0]
-		println tda.parsed[0].trace
-		assert tda.parsed[0].trace.size() == 4
+		println tda.parsed[0].stack
+		assert tda.parsed[0].stack.size() == 4
 	}
 
 	void testWLS1002() {
@@ -87,6 +88,7 @@ class ThreadDumpAnalyzerTest extends GroovyTestCase {
 		println tda.parsed.size()
 		assert tda.parsed
 		println tda.parsed[0]
-		assert tda.parsed.any{ it.trace }
+		assert tda.parsed.any{ it.stack }
+		new File('WLS1002CopyPastedThreadDump.analysed.txt').withPrintWriter { tda.report it }
 	}
 }
