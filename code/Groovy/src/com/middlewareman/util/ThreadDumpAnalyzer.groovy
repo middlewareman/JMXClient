@@ -60,11 +60,12 @@ class ThreadDumpAnalyzer {
 			}
 		}
 
-		ipw.indent('BY ACTION','\n') {
+		ipw.indent('BY ACTION (more than one thread)','\n') {
 			topBy { it.action }.each { action, byAction ->
-				ipw.indent("\n${fraction(byAction.size(), total)}:\t$action") {
-					byAction.sort { it.name }.each { ipw.println it.name }
-				}
+				if (byAction.size() > 1)
+					ipw.indent("\n${fraction(byAction.size(), total)}:\t$action") {
+						byAction.sort { it.name }.each { ipw.println it.name }
+					}
 			}
 		}
 
