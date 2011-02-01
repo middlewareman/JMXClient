@@ -104,7 +104,7 @@ class HtmlExporter {
 		}
 	}
 
-	void mbean(MBean typeService, String interfaceClassName, MBeanInfo info, subtypes) {
+	void mbean(String interfaceClassName, MBeanInfo info, subtypes) {
 		long time0 = System.currentTimeMillis()
 		html.html {
 			head {
@@ -113,8 +113,6 @@ class HtmlExporter {
 			}
 			notice delegate
 			h1 'GWLST MBean Type Browser'
-			h2 'TypeService'
-			pre typeService
 			h2 'InterfaceClassName'
 			pre interfaceClassName
 			body {

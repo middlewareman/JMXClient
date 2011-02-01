@@ -36,7 +36,7 @@ class HtmlExporterTest extends GroovyTestCase {
 		assert domain?.Type == "Domain"
 		namedFile.withPrintWriter {
 			def htmle = new HtmlExporter(it)
-			htmle.mbean domain.info
+			htmle.mbean 'domain.bean', domain.info, ['sub','types']
 		}
 	}
 	
