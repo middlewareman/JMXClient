@@ -52,19 +52,11 @@ class ThreadDumpAnalyzer {
 		def ipw = new IndentPrintWriter(out)
 		int total = parsed.size()
 
-		ipw.indent('BY STATUS','\n') {
-			topBy { it.status }.each { status, byStatus ->
-				ipw.indent("\n${fraction(byStatus.size(), total)}:\t$status") {
-					byStatus.sort { it.name }.each { ipw.println it.name }
-				}
-			}
-		}
-
 		ipw.indent('BY ACTION (more than one thread)','\n') {
 			topBy { it.action }.each { action, byAction ->
 				if (byAction.size() > 1)
 					ipw.indent("\n${fraction(byAction.size(), total)}:\t$action") {
-						byAction.sort { it.name }.each { ipw.println it.name }
+						byAction.sort { it.name }.each { ipw.println "[$it.status] $it.name" }
 					}
 			}
 		}
@@ -72,9 +64,7 @@ class ThreadDumpAnalyzer {
 		ipw.indent('BY STACK','\n') {
 			topBy { it.stack }.each { stack, byStack ->
 				ipw.indent("\n${fraction(byStack.size(),total)}") {
-					topBy(byStack) {
-						byStack.sort { it.name }.each { ipw.println it.name }
-					}
+					byStack.sort { it.name }.each { ipw.println "[$it.status] $it.name ($it.action)" }
 					ipw.indent('STACK') {
 						stack.each { ipw.println it }
 					}
