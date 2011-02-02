@@ -65,7 +65,7 @@ class ThreadDumpAnalyzer {
 			topBy { it.stack }.each { stack, byStack ->
 				ipw.indent("\n${fraction(byStack.size(),total)}") {
 					byStack.sort { it.name }.each { ipw.println "[$it.status] $it.name ($it.action)" }
-					ipw.indent('STACK') {
+					ipw.indent {
 						stack.each { ipw.println it }
 					}
 				}
@@ -95,32 +95,4 @@ class ThreadDumpAnalyzer {
 		return target
 	}
 
-	/**
-	 * Return a new map that is a subset of the given map.
-	 * @params totalFraction include only elements until the total fraction of threads are reached.
-	 * @params individualFraction include only elements with number of threads greater than this fraction.
-	 */
-	private static Map findTop(Map<?,Collection<ThreadDump>> map, totalFraction, individualFraction) {
-		int totalCount = map.values().inject(0) { tally, Collection<ThreadDump> td ->
-			tally + td.trace.size()
-		}
-		println "total count is $totalCount"
-		println "finding top $totalFraction of total -> ${totalFraction*totalCount}"
-		println "including only individuals $individualFraction -> ${individualFraction*totalCount}"
-		def topKeys = map.keySet().sort {
-			-map[it].trace.size()
-		}
-		int totalTally = 0
-		Map<?,ThreadDump> targetMap = new LinkedHashMap()
-		for (key in topKeys) {
-			def td = map[key]
-			int tdc = td.trace.size()
-			if (!individualFraction || tdc/totalCount >= individualFraction)
-				targetMap[key] = td
-			totalTally += tdc
-			if (totalTally/totalCount > totalFraction)
-				break
-		}
-		return targetMap
-	}
 }
