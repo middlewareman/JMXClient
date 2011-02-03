@@ -115,4 +115,16 @@ class ThreadDumpAnalyzerTest extends GroovyTestCase {
 	void testMfixca6() {
 		process 'mfixca6-264-STUCK.txt'
 	}
+	
+	void testB1Bomber() {
+		process 'mfixb1-20110201-192535-150.raw.txt'
+	}
+	
+	void testDanMS1() {
+		process 'threadDumpOnFailureMS1.out'
+	}
+	
+	void testDanMS2() {
+		process 'threadDumpOnFailureMS2.out'
+	}
 }
