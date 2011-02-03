@@ -17,39 +17,51 @@ class DomainReporter {
 		return dr
 	}
 
-	WebLogicAttributeFilter keyFilter = new WebLogicAttributeFilter(key:true)
-	WebLogicAttributeFilter attrFilter = new WebLogicAttributeFilter(key:false,mbeans:false)
-	WebLogicAttributeFilter refFilter = new WebLogicAttributeFilter(reference:true)
-	WebLogicAttributeFilter childFilter = new WebLogicAttributeFilter(child:true)
+	static getIsSetOnly() {
+		def dr = new DomainReporter()
+		dr.attrFilter.isSet = true
+		return dr
+	}
 
-	def describe(MBean parent, MBeanAttributeInfo ai) {
+	static getNoDefaultsAndIsSetOnly() {
+		def dr = new DomainReporter()
+		dr.attrFilter.defaultValue = false
+		dr.attrFilter.isSet = true
+		return dr
+	}
+
+	WebLogicAttributeFilter keyFilter = new WebLogicAttributeFilter(deprecated:false,key:true)
+	WebLogicAttributeFilter attrFilter = new WebLogicAttributeFilter(deprecated:false,key:false,mbeans:false)
+	WebLogicAttributeFilter refFilter = new WebLogicAttributeFilter(deprecated:false,reference:true)
+	WebLogicAttributeFilter childFilter = new WebLogicAttributeFilter(deprecated:false,child:true)
+
+	def describe(MBean parent, MBeanAttributeInfo ai, isSet = null) {
 		def result = []
 		use(MBeanInfoCategory) {
 			if (ai.isDeprecated()) result << 'deprecated'
 			if (ai.hasDefaultValue()) result << "default=$ai.defaultValue"
 		}
-		boolean isSet = parent.isSet(ai.name)
-		result << "isSet=$isSet"
+		if (isSet != null) result << "isSet=$isSet"
 		return result.join(', ')
 	}
 
 	void report(String name, MBean mbean, IndentPrintWriter ipw) {
 		def ais = mbean.info.attributes
 		def aimap = new HashMap(ais.size())
-		ais.each { aimap.put it.name, it }
+		ais.each {
+			aimap.put it.name, it
+		}
 
 		def keys = MBeanProperties.get(mbean.@home, mbean.@objectName, keyFilter)
-		//ipw.println "Key: $keys"
+		keys = keys.collect { key, value -> "$key:${value.inspect()}"}.join(',')
 		ipw.indent("$name($keys) {", '}') {
 			def attrs = MBeanProperties.get(mbean.@home, mbean.@objectName, attrFilter)
 			attrs.each { key, value ->
-				def desc = describe(mbean, aimap[key])
-				ipw.println "$key = $value \t\t// attr, $desc"
-			}
-			def refs = MBeanProperties.get(mbean.@home, mbean.@objectName, refFilter)
-			refs.each { key, value ->
-				def desc = describe(mbean, aimap[key])
-				ipw.println "$key = $value \t\t// ref, $desc"
+				boolean isSet = mbean.isSet(key)
+				if (attrFilter.acceptAttributeIsSet(isSet)) {
+					def desc = describe(mbean, aimap[key], isSet)
+					ipw.println "$key = ${value?.inspect()} \t\t/* $desc */"
+				}
 			}
 			def children = MBeanProperties.get(mbean.@home, mbean.@objectName, childFilter)
 			children.each { key, value ->
@@ -60,11 +72,16 @@ class DomainReporter {
 					case MBean[]:
 					case List:
 					case MBean:
-						report name, value, ipw
+						report key, value, ipw
 						break
 					default:
 						assert false, "$name, $key, $value"
 				}
+			}
+			def refs = MBeanProperties.get(mbean.@home, mbean.@objectName, refFilter)
+			refs.each { key, value ->
+				def desc = describe(mbean, aimap[key])
+				ipw.println "$key = $value \t\t/* $desc */"
 			}
 		}
 	}
