@@ -23,17 +23,19 @@ jdbcsByUrl.each { url, jdbcsPerUrl ->
 			it.JDBCResource?.JDBCDriverParams?.Properties?.Properties?.find { it?.Name == 'user' }?.Value
 		}
 		jdbcsByUser.each { user, jdbcsPerUser ->
+			//prefix, jndiName, user, pass, maxCapacity
 			ipw.indent("\nUSER $user") {
 				for (jdbc in jdbcsPerUser) {
 					def jdbcName = jdbc.Name
 					def resource = jdbc.JDBCResource
+					def password = resource.JDBCDriverParams.Password
 					def pool = resource.JDBCConnectionPoolParams
 					def datasource = resource.JDBCDataSourceParams
 					def initial = pool.InitialCapacity
 					def max = pool.MaxCapacity
 					def jndiNames = datasource.JNDINames
 					def dataSourceList = datasource.DataSourceList
-					ipw.indent("\nJDBC $jdbcName\t$initial\t$max\t$jndiNames\t$dataSourceList") {
+					ipw.indent("JDBC $jdbcName, $jndiNames, $user, $password, ($initial,) $max \t$dataSourceList") {
 						for (target in jdbc.Targets) {
 							ipw.println target
 						}
