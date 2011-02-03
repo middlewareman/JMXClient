@@ -30,7 +30,7 @@ class ThreadDumpAnalyzer {
 		def dumps = []
 		text.eachMatch(allpat) { all ->
 			//all.eachWithIndex { item, ind -> println "all[$ind]:\t$item" }
-			String state = all[3]
+			String status = all[3]
 			String name = all[4]
 			String extra = all[5]
 			String action = all[6]
@@ -40,7 +40,7 @@ class ThreadDumpAnalyzer {
 				list.add line[1]
 			}
 			assert !stack || list, stack
-			parsed.add new ThreadDump(name,extra,state,action,list)
+			parsed.add new ThreadDump(name,extra,status,action,list)
 		}
 	}
 
@@ -51,6 +51,13 @@ class ThreadDumpAnalyzer {
 	void report(out = System.out) {
 		def ipw = new IndentPrintWriter(out)
 		int total = parsed.size()
+
+		ipw.indent('STATUS count','\n') {
+			topBy { it.status }.each { status, byStatus ->
+				if (status)
+					ipw.println "$status\t${fraction(byStatus.size(), total)}"
+			}
+		}
 
 		ipw.indent('BY ACTION (more than one thread)','\n') {
 			topBy { it.action }.each { action, byAction ->
@@ -94,5 +101,4 @@ class ThreadDumpAnalyzer {
 		assert source.size() == target.size()
 		return target
 	}
-
 }
