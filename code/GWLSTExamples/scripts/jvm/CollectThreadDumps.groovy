@@ -1,29 +1,38 @@
 /* $Id$ */
-def df = new java.text.SimpleDateFormat('yyyyMMdd-HHmmss')
+def datef = new java.text.SimpleDateFormat('yyyyMMdd')
+def timef = new java.text.SimpleDateFormat('HHmmss')
 def domainName = domainRuntimeService.DomainConfiguration.Name
 while(true) {
-	def timestamp = df.format(new Date())
-	println timestamp
-	def root = new File("${domainName}/${timestamp}")
+	def date = new Date()
+	def datestamp = datef.format(date)
+	def timestamp = timef.format(date)
+	println "$datestamp-$timestamp"
+	def root = new File("${domainName}/${datestamp}/${timestamp}")
 	root.mkdirs()
 	for (sr in domainRuntimeService.ServerRuntimes) {
 		def serverName = sr.Name
 		println serverName
+		def name = new StringBuilder()
+		name << "${domainName}-${sr.Name}-${datestamp}-${timestamp}"
 		def ph = domainRuntimeServer.getProxyPlatformHome(serverName)
 		def thread = ph.thread
+		if (thread) name << '.' << thread.threadCount
 		def jvm = sr.JVMRuntime
 		String text = jvm.ThreadStackDump
-		boolean stuck = text.contains('STUCK')
-		def name = "${sr.Name}-${timestamp}-${thread.threadCount}"
-		if (stuck) name += "-STUCK"
+		if (text.contains('STUCK')) name << '.STUCK'
 		new File(root,name + '.txt').write(text)
 		try {
 			def tda = new com.middlewareman.util.ThreadDumpAnalyzer()
 			tda.parse text
 			new File(root,name + '.analysed.txt').withPrintWriter { out ->
 				out.println sr
-				out.println "FreeCur\tFree%\tSizeCur\tSizeMax"
+				out.println "\nFreeCur\tFree%\tSizeCur\tSizeMax"
 				out.println "${jvm.HeapFreeCurrent>>20} MB\t${jvm.HeapFreePercent}%\t${jvm.HeapSizeCurrent>>20} MB\t${jvm.HeapSizeMax>>20} MB"
+				out.println()
+				out.println "Active\tCapac\tAvail\tUnavail\tWaiting\tDataSource"
+				for (ds in sr.JDBCServiceRuntime.JDBCDataSourceRuntimeMBeans) {
+					out.println "$ds.ActiveConnectionsCurrentCount\t$ds.CurrCapacity\t$ds.NumAvailable\t$ds.NumUnavailable\t$ds.WaitingForConnectionCurrentCount\t$ds.Name"
+				}
 				out.println()
 				tda.report out
 			}
