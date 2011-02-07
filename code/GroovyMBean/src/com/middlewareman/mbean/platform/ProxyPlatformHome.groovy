@@ -7,7 +7,7 @@ package com.middlewareman.mbean.platform
 import java.lang.management.*
 
 import javax.management.MBeanServerConnection
-import javax.management.ObjectName 
+import javax.management.ObjectName
 
 import com.middlewareman.mbean.MBeanServerConnectionFactory
 
@@ -17,70 +17,77 @@ import com.middlewareman.mbean.MBeanServerConnectionFactory
  * @author Andreas Nyberg
  */
 class ProxyPlatformHome implements IProxyPlatformHome {
-	
-	private final MBeanServerConnectionFactory scf;
-	private final PlatformNames names;
-	
+
+	private final MBeanServerConnectionFactory scf
+	private final PlatformNames names
+	boolean check = true
+
 	ProxyPlatformHome(MBeanServerConnectionFactory connectionFactory, PlatformNames names = PlatformNames.DEFAULT) {
 		this.scf = connectionFactory;
 		this.names = names;
 	}
-	
+
 	private MBeanServerConnection getConnection() {
 		scf.getConnection()
 	}
-	
+
+	private Object newPlatformMXBeanProxy(String name, Class clazz) {
+		MBeanServerConnection connection = scf.getConnection()
+		if (check && !connection.isRegistered(new ObjectName(name))) null
+		else ManagementFactory.newPlatformMXBeanProxy(connection, name, clazz)
+	}
+
 	ClassLoadingMXBean getClassLoading() {
-		ManagementFactory.newPlatformMXBeanProxy(connection, names.classLoading, ClassLoadingMXBean.class)
-	}	
-	
+		newPlatformMXBeanProxy(names.classLoading, ClassLoadingMXBean.class)
+	}
+
 	MemoryMXBean getMemory() {
-		ManagementFactory.newPlatformMXBeanProxy(connection, names.memory, MemoryMXBean.class)
+		newPlatformMXBeanProxy(names.memory, MemoryMXBean.class)
 	}
-	
+
 	ThreadMXBean getThread() {
-		ManagementFactory.newPlatformMXBeanProxy(connection, names.thread, ThreadMXBean.class)
+		newPlatformMXBeanProxy(names.thread, ThreadMXBean.class)
 	}
-	
+
 	RuntimeMXBean getRuntime() {
-		ManagementFactory.newPlatformMXBeanProxy(connection, names.runtime, RuntimeMXBean.class)
+		newPlatformMXBeanProxy(names.runtime, RuntimeMXBean.class)
 	}
-	
+
 	CompilationMXBean getCompilation() {
-		ManagementFactory.newPlatformMXBeanProxy(connection, names.compilation, CompilationMXBean.class)
+		newPlatformMXBeanProxy(names.compilation, CompilationMXBean.class)
 	}
-	
+
 	OperatingSystemMXBean getOperatingSystem() {
-		ManagementFactory.newPlatformMXBeanProxy(connection, names.operatingSystem, OperatingSystemMXBean.class)
+		newPlatformMXBeanProxy(names.operatingSystem, OperatingSystemMXBean.class)
 	}
-	
+
 	Collection<MemoryPoolMXBean> getMemoryPools() {
-		connection.queryNames(new ObjectName(names.getMemoryPool('*')), null).collect { 
-			ManagementFactory.newPlatformMXBeanProxy(connection, it.toString(), MemoryPoolMXBean.class)
+		connection.queryNames(new ObjectName(names.getMemoryPool('*')), null).collect {
+			newPlatformMXBeanProxy(it.toString(), MemoryPoolMXBean.class)
 		}
 	}
-	
+
 	MemoryPoolMXBean getMemoryPool(String name) {
-		ManagementFactory.newPlatformMXBeanProxy(connection, names.getMemoryPool(name), MemoryPoolMXBean.class)
+		newPlatformMXBeanProxy(names.getMemoryPool(name), MemoryPoolMXBean.class)
 	}
-	
+
 	Collection<MemoryManagerMXBean> getMemoryManagers() {
-		connection.queryNames(new ObjectName(names.getMemoryManager('*')), null).collect { 
-			ManagementFactory.newPlatformMXBeanProxy(connection, it.toString(), MemoryManagerMXBean.class)
+		connection.queryNames(new ObjectName(names.getMemoryManager('*')), null).collect {
+			newPlatformMXBeanProxy(it.toString(), MemoryManagerMXBean.class)
 		}
 	}
-	
+
 	MemoryManagerMXBean getMemoryManager(String name) {
-		ManagementFactory.newPlatformMXBeanProxy(connection, names.getMemoryManager(name), MemoryManagerMXBean.class)
+		newPlatformMXBeanProxy(names.getMemoryManager(name), MemoryManagerMXBean.class)
 	}
-	
+
 	Collection<GarbageCollectorMXBean> getGarbageCollectors() {
-		connection.queryNames(new ObjectName(names.getGarbageCollector('*')), null).collect { 
-			ManagementFactory.newPlatformMXBeanProxy(connection, it.toString(), GarbageCollectorMXBean.class)
+		connection.queryNames(new ObjectName(names.getGarbageCollector('*')), null).collect {
+			newPlatformMXBeanProxy(it.toString(), GarbageCollectorMXBean.class)
 		}
 	}
-	
+
 	GarbageCollectorMXBean getGarbageCollector(String name) {
-		ManagementFactory.newPlatformMXBeanProxy(connection, names.getGarbageCollector(name), GarbageCollectorMXBean.class)
+		newPlatformMXBeanProxy(names.getGarbageCollector(name), GarbageCollectorMXBean.class)
 	}
 }
