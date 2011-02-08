@@ -189,6 +189,7 @@ class HtmlExporter {
 	}
 
 	void operations(MBeanInfo info, delegate) {
+		def of = new SimpleOperationFilter()
 		delegate.table('class':'properties') {
 			tr {
 				th 'ReturnType'
@@ -196,7 +197,7 @@ class HtmlExporter {
 				th 'Descriptor'
 				th 'Parameters'
 			}
-			for (op in info.operations) {
+			for (op in info.operations.findAll(of.&accept).sort(of)) {
 				tr {
 					td { type op, delegate }		// TODO
 					td { name op, delegate }
