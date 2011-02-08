@@ -129,7 +129,8 @@ groovy-all.jar and wlfullclient.jar in same directory as gwlst.jar or on classpa
 			if (console || !terminal) {
 				/* GUI Console */
 				logger.fine "Starting GUI Console (console=$console, terminal=$terminal)"
-				new groovy.ui.Console(binding).run()
+				groovy.ui.Console.mixin ConsoleCategory
+				new groovy.ui.Console(binding).run(ConsoleCategory.frameConsoleDelegates(binding.runtimeServer.home.address))
 			} else {
 				/* Terminal */
 				logger.fine "Reading from terminal $terminal"
