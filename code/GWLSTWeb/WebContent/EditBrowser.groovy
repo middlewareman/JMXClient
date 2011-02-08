@@ -42,7 +42,7 @@ new ExceptionHandler(binding).wrap {
 	
 			// TODO any additional parameters or preferences
 	
-			htmlExporter.mbean typeService, interfaceClassName, info, subtypes
+			htmlExporter.mbean interfaceClassName, info, subtypes
 	
 	} else { 
 		
