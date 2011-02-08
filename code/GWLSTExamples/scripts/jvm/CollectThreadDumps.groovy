@@ -36,6 +36,8 @@ while(true) {
 				out.println()
 				tda.report out
 			}
+		} catch(Exception e) {
+			e.printStackTrace()
 		} catch(StackOverflowError e) {
 			println "StackOverflowError for $serverName"
 		}
