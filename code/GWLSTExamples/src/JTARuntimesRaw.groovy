@@ -4,7 +4,7 @@
  */
 
 println "Report all numerical attributes of all JTARuntimes by Location"
-println domainRuntimeServer.home.serverId
+println domainRuntimeServer.home.address
 println new Date()
 
 Set dsrs = domainRuntimeServer.home.getMBeans('com.bea:Type=JTARuntime,*')

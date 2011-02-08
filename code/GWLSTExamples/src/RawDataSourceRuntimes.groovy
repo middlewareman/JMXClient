@@ -4,7 +4,7 @@
  */
 
 println "Report all numerical and attributes of all JDBCDataSourceRuntimes by Name and Location"
-println domainRuntimeServer.home.serverId
+println domainRuntimeServer.home.address
 println new Date()
 
 Set dsrs = domainRuntimeServer.home.getMBeans('com.bea:Type=JDBCDataSourceRuntime,*')

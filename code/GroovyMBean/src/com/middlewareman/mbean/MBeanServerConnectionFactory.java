@@ -16,8 +16,8 @@ import javax.management.MBeanServerConnection;
  */
 public interface MBeanServerConnectionFactory extends Closeable {
 
-	Object getServerId();
-
+	Object getAddress();
+	
 	MBeanServerConnection getConnection() throws IOException;
 
 }

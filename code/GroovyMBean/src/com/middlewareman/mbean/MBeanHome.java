@@ -69,18 +69,18 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	public boolean equals(Object other) {
 		if (other instanceof MBeanHome) {
 			MBeanHome mhother = (MBeanHome) other;
-			return getServerId().equals(mhother.getServerId());
+			return getAddress().equals(mhother.getAddress());
 		}
 		return false;
 	}
 
 	/** Returns hashCode of server. */
 	public int hashCode() {
-		return getServerId().hashCode();
+		return getAddress().hashCode();
 	}
 
 	public String toString() {
-		return getClass().getSimpleName() + "(" + getServerId().toString()
+		return getClass().getSimpleName() + "(" + getAddress().toString()
 				+ ")";
 	}
 

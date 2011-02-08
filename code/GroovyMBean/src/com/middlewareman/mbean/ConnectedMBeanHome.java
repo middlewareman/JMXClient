@@ -40,7 +40,7 @@ public class ConnectedMBeanHome extends RemoteMBeanHome implements
 		this.connection = connection;
 	}
 
-	public Object getServerId() {
+	public Object getAddress() {
 		return server;
 	}
 

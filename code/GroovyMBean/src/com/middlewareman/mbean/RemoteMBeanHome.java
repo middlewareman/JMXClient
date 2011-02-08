@@ -137,7 +137,7 @@ public abstract class RemoteMBeanHome extends MBeanHome {
 				status = e.getMessage();
 			}
 		}
-		return getClass().getSimpleName() + "(" + getServerId() + ", " + status
+		return getClass().getSimpleName() + "(" + getAddress() + ", " + status
 				+ ")";
 	}
 

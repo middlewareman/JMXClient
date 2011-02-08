@@ -18,16 +18,16 @@ import javax.management.MBeanServerConnection;
  */
 public class LocalMBeanHome extends MBeanHome {
 
-	private final Object serverId;
+	private final Object address;
 	private final MBeanServer mbeanServer;
 
-	public LocalMBeanHome(Object serverId, MBeanServer mbeanServer) {
-		this.serverId = serverId;
+	public LocalMBeanHome(Object address, MBeanServer mbeanServer) {
+		this.address = address;
 		this.mbeanServer = mbeanServer;
 	}
 
-	public Object getServerId() {
-		return serverId;
+	public Object getAddress() {
+		return address;
 	}
 
 	public MBeanServer getMBeanServer() {

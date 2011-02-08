@@ -43,7 +43,7 @@ public class ConnectingMBeanHome extends RemoteMBeanHome implements
 		this.subject = subject;
 	}
 
-	public Object getServerId() {
+	public Object getAddress() {
 		return url;
 	}
 

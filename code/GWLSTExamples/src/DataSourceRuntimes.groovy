@@ -4,7 +4,7 @@
  */
 
 println "Report all numerical and non-zero attributes of all JDBCDataSourceRuntimes" 
-println domainRuntimeServer.home.serverId
+println domainRuntimeServer.home.address
 println new Date()
 
 def ipw = new com.middlewareman.groovy.util.IndentPrintWriter(tab:'\t')
