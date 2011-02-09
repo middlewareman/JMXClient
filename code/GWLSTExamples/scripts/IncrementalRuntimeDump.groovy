@@ -19,7 +19,7 @@ List objectNameKeys = (args.size() > 1) ? args[1..-1] : []
 
 if (!objectNameKeys) println "WARNING: no objectName keys may produce confusing output"
 
-Matcher matcher = domainRuntimeServer.home.serverId =~ /.*:\/\/(.+):(\d+).*/
+Matcher matcher = domainRuntimeServer.home.address =~ /.*:\/\/(.+):(\d+).*/
 def host = matcher[0][1]
 def port = matcher[0][2]
 
