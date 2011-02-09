@@ -8,7 +8,7 @@ editSave { domain ->
 	def domainRootDir = domain.RootDirectory
 	for (server in domain.Servers) {
 		def wslog = server.WebServer.WebServerLog
-		wslog.FileName = "$domain.RootDirectory/logs/servers/$server.Name/access.log" as String
+		wslog.FileName = "../../logs/servers/$server.Name/access.log" as String
 		wslog.LogFileFormat = 'extended'
 		wslog.ELFFields = 'date time cs-method cs-uri-stem time-taken cs-status bytes cs-uri-query'
 	}
