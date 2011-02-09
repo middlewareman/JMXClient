@@ -10,18 +10,18 @@ while(true) {
 	def root = new File("${domainName}/${datestamp}/${timestamp}")
 	root.mkdirs()
 	for (sr in domainRuntimeService.ServerRuntimes) {
-		def serverName = sr.Name
-		println serverName
-		def name = new StringBuilder()
-		name << "${domainName}-${sr.Name}-${datestamp}-${timestamp}"
-		def ph = domainRuntimeServer.getProxyPlatformHome(serverName)
-		def thread = ph.thread
-		if (thread) name << '.' << thread.threadCount
-		def jvm = sr.JVMRuntime
-		String text = jvm.ThreadStackDump
-		if (text.contains('STUCK')) name << '.STUCK'
-		new File(root,name + '.txt').write(text)
 		try {
+			def serverName = sr.Name
+			println serverName
+			def name = new StringBuilder()
+			name << "${domainName}-${sr.Name}-${datestamp}-${timestamp}"
+			def ph = domainRuntimeServer.getProxyPlatformHome(serverName)
+			def thread = ph.thread
+			if (thread) name << '.' << thread.threadCount
+			def jvm = sr.JVMRuntime
+			String text = jvm.ThreadStackDump
+			if (text.contains('STUCK')) name << '.STUCK'
+			new File(root,name + '.txt').write(text)
 			def tda = new com.middlewareman.util.ThreadDumpAnalyzer()
 			tda.parse text
 			new File(root,name + '.analysed.txt').withPrintWriter { out ->
