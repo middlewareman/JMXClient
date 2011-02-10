@@ -39,7 +39,7 @@ while(true) {
 		} catch(Exception e) {
 			e.printStackTrace()
 		} catch(StackOverflowError e) {
-			println "StackOverflowError for $serverName"
+			println "StackOverflowError for $sr"
 		}
 	}
 	println 'Sleeping...'
