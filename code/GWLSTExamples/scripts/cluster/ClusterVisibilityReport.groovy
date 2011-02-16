@@ -57,5 +57,5 @@ for (clusterConfig in drs.domainConfiguration.clusters) {
 		}
 	}
 	if (dodgyServerNames) 
-		print "\n  DODGY SERVERS: ${show(dodgyServerNames)}\n"
+		println "\n  DODGY SERVERS: ${show(dodgyServerNames)}\n"
 }
