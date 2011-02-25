@@ -53,6 +53,8 @@ public class WebLogicMBeanHomeFactory extends MBeanHomeFactory {
 		if (value) url = value
 		value = System.getenv('GWLST_USERNAME')
 		if (value) username = value
+		value = System.getenv('GWLST_PASSWORD')
+		if (value) password = value
 		value = System.getenv('GWLST_TIMEOUT')
 		if (value) timeout = value as Long
 	}
