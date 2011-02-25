@@ -124,4 +124,9 @@ public class ConnectingMBeanHome extends RemoteMBeanHome implements
 		connector = null;
 		connection = null;
 	}
+	
+	public void recover() {
+		logger.logp(Level.INFO, this.getClass().getName(), "recover()", "Attempting to recover by resetting connection");
+		reset();
+	}
 }

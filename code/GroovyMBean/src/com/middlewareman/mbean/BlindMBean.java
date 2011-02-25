@@ -77,6 +77,7 @@ public class BlindMBean extends MBean implements GroovyObject {
 		} catch (ReflectionException e) {
 			throw new RuntimeException(e);
 		} catch (IOException e) {
+			home.recover();
 			throw new RuntimeException(e);
 		}
 	}
@@ -108,6 +109,7 @@ public class BlindMBean extends MBean implements GroovyObject {
 		} catch (ReflectionException e) {
 			throw new RuntimeException(e);
 		} catch (IOException e) {
+			home.recover();
 			throw new RuntimeException(e);
 		} catch (IntrospectionException e) { // getProperties only
 			throw new RuntimeException(e);
@@ -135,6 +137,7 @@ public class BlindMBean extends MBean implements GroovyObject {
 		} catch (ReflectionException e) {
 			throw new RuntimeException(e);
 		} catch (IOException e) {
+			home.recover();
 			throw new RuntimeException(e);
 		}
 	}

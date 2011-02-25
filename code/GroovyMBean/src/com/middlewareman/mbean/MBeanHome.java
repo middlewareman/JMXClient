@@ -8,6 +8,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.management.*;
@@ -80,8 +81,7 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	}
 
 	public String toString() {
-		return getClass().getSimpleName() + "(" + getAddress().toString()
-				+ ")";
+		return getClass().getSimpleName() + "(" + getAddress().toString() + ")";
 	}
 
 	public void enableMBeanCache() {
@@ -180,6 +180,15 @@ public abstract class MBeanHome implements MBeanServerConnectionFactory,
 	 */
 	public void ping() throws IOException {
 		assert getConnection().getDefaultDomain() != null;
+	}
+
+	/**
+	 * Called by any client encountering IOException. Subclass might override to
+	 * provide some recovery behaviour.
+	 */
+	public void recover() {
+		logger.logp(Level.INFO, this.getClass().getName(), "recover()",
+				"A problem with the connection has been indicated");
 	}
 
 	/**
