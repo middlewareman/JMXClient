@@ -40,7 +40,7 @@ groovy-all.jar and wlfullclient.jar in same directory as gwlst.jar or on classpa
 	String expression
 	File source
 	boolean stdin
-	WebLogicMBeanHomeFactory hf = new WebLogicMBeanHomeFactory()
+	WebLogicMBeanHomeFactory hf = new WebLogicMBeanHomeFactory(reconnect:true)	// TODO make reconnect an option/parameter
 	String[] args
 
 	/**
