@@ -8,26 +8,26 @@
 	<property name="target" value="1.6" />
 	<property name="source" value="1.6" />
 
-	<property name="groovy.dir" location="C:\Dev\groovy-1.7.5" />
+	<property name="groovy.dir" location="C:\Dev\Groovy\Groovy-1.8.1" />
 
 	<property name="groovy.lib" location="${groovy.dir}/lib" />
 
-	<property name="groovy-all.location" location="${groovy.dir}/embeddable/groovy-all-1.7.5.jar" />
+	<property name="groovy-all.location" location="${groovy.dir}/embeddable/groovy-all-1.8.1.jar" />
 
 	<path id="groovy.classpath">
 		<pathelement location="${groovy-all.location}" />
 	</path>
 
-	<property name="weblogic.location" location="C:\Oracle\Middleware\10.3.3.0\wlserver_10.3\server" />
+	<property name="weblogic.location" location="C:\Dev\Oracle\Middleware\10.3.5\wlserver_10.3\server" />
 	<property name="wlfullclient.location" location="${weblogic.location}/lib/wlfullclient.jar" />
 
 	<property name="commons-collections.location" location="${top.dir}/GroovyMBean/lib/commons-collections-3.2.1.jar" />
 
 	<path id="build.classpath">
-		<pathelement location="${groovy.lib}/ant-1.8.1.jar" />
-		<pathelement location="${groovy.lib}/ant-launcher-1.8.1.jar" />
-		<pathelement location="${groovy.lib}/ant-junit-1.8.1.jar" />
-		<pathelement location="${groovy.lib}/junit-4.8.1.jar" />
+		<pathelement location="${groovy.lib}/ant-1.8.2.jar" />
+		<pathelement location="${groovy.lib}/ant-launcher-1.8.2.jar" />
+		<pathelement location="${groovy.lib}/ant-junit-1.8.2.jar" />
+		<pathelement location="${groovy.lib}/junit-4.8.2.jar" />
 	</path>
 
 	<path id="compile.classpath">
@@ -157,7 +157,7 @@
 				<attribute name="Built-By" value="Andreas Nyberg" />
 				<attribute name="Build-Timestamp" value="${timestamp}" />
 				<attribute name="Implementation-Title" value="Groovy WebLogic Scripting Tool" />
-				<attribute name="Implementation-Version" value="0.5.${versionstamp}" />
+				<attribute name="Implementation-Version" value="0.6.${versionstamp}" />
 				<attribute name="Implementation-Vendor" value="Middlewareman Limited" />
 				<attribute name="Implementation-Vendor-Id" value="com.middlewareman" />
 				<attribute name="Implementation-URL" value="http://www.middlewareman.com/gwlst" />
