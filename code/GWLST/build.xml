@@ -152,7 +152,7 @@
 			<fileset dir="target/classes/main" />
 			<fileset dir="target/classes/exploded" />
 			<manifest>
-				<attribute name="Class-Path" value="groovy-all-1.7.5.jar groovy-all.jar wlfullclient.jar" />
+				<attribute name="Class-Path" value="groovy-all.jar wlfullclient.jar" />
 				<attribute name="Main-Class" value="com.middlewareman.mbean.weblogic.shell.GWLST" />
 				<attribute name="Built-By" value="Andreas Nyberg" />
 				<attribute name="Build-Timestamp" value="${timestamp}" />
@@ -164,20 +164,20 @@
 				<attribute name="Extension-Name" value="gwlst" />
 				<attribute name="Extension-List" value="Groovy" />
 				<attribute name="Groovy-Extension-Name" value="groovy" />
-				<attribute name="Groovy-Implementation-Version" value="1.7" />
+				<attribute name="Groovy-Implementation-Version" value="1.8" />
 			</manifest>
 		</jar>
 	</target>
 
 	<target name="gwlstdoc">
-		<groovydoc destdir="target/gapi" packagenames="**.*" use="true" windowtitle="GWLST API" doctitle="Groovy WebLogic Scripting Tool API">
-			<fileset refid="source.main.path" />
+		<property name="sourcepath" refid="source.main.path" />
+		<groovydoc destdir="target/gapi" sourcepath="${sourcepath}" packagenames="**.*" use="true" windowtitle="GWLST API" doctitle="Groovy WebLogic Scripting Tool API">
 			<link packages="java.,javax.,org.xml." href="http://java.sun.com/javase/6/docs/api/" />
 			<link packages="groovy.,org.codehaus.groovy." href="http://groovy.codehaus.org/gapi/" />
-			<link packages="com.bea.,weblogic.,weblogicx." href="http://download.oracle.com/docs/cd/E14571_01/apirefs.1111/e13941" />
+			<link packages="com.bea.,weblogic.,weblogicx." href="http://docs.oracle.com/cd/E21764_01/apirefs.1111/e13945" />
 		</groovydoc>
 	</target>
 
-	<target depends="package" name="default" />
+	<target depends="package,gwlstdoc" name="default" />
 
 </project>
