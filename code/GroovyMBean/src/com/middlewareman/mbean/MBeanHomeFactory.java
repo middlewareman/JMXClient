@@ -5,6 +5,7 @@
 package com.middlewareman.mbean;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -36,7 +37,8 @@ public abstract class MBeanHomeFactory {
 	 */
 	public boolean reconnect = false;
 
-	public abstract JMXServiceURL surl(String path);
+	public abstract JMXServiceURL surl(String path)
+			throws MalformedURLException;
 
 	public MBeanHome createMBeanHome(String urlPart) throws IOException {
 		if (reconnect)
