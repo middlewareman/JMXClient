@@ -20,8 +20,14 @@
 
 	<property name="weblogic.location" location="C:\Dev\Oracle\Middleware\10.3.5\wlserver_10.3\server" />
 	<property name="wlfullclient.location" location="${weblogic.location}/lib/wlfullclient.jar" />
+	<property name="wlthint3client.location" location="lib/wlthint3client.jar" />
 
 	<property name="commons-collections.location" location="${top.dir}/GroovyMBean/lib/commons-collections-3.2.1.jar" />
+
+
+	<property name="one-jar.ant.jar" value="OneJAR/one-jar-ant-task-0.97.jar" />
+	<taskdef name="one-jar" classname="com.simontuffs.onejar.ant.OneJarTask" classpath="${one-jar.ant.jar}" onerror="report" />
+
 
 	<path id="build.classpath">
 		<pathelement location="${groovy.lib}/ant-1.8.2.jar" />
@@ -137,7 +143,18 @@
 		<fail if="junit-errfail" message="JUnit Tests failed" />
 	</target>
 
-	<target name="package-only">
+	<target name="package-only" depends="package-small,package-all" />
+
+	<target name="package-init">
+		<tstamp>
+			<format property="timestamp" pattern="yyyy-MM-dd HH:mm:ss z" locale="en_GB" />
+		</tstamp>
+		<tstamp>
+			<format property="versionstamp" pattern="yyyy.MM.dd.HH.mm.ss" locale="en_GB" />
+		</tstamp>
+	</target>
+
+	<target name="package-small" depends="package-init">
 		<tstamp>
 			<format property="timestamp" pattern="yyyy-MM-dd HH:mm:ss z" locale="en_GB" />
 		</tstamp>
@@ -152,7 +169,7 @@
 			<fileset dir="target/classes/main" />
 			<fileset dir="target/classes/exploded" />
 			<manifest>
-				<attribute name="Class-Path" value="groovy-all.jar wlfullclient.jar" />
+				<attribute name="Class-Path" value="groovy-all.jar wlthint3client.jar wlfullclient.jar" />
 				<attribute name="Main-Class" value="com.middlewareman.mbean.weblogic.shell.GWLST" />
 				<attribute name="Built-By" value="Andreas Nyberg" />
 				<attribute name="Build-Timestamp" value="${timestamp}" />
@@ -167,6 +184,33 @@
 				<attribute name="Groovy-Implementation-Version" value="1.8" />
 			</manifest>
 		</jar>
+	</target>
+
+	<target name="package-all" depends="package-init">
+		<one-jar destfile="target/gwlst-all.jar">
+			<manifest>
+				<attribute name="One-Jar-Main-Class" value="com.middlewareman.mbean.weblogic.shell.GWLST" />
+				<attribute name="Built-By" value="Andreas Nyberg" />
+				<attribute name="Build-Timestamp" value="${timestamp}" />
+				<attribute name="Implementation-Title" value="Groovy WebLogic Scripting Tool" />
+				<attribute name="Implementation-Version" value="0.6.${versionstamp}" />
+				<attribute name="Implementation-Vendor" value="Middlewareman Limited" />
+				<attribute name="Implementation-Vendor-Id" value="com.middlewareman" />
+				<attribute name="Implementation-URL" value="http://www.middlewareman.com/gwlst" />
+				<attribute name="Extension-Name" value="gwlst" />
+				<attribute name="Extension-List" value="Groovy" />
+				<attribute name="Groovy-Extension-Name" value="groovy" />
+				<attribute name="Groovy-Implementation-Version" value="1.8" />
+			</manifest>
+			<main>
+				<fileset dir="target/classes/main" />
+			</main>
+			<lib>
+				<fileset file="${commons-collections.location}" />
+				<fileset file="lib/*" />
+			</lib>
+			<fileset dir="META-INF" />
+		</one-jar>
 	</target>
 
 	<target name="gwlstdoc">
