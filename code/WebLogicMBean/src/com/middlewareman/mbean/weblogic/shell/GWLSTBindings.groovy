@@ -8,42 +8,31 @@ import com.middlewareman.mbean.weblogic.*
 
 /**
  * Create standard bindings for GWLST script.
- * <p>For any WebLogic Server:
- * <ul>
- * <li><code>runtimeServer</code></li>
- * <li><code>runtimeService</code> (short for 
- * <code>runtimeServer.runtimeService</code>)</li>
- * <li><code>serverConfig</code> (short for <code>runtimeService.ServerConfiguration</code></li>
- * <li><code>serverRuntime</code> (short for <code>runtimeService.ServerRuntime</code></li>
- * </ul>
- * </p>
- * <p>For an admin server:
- * <ul>
- * <li><code>domainRuntimeServer</code></li>
- * <li><code>domainRuntimeService</code> (short for 
- * <code>domainRuntimeServer.domainRuntimeService</code>)</li>
- * <li><code>domainConfig</code> (short for <code>domainRuntimeService.DomainConfiguration</code></li>
- * <li><code>domainRuntime</code> (short for <code>domainRuntimeService.DomainRuntime</code></li>
- * <li><code>editServer</code></li>
- * <li><code>editService</code> (short for 
- * <code>editServer.editService</code>)</li>
- * </ul>
- * </p>
- * <p>Closures:
- * <ul>
- * <li><code>String status()</code></li>
- * <li><code>editValidate(Closure script)</code></li>
- * <li><code>editSave(Closure script)</code></li>
- * <li><code>editActivateWait(Closure script)</code></li>
- * <li><code>editActivateNoWait(Closure script)</code></li>
- * <li>
- * </ul>
- * </p>
  * 
  * @author Andreas Nyberg
  */
 class GWLSTBindings {
 
+	static help = """\
+Bindings for any server:
+  status()
+  runtimeServer
+  runtimeService                       (runtimeServer.RuntimeService)
+  serverConfig                         (runtimeService.ServerConfiguration)
+  serverRuntime                        (runtimeService.ServerRuntime)
+
+Bindings for admin server:
+  domainRuntimeServer
+  domainRuntimeService                 (domainRuntimeServer.domainRuntimeService)
+  domainConfig                         (domainRuntimeService.DomainConfiguration)
+  domainRuntime                        (domainRuntimeService.DomainRuntime)
+  editServer
+  editService                          (short for editServer.editService)
+  editValidate { domain -> }           Configure domain and validate only
+  editSave { domain -> }               Configure domain and save
+  editActivateWait { domain -> }       Configure domain and activate synchronously
+  editActivateNoWait { domain -> }     Configure domain and activate asynchronously
+"""
 	/**
 	 * Returns a string describing the runtimeService.
 	 */
@@ -108,6 +97,7 @@ class GWLSTBindings {
 				target.editService = null
 			}
 		}
+		target.help = help
 		target.status = { status(target.runtimeService) }
 		target.editValidate = { script ->
 			Editor.validateOnly.editDomain(target.editService, script)
