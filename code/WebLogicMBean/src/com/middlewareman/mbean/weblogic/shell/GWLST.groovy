@@ -25,14 +25,13 @@ class GWLST {
 Groovy WebLogic Scripting Tool version ${GWLST.class.package.implementationVersion}
 http://www.middlewareman.com/gwlst
 Usage:
-  java [options] -jar gwlst.jar [flags] [-console [args...]] 
+  java [options] -jar gwlst.jar [flags] [-console] [args...] 
   java [options] -jar gwlst.jar [flags] -e expr [args...]     (evaluate given expression)
   java [options] -jar gwlst.jar [flags] filename [args...]    (read script from file and evaluate)
   java [options] -jar gwlst.jar [flags] - [args...]           (read script from stdin and evaluate)
     environment: GWLST_URL GWLST_USERNAME GWLST_TIMEOUT GWLST_LOGLEVEL
     options:     -Dgwlst.url= -Dgwlst.username= -Dgwlst.password -Dgwlst.timeout= -Dgwlst.loglevel=
-    flags:       -url {url} -username {username} -password {password} -timeout {timeout}
-groovy-all.jar and wlfullclient.jar in same directory as gwlst.jar or on classpath."""
+    flags:       -username {username} -password {password} -timeout {timeout}"""
 
 	static final StackTraceCleaner cleaner = StackTraceCleaner.defaultInstance
 
@@ -82,9 +81,9 @@ groovy-all.jar and wlfullclient.jar in same directory as gwlst.jar or on classpa
 	 * Prompt user for any missing properties.
 	 */
 	void topupHomeFactory() {
-		if (console || !System.console())
+		if (console)
 			hf.promptPopup()
-		else
+		else if (System.console())
 			hf.promptConsole()
 	}
 
